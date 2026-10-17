@@ -1,11 +1,12 @@
 'use client';
 
-import { GripVertical, Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { useTaskStore } from '@/store/StoreProvider';
 import { Badge } from '@/components/shared/Badge';
 import { CategoryBadge } from '@/components/shared/CategoryBadge';
 import type { Task } from '@/types';
+import { DragHandle } from '@/components/shared/DragHandle';
 
 interface Props {
   task: Task;
@@ -62,17 +63,7 @@ export function TaskItem({
       ].join(' ')}
     >
       {/* drag handle — 관리 모드에서만 */}
-      {mode === 'manage' && (
-        <button
-          {...attributes}
-          {...listeners}
-          onClick={(e) => e.stopPropagation()}
-          aria-label="순서 조정"
-          className="shrink-0 -m-[13px] p-[13px] text-muted-foreground/50 hover:text-muted-foreground cursor-grab active:cursor-grabbing transition-colors touch-none"
-        >
-          <GripVertical className="w-4.5 h-4.5" />
-        </button>
-      )}
+      {mode === 'manage' && <DragHandle attributes={attributes} listeners={listeners} />}
 
       {/* 선택 인디케이터 — 선택 모드 */}
       {mode === 'select' && (

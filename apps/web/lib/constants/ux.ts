@@ -5,6 +5,8 @@ export const SKELETON_SHOW_DELAY_MS = 200;
 
 export const SOUND_SEQUENCE_INTERVAL = 1.9;
 
+export const DRAG_ACTIVATION_DISTANCE_PX = 5;
+
 import type { SoundType } from '@/types/models';
 
 export const SOUND_TYPE_LABELS: Record<SoundType, string> = {

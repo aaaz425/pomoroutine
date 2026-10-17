@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import DraggableFlatList, { type RenderItemParams } from 'react-native-draggable-flatlist';
-import { Check, GripVertical, Pencil, Plus, Trash2, X } from 'lucide-react-native';
+import { Check, Pencil, Plus, Trash2, X } from 'lucide-react-native';
 import { INPUT_LIMITS } from '@pomoroutine/shared';
 import { Text } from '@/components/shared/Text';
 import { useSettingsStore } from '@/store/StoreProvider';
@@ -10,6 +10,7 @@ import { ConfirmModal } from '@/components/shared/ConfirmModal';
 import { withAlpha } from '@/constants/timerColors';
 import { FONTS } from '@/constants/fonts';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
+import { DragHandle } from '@/components/shared/DragHandle';
 
 function MessageRow({
   message,
@@ -69,9 +70,7 @@ function MessageRow({
         isActive && styles.dragging,
       ]}
     >
-      <Pressable onLongPress={drag} delayLongPress={30} hitSlop={13}>
-        <GripVertical size={18} color={withAlpha(theme.mutedForeground, 0.5)} />
-      </Pressable>
+      <DragHandle onDrag={drag} />
       <Text
         numberOfLines={1}
         style={[styles.message, { color: theme.foreground, fontFamily: FONTS.sansRegular }]}
