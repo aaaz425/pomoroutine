@@ -2,9 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, BackHandler, PixelRatio, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView, { type WebViewNavigation } from 'react-native-webview';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { WEBVIEW_TAB_BLUR_EVENT, WEBVIEW_TAB_FOCUS_EVENT } from '@pomoroutine/shared';
 import { Text } from '@/components/shared/Text';
+import { NoticeScreen } from '@/components/shared/NoticeScreen';
 import { FONTS, MAX_FONT_SIZE_MULTIPLIER } from '@/constants/fonts';
 import { useThemeScheme, useThemeTokens } from '@/hooks/use-theme-scheme';
 import { useAuth } from '@/store/AuthProvider';
@@ -18,10 +19,11 @@ interface Props {
 export function EmbeddedWebScreen({ path }: Props) {
   const scheme = useThemeScheme();
   const theme = useThemeTokens();
-  const { session } = useAuth();
+  const { session, logout } = useAuth();
   const webAppUrl = process.env.EXPO_PUBLIC_WEB_APP_URL;
   const webViewRef = useRef<WebView>(null);
   const [canGoBack, setCanGoBack] = useState(false);
+  const [authFailed, setAuthFailed] = useState(false);
   const focusedOnceRef = useRef(false);
 
   useEffect(() => {
@@ -48,6 +50,22 @@ export function EmbeddedWebScreen({ path }: Props) {
       };
     }, []),
   );
+
+  async function handleRelogin() {
+    await logout();
+    router.push('/login');
+  }
+
+  if (authFailed) {
+    return (
+      <NoticeScreen
+        title="로그인이 만료됐어요"
+        message="다시 로그인해 주세요"
+        actionLabel="다시 로그인"
+        onAction={() => void handleRelogin()}
+      />
+    );
+  }
 
   if (!webAppUrl || !session) {
     return (
@@ -81,6 +99,9 @@ export function EmbeddedWebScreen({ path }: Props) {
         `}
         onMessage={(event) => handleWebviewMessage(event.nativeEvent, webAppUrl)}
         onNavigationStateChange={(event: WebViewNavigation) => setCanGoBack(event.canGoBack)}
+        onHttpError={(event) => {
+          if (event.nativeEvent.url.includes('/auth/webview-bridge')) setAuthFailed(true);
+        }}
         startInLoadingState
         renderLoading={() => (
           <View
