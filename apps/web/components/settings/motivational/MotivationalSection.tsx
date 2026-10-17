@@ -1,28 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Trash2, GripVertical, Pencil, Check, X } from 'lucide-react';
-import {
-  DndContext,
-  closestCenter,
-  PointerSensor,
-  KeyboardSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from '@dnd-kit/core';
+import { Plus, Trash2, Pencil, Check, X } from 'lucide-react';
+import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-  useSortable,
-} from '@dnd-kit/sortable';
+import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { useSettingsStore } from '@/store/StoreProvider';
 import { TextInput } from '@/components/shared/TextInput';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 
 import { INPUT_LIMITS } from '@/lib/constants/limits';
+import { DragHandle } from '@/components/shared/DragHandle';
+import { useDragSensors } from '@/hooks/useDragSensors';
 
 interface MessageRowProps {
   id: string;
@@ -117,14 +106,7 @@ function MessageRow({
         isDragging ? 'opacity-50' : '',
       ].join(' ')}
     >
-      <button
-        {...attributes}
-        {...listeners}
-        aria-label="순서 조정"
-        className="shrink-0 text-muted-foreground/30 hover:text-muted-foreground cursor-grab active:cursor-grabbing transition-colors touch-none"
-      >
-        <GripVertical className="w-3.5 h-3.5" />
-      </button>
+      <DragHandle attributes={attributes} listeners={listeners} />
       <span className="text-sm text-foreground flex-1 min-w-0 truncate pr-2">{message}</span>
       <button
         onClick={onStartEdit}
@@ -164,10 +146,7 @@ export function MotivationalSection() {
     setDeleteIndex(null);
   }
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  );
+  const sensors = useDragSensors();
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;

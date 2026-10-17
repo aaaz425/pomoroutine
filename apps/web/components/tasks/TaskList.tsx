@@ -1,21 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  DndContext,
-  closestCenter,
-  PointerSensor,
-  KeyboardSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from '@dnd-kit/core';
+import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Plus } from 'lucide-react';
 import { useTaskStore } from '@/store/StoreProvider';
 import { useDelayedHydration } from '@/hooks/useDelayedHydration';
@@ -25,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { TaskItem } from '@/components/tasks/TaskItem';
 import { TaskFormModal } from '@/components/tasks/TaskFormModal';
 import type { Task } from '@/types';
+import { useDragSensors } from '@/hooks/useDragSensors';
 
 interface Props {
   mode: 'select' | 'manage';
@@ -49,10 +38,7 @@ export function TaskList({
   const [editTarget, setEditTarget] = useState<Task | 'new' | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  );
+  const sensors = useDragSensors();
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import DraggableFlatList, { type RenderItemParams } from 'react-native-draggable-flatlist';
-import { GripVertical, Pencil, Plus, Trash2 } from 'lucide-react-native';
+import { Pencil, Plus, Trash2 } from 'lucide-react-native';
 import { INPUT_LIMITS } from '@pomoroutine/shared';
 import { Text } from '@/components/shared/Text';
 import { useTaskStore } from '@/store/StoreProvider';
@@ -11,6 +11,7 @@ import { withAlpha } from '@/constants/timerColors';
 import { FONTS } from '@/constants/fonts';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
 import type { Category } from '@/types/tasks';
+import { DragHandle } from '@/components/shared/DragHandle';
 
 function CategoryRow({
   category,
@@ -36,9 +37,7 @@ function CategoryRow({
       ]}
     >
       <View style={styles.left}>
-        <Pressable onLongPress={drag} delayLongPress={150} hitSlop={8}>
-          <GripVertical size={14} color={withAlpha(theme.mutedForeground, 0.3)} />
-        </Pressable>
+        <DragHandle onDrag={drag} />
         <View style={[styles.dot, { backgroundColor: category.color }]} />
         <Text
           numberOfLines={1}

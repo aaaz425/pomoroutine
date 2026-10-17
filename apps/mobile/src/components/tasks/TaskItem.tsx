@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Check, GripVertical, Pencil, Trash2 } from 'lucide-react-native';
+import { Check, Pencil, Trash2 } from 'lucide-react-native';
 import { Text } from '@/components/shared/Text';
 import { useTaskStore } from '@/store/StoreProvider';
 import { CategoryBadge } from '@/components/shared/CategoryBadge';
@@ -7,6 +7,7 @@ import { withAlpha } from '@/constants/timerColors';
 import { FONTS } from '@/constants/fonts';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
 import type { Task } from '@/types/tasks';
+import { DragHandle } from '@/components/shared/DragHandle';
 
 interface Props {
   task: Task;
@@ -42,16 +43,7 @@ export function TaskItem({
         isDragging && styles.dragging,
       ]}
     >
-      {mode === 'manage' && (
-        <Pressable
-          onLongPress={onDrag}
-          hitSlop={8}
-          style={styles.gripButton}
-          accessibilityLabel="순서 조정"
-        >
-          <GripVertical size={14} color={withAlpha(theme.mutedForeground, 0.3)} />
-        </Pressable>
-      )}
+      {mode === 'manage' && <DragHandle onDrag={onDrag} />}
 
       {mode === 'select' && (
         <View
@@ -129,9 +121,6 @@ const styles = StyleSheet.create({
   },
   dragging: {
     opacity: 0.5,
-  },
-  gripButton: {
-    padding: 4,
   },
   selectCircle: {
     width: 18,
