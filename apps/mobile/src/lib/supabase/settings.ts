@@ -59,11 +59,14 @@ export async function fetchSettings(): Promise<AppSettings | null> {
 
 export async function saveSettings(settings: AppSettings): Promise<{ error: boolean }> {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: true };
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) return { error: true };
 
-  const { error } = await supabase.from('settings').update(toRow(settings)).eq('user_id', user.id);
+  const { error } = await supabase
+    .from('settings')
+    .update(toRow(settings))
+    .eq('user_id', session.user.id);
 
   return { error: error !== null };
 }

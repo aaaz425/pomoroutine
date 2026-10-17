@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Volume2, Play, Pause } from 'lucide-react';
 import { useSettingsStore } from '@/store/StoreProvider';
 import { useSoundPreview } from '@/hooks/useSoundPreview';
@@ -19,7 +20,16 @@ export function SoundAlertSettings() {
   const setSoundVolume = useSettingsStore((s) => s.setSoundVolume);
   const setSoundRepeatCount = useSettingsStore((s) => s.setSoundRepeatCount);
 
-  const { isPlaying, toggle, stop } = useSoundPreview(soundType, soundVolume, soundRepeatCount);
+  const [draftVolume, setDraftVolume] = useState<number | null>(null);
+  const volume = draftVolume ?? soundVolume;
+
+  const { isPlaying, toggle, stop } = useSoundPreview(soundType, volume, soundRepeatCount);
+
+  function commitVolume() {
+    if (draftVolume === null) return;
+    if (draftVolume !== soundVolume) void setSoundVolume(draftVolume);
+    setDraftVolume(null);
+  }
 
   function handleSoundAlertToggle(enabled: boolean) {
     if (!enabled && isPlaying) stop();
@@ -82,12 +92,15 @@ export function SoundAlertSettings() {
               min={SOUND_LIMITS.VOLUME_MIN}
               max={SOUND_LIMITS.VOLUME_MAX}
               step={5}
-              value={soundVolume}
-              onChange={(e) => setSoundVolume(Number(e.target.value))}
+              value={volume}
+              onChange={(e) => setDraftVolume(Number(e.target.value))}
+              onPointerUp={commitVolume}
+              onKeyUp={commitVolume}
+              onBlur={commitVolume}
               className="flex-1 min-w-0 accent-primary disabled:cursor-not-allowed"
             />
             <span className="hidden sm:inline text-xs text-muted-foreground w-8 text-right shrink-0">
-              {soundVolume}%
+              {volume}%
             </span>
           </div>
         </div>
