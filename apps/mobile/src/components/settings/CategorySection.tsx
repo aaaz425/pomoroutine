@@ -36,7 +36,7 @@ function CategoryRow({
       ]}
     >
       <View style={styles.left}>
-        <Pressable onPressIn={drag} hitSlop={13}>
+        <Pressable onLongPress={drag} delayLongPress={30} hitSlop={13}>
           <GripVertical size={18} color={withAlpha(theme.mutedForeground, 0.5)} />
         </Pressable>
         <View style={[styles.dot, { backgroundColor: category.color }]} />

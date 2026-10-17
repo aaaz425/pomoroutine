@@ -44,7 +44,8 @@ export function TaskItem({
     >
       {mode === 'manage' && (
         <Pressable
-          onPressIn={onDrag}
+          onLongPress={onDrag}
+          delayLongPress={30}
           hitSlop={9}
           style={styles.gripButton}
           accessibilityLabel="순서 조정"
