@@ -21,6 +21,8 @@ export {
 export { DEFAULT_TIMER_SETTINGS } from './constants/defaults';
 export { MOTIVATIONAL_MESSAGES } from './constants/messages';
 export { TOAST_MESSAGES } from './constants/toastMessages';
+export { NOTICE_MESSAGES } from './constants/notices';
+export { AUTH_ERROR_MESSAGES } from './constants/authMessages';
 export type { ToastType, ToastMessage } from './constants/toastMessages';
 export type { SoundType, AppSettings } from './types/settings';
 export { FOCUS_RATING_OPTIONS, FOCUS_RATING_LABELS } from './constants/focusRating';

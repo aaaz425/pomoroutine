@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { NOTICE_MESSAGES } from '@/lib/constants/messages';
 
 interface Props {
   title: string;
@@ -16,7 +17,7 @@ export function GuestPrompt({ title, description }: Props) {
         href="/login"
         className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"
       >
-        로그인
+        {NOTICE_MESSAGES.login}
       </Link>
     </div>
   );
