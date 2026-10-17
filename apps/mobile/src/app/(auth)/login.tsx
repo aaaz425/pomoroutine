@@ -109,6 +109,18 @@ export default function LoginScreen() {
 
       <AuthDivider />
       <KakaoButton onError={setError} />
+      <Link href="/" replace asChild>
+        <Pressable style={styles.guest}>
+          <Text
+            style={[
+              styles.guestText,
+              { color: theme.mutedForeground, fontFamily: FONTS.sansRegular },
+            ]}
+          >
+            로그인 없이 타이머 사용하기
+          </Text>
+        </Pressable>
+      </Link>
     </AuthShell>
   );
 }
@@ -153,6 +165,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   link: {
+    fontSize: 14,
+  },
+  guest: {
+    alignSelf: 'center',
+  },
+  guestText: {
     fontSize: 14,
   },
 });

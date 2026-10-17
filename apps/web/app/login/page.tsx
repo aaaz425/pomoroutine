@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/supabase/server';
 import { AuthShell } from '@/components/auth/AuthShell';
@@ -32,6 +33,9 @@ export default async function LoginPage({ searchParams }: Props) {
       </Suspense>
       <AuthDivider />
       <KakaoButton redirectTo={redirectTo} />
+      <Link href="/" className="self-center text-sm text-muted-foreground hover:text-foreground">
+        로그인 없이 타이머 사용하기
+      </Link>
     </AuthShell>
   );
 }
