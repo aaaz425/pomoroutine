@@ -44,12 +44,12 @@ export function TaskItem({
     >
       {mode === 'manage' && (
         <Pressable
-          onLongPress={onDrag}
-          hitSlop={8}
+          onPressIn={onDrag}
+          hitSlop={9}
           style={styles.gripButton}
           accessibilityLabel="순서 조정"
         >
-          <GripVertical size={14} color={withAlpha(theme.mutedForeground, 0.3)} />
+          <GripVertical size={18} color={withAlpha(theme.mutedForeground, 0.5)} />
         </Pressable>
       )}
 

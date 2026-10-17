@@ -121,9 +121,9 @@ function MessageRow({
         {...attributes}
         {...listeners}
         aria-label="순서 조정"
-        className="shrink-0 text-muted-foreground/30 hover:text-muted-foreground cursor-grab active:cursor-grabbing transition-colors touch-none"
+        className="shrink-0 -m-[13px] p-[13px] text-muted-foreground/50 hover:text-muted-foreground cursor-grab active:cursor-grabbing transition-colors touch-none"
       >
-        <GripVertical className="w-3.5 h-3.5" />
+        <GripVertical className="w-4.5 h-4.5" />
       </button>
       <span className="text-sm text-foreground flex-1 min-w-0 truncate pr-2">{message}</span>
       <button

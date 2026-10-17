@@ -69,8 +69,8 @@ function MessageRow({
         isActive && styles.dragging,
       ]}
     >
-      <Pressable onLongPress={drag} delayLongPress={150} hitSlop={8}>
-        <GripVertical size={14} color={withAlpha(theme.mutedForeground, 0.3)} />
+      <Pressable onPressIn={drag} hitSlop={13}>
+        <GripVertical size={18} color={withAlpha(theme.mutedForeground, 0.5)} />
       </Pressable>
       <Text
         numberOfLines={1}
