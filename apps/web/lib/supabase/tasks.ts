@@ -73,8 +73,6 @@ export async function deleteTask(id: string): Promise<{ error: boolean }> {
 // 목록 순서(position)를 배열 순서대로 다시 씀 — add/reorder 후 호출
 export async function reorderTasks(orderedIds: string[]): Promise<{ error: boolean }> {
   const supabase = createClient();
-  const results = await Promise.all(
-    orderedIds.map((id, index) => supabase.from('tasks').update({ position: index }).eq('id', id)),
-  );
-  return { error: results.some((r) => r.error !== null) };
+  const { error } = await supabase.rpc('reorder_tasks', { p_ids: orderedIds });
+  return { error: error !== null };
 }
