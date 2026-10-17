@@ -3,6 +3,7 @@
 import { createStore } from 'zustand';
 import { arrayMove } from '@dnd-kit/sortable';
 import { toast } from 'sonner';
+import { createMutationTracker } from '@pomoroutine/shared';
 import { fetchSettings, saveSettings } from '@/lib/supabase/settings';
 import {
   type TimerSettings,
@@ -56,6 +57,7 @@ interface SettingsStore {
   deleteMessage: (index: number) => Promise<void>;
   reorderMessages: (fromId: string, toId: string) => Promise<void>;
   hydrate: () => Promise<void>;
+  refresh: () => Promise<void>;
 }
 
 function toAppSettings(s: SettingsStore): AppSettings {
@@ -74,8 +76,10 @@ function toAppSettings(s: SettingsStore): AppSettings {
 
 export const createSettingsStore = () =>
   createStore<SettingsStore>()((set, get) => {
+    const tracker = createMutationTracker();
+
     // 낙관적으로 먼저 반영하고, 저장 실패하면 이전 값으로 되돌린다
-    async function persistChange(
+    async function savePatch(
       previous: Partial<SettingsStore>,
       patch: Partial<SettingsStore>,
     ): Promise<void> {
@@ -86,6 +90,7 @@ export const createSettingsStore = () =>
         toast(TOAST_MESSAGES.settingsSaveFailed);
       }
     }
+    const persistChange = tracker.track(savePatch);
 
     return {
       ...DEFAULT_SETTINGS,
@@ -174,6 +179,19 @@ export const createSettingsStore = () =>
             messageIds: generateMessageIds(settings.motivationalMessages.length),
           });
       },
+
+      refresh: () =>
+        tracker.refreshWhenIdle(fetchSettings, (settings) => {
+          if (!settings) return;
+          const { messageIds } = get();
+          set({
+            ...settings,
+            messageIds:
+              messageIds.length === settings.motivationalMessages.length
+                ? messageIds
+                : generateMessageIds(settings.motivationalMessages.length),
+          });
+        }),
     };
   });
 

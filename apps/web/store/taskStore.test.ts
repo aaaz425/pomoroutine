@@ -710,3 +710,62 @@ describe('hydrate', () => {
     expect(store.getState().sessionsHydrated).toBe(true);
   });
 });
+
+describe('refresh', () => {
+  const task: Task = {
+    id: 't1',
+    title: '다른 기기에서 추가',
+    categoryId: 'c1',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  };
+
+  it('다시 조회한 데이터로 바꾸고 refreshVersion을 올림', async () => {
+    mockFetchTasks.mockResolvedValueOnce({ tasks: [task], invalidCount: 0 });
+    mockFetchCategories.mockResolvedValueOnce({ categories: DEFAULT_CATEGORIES, invalidCount: 0 });
+    mockFetchSessions.mockResolvedValueOnce({ sessions: [], invalidCount: 0 });
+
+    const store = createTaskStore();
+    await store.getState().refresh();
+
+    expect(store.getState().tasks).toEqual([task]);
+    expect(store.getState().refreshVersion).toBe(1);
+  });
+
+  it('조회에 실패한 항목은 기존 데이터를 유지', async () => {
+    mockFetchTasks.mockResolvedValueOnce(null);
+    mockFetchCategories.mockResolvedValueOnce(null);
+    mockFetchSessions.mockResolvedValueOnce(null);
+
+    const store = createTaskStore();
+    store.setState({ tasks: [task] });
+    await store.getState().refresh();
+
+    expect(store.getState().tasks).toEqual([task]);
+  });
+
+  it('추가 요청이 끝난 뒤에 조회해 낙관적으로 추가한 항목을 덮어쓰지 않음', async () => {
+    let resolveInsert!: (value: Task) => void;
+    mockInsertTask.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveInsert = resolve;
+        }),
+    );
+    const inserted: Task = { ...task, id: 'db-new', title: '새 작업' };
+    mockFetchTasks.mockResolvedValueOnce({ tasks: [inserted], invalidCount: 0 });
+    mockFetchCategories.mockResolvedValueOnce({ categories: DEFAULT_CATEGORIES, invalidCount: 0 });
+    mockFetchSessions.mockResolvedValueOnce({ sessions: [], invalidCount: 0 });
+
+    const store = createTaskStore();
+    const adding = store.getState().addTask({ title: '새 작업', categoryId: 'c1' });
+    const refreshing = store.getState().refresh();
+    expect(mockFetchTasks).not.toHaveBeenCalled();
+
+    resolveInsert(inserted);
+    await adding;
+    await refreshing;
+
+    expect(mockFetchTasks).toHaveBeenCalledTimes(1);
+    expect(store.getState().tasks).toEqual([inserted]);
+  });
+});

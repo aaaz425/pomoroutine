@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { fetchSessionsPage, type SessionsPageParams } from '@/lib/supabase/sessions';
 import { SESSION_LIMITS } from '@/lib/constants/limits';
+import { useTaskStore } from '@/store/StoreProvider';
 import type { Session } from '@/types';
 
 type SessionFilters = Pick<SessionsPageParams, 'categoryIds' | 'search' | 'dateFrom' | 'dateTo'>;
@@ -11,6 +12,7 @@ const SEARCH_DEBOUNCE_MS = 300;
 
 // categoryIds는 호출부에서 useMemo로 참조를 고정해서 넘겨야 아래 effect가 매 렌더 재실행되지 않는다
 export function useSessionsPage(filters: SessionFilters) {
+  const refreshVersion = useTaskStore((s) => s.refreshVersion);
   const [items, setItems] = useState<Session[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
@@ -56,7 +58,7 @@ export function useSessionsPage(filters: SessionFilters) {
     return () => {
       cancelled = true;
     };
-  }, [filters.categoryIds, debouncedSearch, filters.dateFrom, filters.dateTo]);
+  }, [filters.categoryIds, debouncedSearch, filters.dateFrom, filters.dateTo, refreshVersion]);
 
   const loadMore = useCallback(async () => {
     if (loading || !hasMore) return;

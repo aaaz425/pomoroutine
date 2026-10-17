@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { AppState } from 'react-native';
 import { useStore } from 'zustand';
 import { createTimerStore, preloadTimerSnapshot } from '@/store/timerStore';
 import { createTaskStore } from '@/store/taskStore';
@@ -51,6 +52,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       settingsStore.getState().hydrate(),
     ]).finally(() => setHydrated(true));
   }, [timerStore, taskStore, settingsStore]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state !== 'active') return;
+      void taskStore.getState().refresh();
+      void settingsStore.getState().refresh();
+    });
+    return () => subscription.remove();
+  }, [hydrated, taskStore, settingsStore]);
 
   useEffect(
     () =>

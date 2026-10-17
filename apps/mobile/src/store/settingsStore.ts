@@ -10,7 +10,7 @@ import { toast } from '@/lib/toast';
 import { withRetry } from '@/lib/retry';
 import { generateId } from '@/lib/generateId';
 import type { AppSettings, SoundType } from '@/types/settings';
-import { TOAST_MESSAGES } from '@pomoroutine/shared';
+import { TOAST_MESSAGES, createMutationTracker } from '@pomoroutine/shared';
 
 const DEFAULT_SETTINGS: AppSettings = {
   nickname: '',
@@ -39,6 +39,7 @@ interface SettingsStore extends AppSettings {
   deleteMessage: (index: number) => Promise<void>;
   reorderMessages: (from: number, to: number) => Promise<void>;
   hydrate: () => Promise<void>;
+  refresh: () => Promise<void>;
 }
 
 function toAppSettings(s: SettingsStore): AppSettings {
@@ -61,8 +62,10 @@ function generateMessageIds(count: number): string[] {
 
 export const createSettingsStore = () =>
   createStore<SettingsStore>()((set, get) => {
+    const tracker = createMutationTracker();
+
     // 낙관적으로 먼저 반영하고, 저장 실패하면 이전 값으로 되돌린다
-    async function persistChange(
+    async function savePatch(
       previous: Partial<SettingsStore>,
       patch: Partial<SettingsStore>,
     ): Promise<void> {
@@ -73,6 +76,7 @@ export const createSettingsStore = () =>
         toast(TOAST_MESSAGES.settingsSaveFailed);
       }
     }
+    const persistChange = tracker.track(savePatch);
 
     return {
       ...DEFAULT_SETTINGS,
@@ -173,6 +177,19 @@ export const createSettingsStore = () =>
             messageIds: generateMessageIds(settings.motivationalMessages.length),
           });
       },
+
+      refresh: () =>
+        tracker.refreshWhenIdle(fetchSettings, (settings) => {
+          if (!settings) return;
+          const { messageIds } = get();
+          set({
+            ...settings,
+            messageIds:
+              messageIds.length === settings.motivationalMessages.length
+                ? messageIds
+                : generateMessageIds(settings.motivationalMessages.length),
+          });
+        }),
     };
   });
 

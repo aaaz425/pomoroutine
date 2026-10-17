@@ -1,5 +1,5 @@
 import { createStore } from 'zustand';
-import { INPUT_LIMITS } from '@pomoroutine/shared';
+import { INPUT_LIMITS, createMutationTracker } from '@pomoroutine/shared';
 import { generateId } from '@/lib/generateId';
 import { toast } from '@/lib/toast';
 import { withRetry } from '@/lib/retry';
@@ -49,6 +49,7 @@ interface TaskStore {
   addSession: (input: Omit<Session, 'id'>) => Promise<boolean>;
 
   hydrate: () => Promise<void>;
+  refresh: () => Promise<void>;
 }
 
 function arrayMove<T>(arr: T[], from: number, to: number): T[] {
@@ -72,12 +73,13 @@ function resolvePendingId(pending: PendingIds, id: string): Promise<string | nul
 export const createTaskStore = () => {
   const pendingTaskIds: PendingIds = new Map();
   const pendingCategoryIds: PendingIds = new Map();
+  const tracker = createMutationTracker();
 
   return createStore<TaskStore>()((set, get) => ({
     tasks: [],
     categories: [],
 
-    addTask: async ({ title, categoryId }) => {
+    addTask: tracker.track(async ({ title, categoryId }) => {
       const trimmed = title.trim();
       const tempId = generateId();
       const optimisticTask: Task = {
@@ -104,9 +106,9 @@ export const createTaskStore = () => {
       })();
       trackPendingId(pendingTaskIds, tempId, idPromise);
       return idPromise;
-    },
+    }),
 
-    updateTask: async (id, patch) => {
+    updateTask: tracker.track(async (id, patch) => {
       const targetId = await resolvePendingId(pendingTaskIds, id);
       if (!targetId) return;
       const original = get().tasks.find((t) => t.id === targetId);
@@ -122,9 +124,9 @@ export const createTaskStore = () => {
         set((state) => ({ tasks: state.tasks.map((t) => (t.id === targetId ? original : t)) }));
         toast(TOAST_MESSAGES.taskSaveFailed);
       }
-    },
+    }),
 
-    deleteTask: async (id) => {
+    deleteTask: tracker.track(async (id) => {
       const targetId = await resolvePendingId(pendingTaskIds, id);
       if (!targetId) return;
       const index = get().tasks.findIndex((t) => t.id === targetId);
@@ -140,9 +142,9 @@ export const createTaskStore = () => {
         });
         toast(TOAST_MESSAGES.taskDeleteFailed);
       }
-    },
+    }),
 
-    reorderTasks: async (fromIndex, toIndex) => {
+    reorderTasks: tracker.track(async (fromIndex, toIndex) => {
       const previousTasks = get().tasks;
       const next = arrayMove(previousTasks, fromIndex, toIndex);
       set({ tasks: next });
@@ -151,9 +153,9 @@ export const createTaskStore = () => {
         set({ tasks: previousTasks });
         toast(TOAST_MESSAGES.reorderFailed);
       }
-    },
+    }),
 
-    addCategory: async ({ name, color }) => {
+    addCategory: tracker.track(async ({ name, color }) => {
       if (get().categories.length >= INPUT_LIMITS.CATEGORIES_MAX) return;
       const trimmed = name.trim();
       const tempId = generateId();
@@ -176,9 +178,9 @@ export const createTaskStore = () => {
       })();
       trackPendingId(pendingCategoryIds, tempId, idPromise);
       await idPromise;
-    },
+    }),
 
-    updateCategory: async (id, { name, color }) => {
+    updateCategory: tracker.track(async (id, { name, color }) => {
       const targetId = await resolvePendingId(pendingCategoryIds, id);
       if (!targetId) return;
       const original = get().categories.find((c) => c.id === targetId);
@@ -196,9 +198,9 @@ export const createTaskStore = () => {
         }));
         toast(TOAST_MESSAGES.categorySaveFailed);
       }
-    },
+    }),
 
-    deleteCategory: async (id) => {
+    deleteCategory: tracker.track(async (id) => {
       const targetId = await resolvePendingId(pendingCategoryIds, id);
       if (!targetId) return { blocked: false };
       const index = get().categories.findIndex((c) => c.id === targetId);
@@ -221,9 +223,9 @@ export const createTaskStore = () => {
         toast(TOAST_MESSAGES.categoryDeleteFailed);
       }
       return { blocked };
-    },
+    }),
 
-    reorderCategories: async (fromIndex, toIndex) => {
+    reorderCategories: tracker.track(async (fromIndex, toIndex) => {
       const previousCategories = get().categories;
       const next = arrayMove(previousCategories, fromIndex, toIndex);
       set({ categories: next });
@@ -232,16 +234,16 @@ export const createTaskStore = () => {
         set({ categories: previousCategories });
         toast(TOAST_MESSAGES.reorderFailed);
       }
-    },
+    }),
 
-    addSession: async (input) => {
+    addSession: tracker.track(async (input) => {
       const { error } = await insertSessionRow(input);
       if (error) {
         toast(TOAST_MESSAGES.sessionSaveFailed);
         return false;
       }
       return true;
-    },
+    }),
 
     hydrate: async () => {
       const [tasksResult, categoriesResult] = await Promise.all([
@@ -259,6 +261,17 @@ export const createTaskStore = () => {
         toast(TOAST_MESSAGES.sessionsInvalid(invalidCount));
       }
     },
+
+    refresh: () =>
+      tracker.refreshWhenIdle(
+        () => Promise.all([fetchTasks(), fetchCategories()]),
+        ([tasksResult, categoriesResult]) => {
+          set((state) => ({
+            tasks: tasksResult?.tasks ?? state.tasks,
+            categories: categoriesResult?.categories ?? state.categories,
+          }));
+        },
+      ),
   }));
 };
 

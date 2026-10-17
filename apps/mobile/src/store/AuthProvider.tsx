@@ -211,7 +211,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // activeTimer는 계정과 무관하게 저장되므로, 다음 사용자에게 이전 진행 중 타이머가 보이지 않도록 로그아웃 시 정리
   async function logout(): Promise<void> {
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: 'local' });
     void AsyncStorage.removeItem(ACTIVE_TIMER_STORAGE_KEY);
   }
 

@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { addMonths, startOfMonth } from 'date-fns';
 import { fetchSessionsInRange } from '@/lib/supabase/sessions';
+import { useTaskStore } from '@/store/StoreProvider';
 import type { Session } from '@/types';
 
 export function useMonthSessions(viewedMonth: Date) {
+  const refreshVersion = useTaskStore((s) => s.refreshVersion);
   const [items, setItems] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,7 +29,7 @@ export function useMonthSessions(viewedMonth: Date) {
     return () => {
       cancelled = true;
     };
-  }, [viewedMonth]);
+  }, [viewedMonth, refreshVersion]);
 
   const updateItem = useCallback((id: string, patch: Partial<Session>) => {
     setItems((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));

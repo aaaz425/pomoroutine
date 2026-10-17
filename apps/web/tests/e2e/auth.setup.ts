@@ -36,7 +36,7 @@ setup('authenticate', async ({ page }) => {
         .eq('user_id', authData.user.id);
     }
   }
-  await supabase.auth.signOut();
+  await supabase.auth.signOut({ scope: 'local' });
 
   await page.goto('/login');
   await page.getByLabel('이메일', { exact: true }).fill(process.env.E2E_TEST_EMAIL!);

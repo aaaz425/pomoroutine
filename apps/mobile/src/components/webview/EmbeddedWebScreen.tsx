@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, BackHandler, PixelRatio, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView, { type WebViewNavigation } from 'react-native-webview';
 import { useFocusEffect } from 'expo-router';
-import { WEBVIEW_TAB_BLUR_EVENT } from '@pomoroutine/shared';
+import { WEBVIEW_TAB_BLUR_EVENT, WEBVIEW_TAB_FOCUS_EVENT } from '@pomoroutine/shared';
 import { Text } from '@/components/shared/Text';
 import { FONTS, MAX_FONT_SIZE_MULTIPLIER } from '@/constants/fonts';
 import { useThemeScheme, useThemeTokens } from '@/hooks/use-theme-scheme';
@@ -22,6 +22,7 @@ export function EmbeddedWebScreen({ path }: Props) {
   const webAppUrl = process.env.EXPO_PUBLIC_WEB_APP_URL;
   const webViewRef = useRef<WebView>(null);
   const [canGoBack, setCanGoBack] = useState(false);
+  const focusedOnceRef = useRef(false);
 
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -32,13 +33,21 @@ export function EmbeddedWebScreen({ path }: Props) {
     return () => sub.remove();
   }, [canGoBack]);
 
-  useFocusEffect(() => {
-    return () => {
-      webViewRef.current?.injectJavaScript(
-        `window.dispatchEvent(new Event('${WEBVIEW_TAB_BLUR_EVENT}')); true;`,
-      );
-    };
-  });
+  useFocusEffect(
+    useCallback(() => {
+      if (focusedOnceRef.current) {
+        webViewRef.current?.injectJavaScript(
+          `window.dispatchEvent(new Event('${WEBVIEW_TAB_FOCUS_EVENT}')); true;`,
+        );
+      }
+      focusedOnceRef.current = true;
+      return () => {
+        webViewRef.current?.injectJavaScript(
+          `window.dispatchEvent(new Event('${WEBVIEW_TAB_BLUR_EVENT}')); true;`,
+        );
+      };
+    }, []),
+  );
 
   if (!webAppUrl || !session) {
     return (

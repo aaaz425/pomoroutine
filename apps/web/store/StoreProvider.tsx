@@ -2,6 +2,7 @@
 
 import { createContext, startTransition, useContext, useEffect, useState } from 'react';
 import { useStore } from 'zustand';
+import { WEBVIEW_TAB_FOCUS_EVENT } from '@pomoroutine/shared';
 import { createTimerStore } from '@/store/timerStore';
 import { createTaskStore } from '@/store/taskStore';
 import { createSettingsStore } from '@/store/settingsStore';
@@ -55,6 +56,23 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       },
     );
   }, [taskStore, settingsStore, timerStore]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    function refresh() {
+      void taskStore.getState().refresh();
+      void settingsStore.getState().refresh();
+    }
+    function handleVisibility() {
+      if (document.visibilityState === 'visible') refresh();
+    }
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener(WEBVIEW_TAB_FOCUS_EVENT, refresh);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener(WEBVIEW_TAB_FOCUS_EVENT, refresh);
+    };
+  }, [hydrated, taskStore, settingsStore]);
 
   useEffect(
     () =>

@@ -3,6 +3,7 @@
 import { createStore } from 'zustand';
 import { arrayMove } from '@dnd-kit/sortable';
 import { toast } from 'sonner';
+import { createMutationTracker } from '@pomoroutine/shared';
 import { generateId } from '@/lib/utils';
 import { INPUT_LIMITS } from '@/lib/constants/limits';
 import {
@@ -44,6 +45,7 @@ interface TaskStore {
   categories: Category[];
   sessions: Session[];
   sessionsHydrated: boolean; // core(tasks/categories) hydrate와 별개로 sessions 전체 조회 완료 여부
+  refreshVersion: number;
 
   addTask: (input: { title: string; categoryId: string }) => Promise<string | null>;
   updateTask: (id: string, patch: Partial<Pick<Task, 'title' | 'categoryId'>>) => Promise<void>;
@@ -61,12 +63,14 @@ interface TaskStore {
   deleteCategory: (id: string) => Promise<void>;
   reorderCategories: (activeId: string, overId: string) => Promise<void>;
   hydrate: () => Promise<void>;
+  refresh: () => Promise<void>;
 }
 
 export const createTaskStore = () => {
   const pendingTaskIds: PendingIds = new Map();
   const pendingCategoryIds: PendingIds = new Map();
   const pendingSessionIds: PendingIds = new Map();
+  const tracker = createMutationTracker();
 
   return createStore<TaskStore>()((set, get) => ({
     // SSR hydration mismatch 방지 — 실제 데이터는 hydrate()로 반영
@@ -74,8 +78,9 @@ export const createTaskStore = () => {
     categories: DEFAULT_CATEGORIES,
     sessions: [],
     sessionsHydrated: false,
+    refreshVersion: 0,
 
-    addTask: async ({ title, categoryId }) => {
+    addTask: tracker.track(async ({ title, categoryId }) => {
       const trimmed = title.trim();
       const tempId = generateId();
       const optimisticTask: Task = {
@@ -103,9 +108,9 @@ export const createTaskStore = () => {
       })();
       trackPendingId(pendingTaskIds, tempId, idPromise);
       return idPromise;
-    },
+    }),
 
-    updateTask: async (id, patch) => {
+    updateTask: tracker.track(async (id, patch) => {
       const targetId = await resolvePendingId(pendingTaskIds, id);
       if (!targetId) return;
       const original = get().tasks.find((t) => t.id === targetId);
@@ -121,9 +126,9 @@ export const createTaskStore = () => {
         set((state) => ({ tasks: state.tasks.map((t) => (t.id === targetId ? original : t)) }));
         toast(TOAST_MESSAGES.taskSaveFailed);
       }
-    },
+    }),
 
-    deleteTask: async (id) => {
+    deleteTask: tracker.track(async (id) => {
       const targetId = await resolvePendingId(pendingTaskIds, id);
       if (!targetId) return;
       const index = get().tasks.findIndex((t) => t.id === targetId);
@@ -139,9 +144,9 @@ export const createTaskStore = () => {
         });
         toast(TOAST_MESSAGES.taskDeleteFailed);
       }
-    },
+    }),
 
-    addSession: async (input) => {
+    addSession: tracker.track(async (input) => {
       const tempId = generateId();
       set((state) => ({ sessions: [{ id: tempId, ...input }, ...state.sessions] }));
 
@@ -162,9 +167,9 @@ export const createTaskStore = () => {
         return false;
       }
       return true;
-    },
+    }),
 
-    updateSessionFields: async (id, patch) => {
+    updateSessionFields: tracker.track(async (id, patch) => {
       const targetId = await resolvePendingId(pendingSessionIds, id);
       if (!targetId) return false;
       const original = get().sessions.find((s) => s.id === targetId);
@@ -181,9 +186,9 @@ export const createTaskStore = () => {
         return false;
       }
       return true;
-    },
+    }),
 
-    deleteSession: async (id) => {
+    deleteSession: tracker.track(async (id) => {
       const targetId = await resolvePendingId(pendingSessionIds, id);
       if (!targetId) return false;
       const index = get().sessions.findIndex((s) => s.id === targetId);
@@ -201,9 +206,9 @@ export const createTaskStore = () => {
         return false;
       }
       return true;
-    },
+    }),
 
-    reorderTasks: async (activeId, overId) => {
+    reorderTasks: tracker.track(async (activeId, overId) => {
       const previousTasks = get().tasks;
       const from = previousTasks.findIndex((t) => t.id === activeId);
       const to = previousTasks.findIndex((t) => t.id === overId);
@@ -215,9 +220,9 @@ export const createTaskStore = () => {
         set({ tasks: previousTasks });
         toast(TOAST_MESSAGES.reorderFailed);
       }
-    },
+    }),
 
-    addCategory: async ({ name, color }) => {
+    addCategory: tracker.track(async ({ name, color }) => {
       if (get().categories.length >= INPUT_LIMITS.CATEGORIES_MAX) return;
       const trimmed = name.trim();
       const tempId = generateId();
@@ -240,9 +245,9 @@ export const createTaskStore = () => {
       })();
       trackPendingId(pendingCategoryIds, tempId, idPromise);
       await idPromise;
-    },
+    }),
 
-    updateCategory: async (id, { name, color }) => {
+    updateCategory: tracker.track(async (id, { name, color }) => {
       const targetId = await resolvePendingId(pendingCategoryIds, id);
       if (!targetId) return;
       const original = get().categories.find((c) => c.id === targetId);
@@ -260,9 +265,9 @@ export const createTaskStore = () => {
         }));
         toast(TOAST_MESSAGES.categorySaveFailed);
       }
-    },
+    }),
 
-    deleteCategory: async (id) => {
+    deleteCategory: tracker.track(async (id) => {
       const targetId = await resolvePendingId(pendingCategoryIds, id);
       if (!targetId) return;
       const index = get().categories.findIndex((c) => c.id === targetId);
@@ -285,9 +290,9 @@ export const createTaskStore = () => {
         });
         toast(blocked ? TOAST_MESSAGES.categoryInUse : TOAST_MESSAGES.categoryDeleteFailed);
       }
-    },
+    }),
 
-    reorderCategories: async (activeId, overId) => {
+    reorderCategories: tracker.track(async (activeId, overId) => {
       const previousCategories = get().categories;
       const from = previousCategories.findIndex((c) => c.id === activeId);
       const to = previousCategories.findIndex((c) => c.id === overId);
@@ -299,7 +304,7 @@ export const createTaskStore = () => {
         set({ categories: previousCategories });
         toast(TOAST_MESSAGES.reorderFailed);
       }
-    },
+    }),
 
     hydrate: async () => {
       const [tasksResult, categoriesResult] = await Promise.all([fetchTasks(), fetchCategories()]);
@@ -321,6 +326,19 @@ export const createTaskStore = () => {
         }
       });
     },
+
+    refresh: () =>
+      tracker.refreshWhenIdle(
+        () => Promise.all([fetchTasks(), fetchCategories(), fetchAllSessionsLazy()]),
+        ([tasksResult, categoriesResult, sessionsResult]) => {
+          set((state) => ({
+            tasks: tasksResult?.tasks ?? state.tasks,
+            categories: categoriesResult?.categories ?? state.categories,
+            sessions: sessionsResult?.sessions ?? state.sessions,
+            refreshVersion: state.refreshVersion + 1,
+          }));
+        },
+      ),
   }));
 };
 
