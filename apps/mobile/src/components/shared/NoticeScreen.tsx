@@ -1,15 +1,17 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
 import { Text } from '@/components/shared/Text';
 import { FONTS } from '@/constants/fonts';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
 
 interface Props {
   title: string;
+  message?: string;
+  actionLabel: string;
+  onAction: () => void;
 }
 
-export function GuestPrompt({ title }: Props) {
+export function NoticeScreen({ title, message, actionLabel, onAction }: Props) {
   const theme = useThemeTokens();
 
   return (
@@ -19,17 +21,24 @@ export function GuestPrompt({ title }: Props) {
           <Text style={[styles.title, { color: theme.foreground, fontFamily: FONTS.sansMedium }]}>
             {title}
           </Text>
-          <Pressable
-            onPress={() => router.push('/login')}
-            style={[styles.cta, { backgroundColor: theme.primary }]}
-          >
+          {message && (
+            <Text
+              style={[
+                styles.message,
+                { color: theme.mutedForeground, fontFamily: FONTS.sansRegular },
+              ]}
+            >
+              {message}
+            </Text>
+          )}
+          <Pressable onPress={onAction} style={[styles.cta, { backgroundColor: theme.primary }]}>
             <Text
               style={[
                 styles.ctaText,
                 { color: theme.primaryForeground, fontFamily: FONTS.sansSemiBold },
               ]}
             >
-              로그인
+              {actionLabel}
             </Text>
           </Pressable>
         </View>
@@ -54,6 +63,10 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 15,
+    textAlign: 'center',
+  },
+  message: {
+    fontSize: 13,
     textAlign: 'center',
   },
   cta: {

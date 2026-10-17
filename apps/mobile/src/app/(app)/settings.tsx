@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { Easing, Keyframe } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, router } from 'expo-router';
 import {
   Bell,
   ChevronLeft,
@@ -15,7 +15,7 @@ import { Text } from '@/components/shared/Text';
 import { useHydrated, useSettingsStore } from '@/store/StoreProvider';
 import { useAuth } from '@/store/AuthProvider';
 import { SettingsMenuRow } from '@/components/shared/SettingsMenuRow';
-import { GuestPrompt } from '@/components/shared/GuestPrompt';
+import { NoticeScreen } from '@/components/shared/NoticeScreen';
 import { SettingsCard } from '@/components/settings/SettingsCard';
 import { SettingsRowGroup } from '@/components/settings/SettingsRowGroup';
 import { AccountCategoryCard } from '@/components/settings/AccountCategoryCard';
@@ -91,7 +91,14 @@ export default function SettingsScreen() {
     setActiveCategory(next);
   }
 
-  if (!user) return <GuestPrompt title="로그인하면 동기화할 수 있어요" />;
+  if (!user)
+    return (
+      <NoticeScreen
+        title="로그인하면 동기화할 수 있어요"
+        actionLabel="로그인"
+        onAction={() => router.push('/login')}
+      />
+    );
 
   if (!hydrated) {
     return (
