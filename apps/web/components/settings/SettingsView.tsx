@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
+import { NOTICE_MESSAGES, TOAST_MESSAGES } from '@/lib/constants/messages';
 import {
   Bell,
   ChevronLeft,
@@ -110,12 +111,12 @@ export function SettingsView({ userPromise }: Props) {
     deletingRef.current = true;
     // 성공 시 redirect()로 응답이 끝나 .then이 실행되지 않음 — 실패 시에만 결과를 확인해 토스트로 알림
     deleteAccountConfirmed().then((result) => {
-      if (result.error) toast(result.error);
+      if (result.error) toast(TOAST_MESSAGES.errorMessage(result.error));
     });
   }, [searchParams]);
 
   if (!hydrated || !userLoaded) return showSkeleton ? <SettingsSkeleton /> : null;
-  if (!user) return <GuestPrompt title="로그인하면 동기화할 수 있어요" />;
+  if (!user) return <GuestPrompt title={NOTICE_MESSAGES.guestSettings} />;
 
   const activeLabel = CATEGORIES.find((c) => c.key === activeCategory)?.label;
 

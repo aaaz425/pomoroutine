@@ -1,0 +1,15 @@
+export const AUTH_ERROR_MESSAGES = {
+  invalidInput: '입력값을 확인해주세요',
+  emailNotConfirmed: '이메일 인증이 필요해요. 받은 메일함을 확인해주세요',
+  tooManyRequests: '잠시 후 다시 시도해주세요',
+  kakaoAccount: '카카오로 가입됐어요. 카카오 로그인을 이용해주세요',
+  invalidCredentials: '이메일 또는 비밀번호가 올바르지 않아요',
+  loginFailed: '로그인에 실패했어요. 잠시 후 다시 시도해주세요',
+  kakaoLoginFailed: '카카오 로그인에 실패했어요. 잠시 후 다시 시도해주세요',
+  authFailed: '인증에 실패했어요. 다시 시도해주세요',
+  signupFailed: '가입에 실패했어요. 잠시 후 다시 시도해주세요',
+  emailAlreadyRegistered: '이미 가입된 이메일이에요. 로그인해주세요',
+  passwordUpdateFailed: '비밀번호 변경에 실패했어요. 다시 시도해주세요',
+  deleteAccountFailed: '탈퇴 처리에 실패했어요. 잠시 후 다시 시도해주세요',
+  passwordRequired: '비밀번호를 입력해주세요',
+} as const;

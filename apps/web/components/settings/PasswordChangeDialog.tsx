@@ -1,6 +1,6 @@
 'use client';
 
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { Modal } from '@/components/shared/Modal';
 import { ResetPasswordForm } from '@/components/auth/ResetPasswordForm';
 import { TOAST_MESSAGES } from '@/lib/constants/messages';

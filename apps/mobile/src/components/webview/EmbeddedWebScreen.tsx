@@ -3,7 +3,11 @@ import { ActivityIndicator, BackHandler, PixelRatio, StyleSheet, View } from 're
 import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView, { type WebViewNavigation } from 'react-native-webview';
 import { router, useFocusEffect } from 'expo-router';
-import { WEBVIEW_TAB_BLUR_EVENT, WEBVIEW_TAB_FOCUS_EVENT } from '@pomoroutine/shared';
+import {
+  NOTICE_MESSAGES,
+  WEBVIEW_TAB_BLUR_EVENT,
+  WEBVIEW_TAB_FOCUS_EVENT,
+} from '@pomoroutine/shared';
 import { Text } from '@/components/shared/Text';
 import { NoticeScreen } from '@/components/shared/NoticeScreen';
 import { FONTS, MAX_FONT_SIZE_MULTIPLIER } from '@/constants/fonts';
@@ -59,9 +63,9 @@ export function EmbeddedWebScreen({ path }: Props) {
   if (authFailed) {
     return (
       <NoticeScreen
-        title="로그인이 만료됐어요"
-        message="다시 로그인해 주세요"
-        actionLabel="다시 로그인"
+        title={NOTICE_MESSAGES.sessionExpiredTitle}
+        message={NOTICE_MESSAGES.sessionExpiredMessage}
+        actionLabel={NOTICE_MESSAGES.relogin}
         onAction={() => void handleRelogin()}
       />
     );

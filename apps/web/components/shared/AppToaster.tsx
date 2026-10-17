@@ -12,7 +12,10 @@ export function AppToaster() {
       position="top-center"
       toastOptions={{
         classNames: {
-          toast: 'bg-secondary! border-border! text-foreground! shadow-lg!',
+          toast: 'bg-popover! text-popover-foreground! border! shadow-lg! text-left!',
+          success: 'border-success! shadow-success/25! [&_[data-icon]]:text-success',
+          info: 'border-info! shadow-info/25! [&_[data-icon]]:text-info',
+          error: 'border-destructive! shadow-destructive/25! [&_[data-icon]]:text-destructive',
         },
       }}
     />

@@ -32,6 +32,7 @@ import { CategoryModal } from '@/components/settings/CategoryModal';
 import { MotivationalModal } from '@/components/settings/MotivationalModal';
 import { FONTS } from '@/constants/fonts';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
+import { NOTICE_MESSAGES } from '@pomoroutine/shared';
 
 type CategoryKey = 'account' | 'presets' | 'notifications' | 'about';
 
@@ -94,8 +95,8 @@ export default function SettingsScreen() {
   if (!user)
     return (
       <NoticeScreen
-        title="로그인하면 동기화할 수 있어요"
-        actionLabel="로그인"
+        title={NOTICE_MESSAGES.guestSettings}
+        actionLabel={NOTICE_MESSAGES.login}
         onAction={() => router.push('/login')}
       />
     );

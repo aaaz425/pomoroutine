@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { createTimerStore } from '@/store/timerStore';
 import { STORAGE_KEYS } from '@/types';
 
-vi.mock('sonner', () => ({ toast: vi.fn() }));
+vi.mock('@/lib/toast', () => ({ toast: vi.fn() }));
 
 beforeEach(() => {
   vi.useFakeTimers();

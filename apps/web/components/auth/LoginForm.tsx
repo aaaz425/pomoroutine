@@ -7,6 +7,7 @@ import { login } from '@/lib/supabase/actions';
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/shared/TextInput';
 import { PasswordField } from '@/components/auth/PasswordField';
+import { AUTH_ERROR_MESSAGES } from '@/lib/constants/messages';
 import type { AuthActionResult } from '@/types';
 
 export function LoginForm() {
@@ -16,7 +17,7 @@ export function LoginForm() {
 
   const [state, formAction, pending] = useActionState<AuthActionResult, FormData>(
     (_prev, formData) => login(formData),
-    authFailed ? { error: '인증에 실패했어요. 다시 시도해주세요' } : {},
+    authFailed ? { error: AUTH_ERROR_MESSAGES.authFailed } : {},
   );
 
   return (

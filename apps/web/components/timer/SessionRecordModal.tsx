@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog';
 import { Check } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { useTimerStore, useTaskStore, useHydrated } from '@/store/StoreProvider';
 import { useCurrentTask } from '@/hooks/useCurrentTask';
 import { useLoggedIn } from '@/hooks/useLoggedIn';
