@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Modal as RNModal, Pressable, StyleSheet, View } from 'react-native';
+import { router } from 'expo-router';
 import { Text } from '@/components/shared/Text';
 import { useAuth } from '@/store/AuthProvider';
 import { ConfirmModal } from '@/components/shared/ConfirmModal';
@@ -43,8 +44,11 @@ export function DeleteAccountModal({ visible, onClose }: Props) {
     }
     const result = await deleteAccount();
     setPending(false);
-    if (result.error) setError(result.error);
-    // 성공 시 deleteAccount() 내부에서 signOut까지 처리 — 세션이 사라지며 자동으로 로그인 화면 전환
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    router.push('/login');
   }
 
   async function handlePasswordDelete() {
@@ -53,7 +57,11 @@ export function DeleteAccountModal({ visible, onClose }: Props) {
     setError(null);
     const result = await deleteAccount(password);
     setPending(false);
-    if (result.error) setError(result.error);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    router.push('/login');
   }
 
   if (step === 'confirm') {

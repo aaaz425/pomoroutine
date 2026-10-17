@@ -1,4 +1,5 @@
 import { StyleSheet, View } from 'react-native';
+import { router } from 'expo-router';
 import { KeyRound, LogOut, Mail, Trash2 } from 'lucide-react-native';
 import { Text } from '@/components/shared/Text';
 import { useAuth } from '@/store/AuthProvider';
@@ -17,6 +18,11 @@ export function AccountCategoryCard({ onPasswordChangePress, onDeleteAccountPres
   const theme = useThemeTokens();
   const { user, logout } = useAuth();
   const isKakao = user?.user_metadata?.provider === 'kakao';
+
+  async function handleLogout() {
+    await logout();
+    router.push('/login');
+  }
 
   return (
     <SettingsRowGroup>
@@ -43,7 +49,12 @@ export function AccountCategoryCard({ onPasswordChangePress, onDeleteAccountPres
         value=""
         onPress={onPasswordChangePress}
       />
-      <SettingsMenuRow Icon={LogOut} label="로그아웃" value="" onPress={logout} />
+      <SettingsMenuRow
+        Icon={LogOut}
+        label="로그아웃"
+        value=""
+        onPress={() => void handleLogout()}
+      />
       <SettingsMenuRow
         Icon={Trash2}
         label="회원탈퇴"
