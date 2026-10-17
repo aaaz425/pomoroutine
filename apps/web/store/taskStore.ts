@@ -2,7 +2,7 @@
 
 import { createStore } from 'zustand';
 import { arrayMove } from '@dnd-kit/sortable';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { createMutationTracker } from '@pomoroutine/shared';
 import { generateId } from '@/lib/utils';
 import { INPUT_LIMITS } from '@/lib/constants/limits';

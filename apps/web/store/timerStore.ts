@@ -3,7 +3,7 @@
 import { createTimerStore as createSharedTimerStore } from '@pomoroutine/shared';
 import type { TimerStorePorts, TimerSnapshot } from '@pomoroutine/shared';
 import { ActiveTimerStateSchema, STORAGE_KEYS } from '@/types';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { loadFromStorage, saveToStorage } from '@/lib/storage';
 import { TOAST_MESSAGES } from '@/lib/constants/messages';
 

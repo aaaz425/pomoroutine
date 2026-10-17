@@ -57,12 +57,15 @@ export interface ThemeTokens {
   background: string;
   foreground: string;
   card: string;
+  popover: string;
   primary: string;
   primaryForeground: string;
   muted: string;
   mutedForeground: string;
   border: string;
   destructive: string;
+  success: string;
+  info: string;
 }
 
 export const THEME: Record<'light' | 'dark', ThemeTokens> = {
@@ -70,6 +73,7 @@ export const THEME: Record<'light' | 'dark', ThemeTokens> = {
     background: '#FFFFFF',
     foreground: '#111111',
     card: '#F8F9FA',
+    popover: '#F5F5F5',
     get primary() {
       return COLOR_THEMES[activeColorTheme].accent.light.color;
     },
@@ -80,11 +84,14 @@ export const THEME: Record<'light' | 'dark', ThemeTokens> = {
     mutedForeground: '#374151',
     border: '#E5E7EB',
     destructive: '#EF4444',
+    success: '#22C55E',
+    info: '#3B82F6',
   },
   dark: {
     background: '#07090F',
     foreground: '#F0F4F8',
     card: '#0D1117',
+    popover: '#111827',
     get primary() {
       return COLOR_THEMES[activeColorTheme].accent.dark.color;
     },
@@ -95,6 +102,8 @@ export const THEME: Record<'light' | 'dark', ThemeTokens> = {
     mutedForeground: '#94A3B8',
     border: '#1E2D3D',
     destructive: '#EF4444',
+    success: '#22C55E',
+    info: '#3B82F6',
   },
 };
 
