@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { EmailOtpType, Session, User } from '@supabase/supabase-js';
 import { login as kakaoLogin } from '@react-native-seoul/kakao-login';
-import { AUTH_LIMITS } from '@pomoroutine/shared';
+import { AUTH_ERROR_MESSAGES, AUTH_LIMITS } from '@pomoroutine/shared';
 import { supabase } from '@/lib/supabase/client';
 import { ACTIVE_TIMER_STORAGE_KEY } from '@/store/timerStore';
 import {
@@ -66,26 +66,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function login(email: string, password: string): Promise<AuthActionResult> {
     const parsed = LoginCredentialsSchema.safeParse({ email, password });
     if (!parsed.success) {
-      return { error: parsed.error.issues[0]?.message ?? '입력값을 확인해주세요' };
+      return { error: parsed.error.issues[0]?.message ?? AUTH_ERROR_MESSAGES.invalidInput };
     }
 
     const { error } = await supabase.auth.signInWithPassword(parsed.data);
 
     if (error) {
       if (error.message === 'Email not confirmed') {
-        return { error: '이메일 인증이 필요해요. 받은 메일함을 확인해주세요' };
+        return { error: AUTH_ERROR_MESSAGES.emailNotConfirmed };
       }
       if (error.status === 429) {
-        return { error: '잠시 후 다시 시도해주세요' };
+        return { error: AUTH_ERROR_MESSAGES.tooManyRequests };
       }
       if (error.message === 'Invalid login credentials') {
         const provider = await getExistingProvider(parsed.data.email);
         if (provider === 'kakao') {
-          return { error: '카카오로 가입됐어요. 카카오 로그인을 이용해주세요' };
+          return { error: AUTH_ERROR_MESSAGES.kakaoAccount };
         }
-        return { error: '이메일 또는 비밀번호가 올바르지 않습니다' };
+        return { error: AUTH_ERROR_MESSAGES.invalidCredentials };
       }
-      return { error: '로그인에 실패했어요. 잠시 후 다시 시도해주세요' };
+      return { error: AUTH_ERROR_MESSAGES.loginFailed };
     }
 
     return {};
@@ -102,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return {};
       }
       console.error('[kakao] login() failed', err);
-      return { error: '카카오 로그인에 실패했어요. 잠시 후 다시 시도해주세요' };
+      return { error: AUTH_ERROR_MESSAGES.kakaoLoginFailed };
     }
 
     const { data, error: invokeError } = await supabase.functions.invoke<{
@@ -113,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (invokeError || !data?.tokenHash || !data.verificationType) {
       console.error('[kakao] edge function failed', invokeError, data);
-      return { error: '카카오 로그인에 실패했어요. 잠시 후 다시 시도해주세요' };
+      return { error: AUTH_ERROR_MESSAGES.kakaoLoginFailed };
     }
 
     const { error: verifyError } = await supabase.auth.verifyOtp({
@@ -123,7 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (verifyError) {
       console.error('[kakao] verifyOtp failed', verifyError);
-      return { error: '카카오 로그인에 실패했어요. 잠시 후 다시 시도해주세요' };
+      return { error: AUTH_ERROR_MESSAGES.kakaoLoginFailed };
     }
 
     return {};
@@ -136,7 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   ): Promise<AuthActionResult> {
     const parsed = SignupCredentialsSchema.safeParse({ email, password, passwordConfirm });
     if (!parsed.success) {
-      return { error: parsed.error.issues[0]?.message ?? '입력값을 확인해주세요' };
+      return { error: parsed.error.issues[0]?.message ?? AUTH_ERROR_MESSAGES.invalidInput };
     }
 
     const { data, error } = await supabase.auth.signUp({
@@ -147,18 +147,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (error) {
       if (error.status === 429) {
-        return { error: '잠시 후 다시 시도해주세요' };
+        return { error: AUTH_ERROR_MESSAGES.tooManyRequests };
       }
-      return { error: '가입에 실패했어요. 잠시 후 다시 시도해주세요' };
+      return { error: AUTH_ERROR_MESSAGES.signupFailed };
     }
 
     // 이미 가입+인증된 이메일이면 Supabase는 에러 없이 identities가 빈 배열인 응답을 준다
     if (data.user && data.user.identities?.length === 0) {
       const provider = await getExistingProvider(parsed.data.email);
       if (provider === 'kakao') {
-        return { error: '카카오로 가입됐어요. 카카오 로그인을 이용해주세요' };
+        return { error: AUTH_ERROR_MESSAGES.kakaoAccount };
       }
-      return { error: '이미 가입된 이메일이에요. 로그인해주세요' };
+      return { error: AUTH_ERROR_MESSAGES.emailAlreadyRegistered };
     }
 
     return { pendingConfirmation: true };
@@ -167,7 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function requestPasswordReset(email: string): Promise<AuthActionResult> {
     const parsed = ForgotPasswordSchema.safeParse({ email });
     if (!parsed.success) {
-      return { error: parsed.error.issues[0]?.message ?? '입력값을 확인해주세요' };
+      return { error: parsed.error.issues[0]?.message ?? AUTH_ERROR_MESSAGES.invalidInput };
     }
 
     const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
@@ -175,7 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     if (error?.status === 429) {
-      return { error: '잠시 후 다시 시도해주세요' };
+      return { error: AUTH_ERROR_MESSAGES.tooManyRequests };
     }
 
     // 계정 존재 여부를 흘리지 않기 위해, 실패해도 성공과 동일하게 응답한다
@@ -189,7 +189,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
-      return { error: '비밀번호 변경에 실패했어요. 다시 시도해주세요' };
+      return { error: AUTH_ERROR_MESSAGES.passwordUpdateFailed };
     }
 
     return {};
@@ -201,7 +201,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     if (error || data?.error) {
-      return { error: data?.error ?? '탈퇴 처리에 실패했어요. 잠시 후 다시 시도해주세요' };
+      return { error: data?.error ?? AUTH_ERROR_MESSAGES.deleteAccountFailed };
     }
 
     await supabase.auth.signOut();
