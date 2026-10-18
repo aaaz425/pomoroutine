@@ -7,7 +7,7 @@ import { InsightsSection } from '@/components/journal/InsightsSection';
 import { JournalTabs } from '@/components/journal/JournalTabs';
 import { SessionDetailOverlay } from '@/components/journal/SessionDetailOverlay';
 import { JournalEmptyState } from '@/components/journal/JournalEmptyState';
-import { JournalSkeleton } from '@/components/journal/JournalSkeleton';
+import { InsightsSkeleton, JournalSkeleton } from '@/components/journal/JournalSkeleton';
 import { ErrorFallback } from '@/components/shared/ErrorFallback';
 import { useHydrated, useTaskStore } from '@/store/StoreProvider';
 import { useDelayedFlag } from '@/hooks/useDelayedFlag';
@@ -28,15 +28,11 @@ export function JournalView() {
   const [selection, setSelection] = useState<Selection | null>(null);
   const [activeTab, setActiveTab] = useState<JournalTab>('list');
 
-  const showSkeleton = useDelayedFlag(!hydrated || !summary || !insightSessions);
+  const showSkeleton = useDelayedFlag(!hydrated);
 
-  if (hydrated && isError && (!summary || !insightSessions)) {
-    return <ErrorFallback onRetry={refetch} />;
-  }
-  if (!hydrated || !summary || !insightSessions) {
-    return showSkeleton ? <JournalSkeleton /> : null;
-  }
-  if (summary.count === 0) return <JournalEmptyState />;
+  if (!hydrated) return showSkeleton ? <JournalSkeleton /> : null;
+  if (isError && (!summary || !insightSessions)) return <ErrorFallback onRetry={refetch} />;
+  if (summary?.count === 0) return <JournalEmptyState />;
 
   const selectedSession = selection?.session ?? null;
   const selectedTask = selectedSession
@@ -65,11 +61,15 @@ export function JournalView() {
         <JournalTabs value={activeTab} onChange={setActiveTab} />
       </header>
 
-      <InsightsSection
-        sessions={insightSessions}
-        categoryRatings={summary.categoryRatings}
-        categories={categories}
-      />
+      {summary && insightSessions ? (
+        <InsightsSection
+          sessions={insightSessions}
+          categoryRatings={summary.categoryRatings}
+          categories={categories}
+        />
+      ) : (
+        <InsightsSkeleton />
+      )}
 
       {activeTab === 'list' && (
         <ListView

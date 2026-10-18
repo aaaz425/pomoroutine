@@ -87,12 +87,14 @@ export function ListView({ tasks, categories, selectedId, onSelect }: Props) {
       ) : isError && items.length === 0 ? (
         <ErrorFallback onRetry={refetch} />
       ) : groups.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-16 text-center">
-          <p className="text-sm text-muted-foreground">검색 결과가 없어요</p>
-          <button onClick={resetFilters} className="text-sm text-primary hover:underline">
-            필터 초기화
-          </button>
-        </div>
+        hasActiveFilter && (
+          <div className="flex flex-col items-center gap-2 py-16 text-center">
+            <p className="text-sm text-muted-foreground">검색 결과가 없어요</p>
+            <button onClick={resetFilters} className="text-sm text-primary hover:underline">
+              필터 초기화
+            </button>
+          </div>
+        )
       ) : (
         <>
           <JournalSessionList
