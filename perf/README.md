@@ -1,6 +1,6 @@
 # perf
 
-로컬 Supabase에서만 돌리는 성능 측정 스크립트, 결과 해석은 `docs/perf/sessions-baseline.md`
+로컬 Supabase에서만 돌리는 성능 측정 스크립트
 
 | 스크립트 | 명령 | 내용 |
 |---|---|---|
@@ -11,3 +11,4 @@
 - 측정 계정 비밀번호는 `perf1234`
 - 시드와 측정 모두 Supabase URL이 로컬이 아니면 중단
 - 결과 JSON은 `perf/results/`, gitignore
+- 빌드를 건너뛰려면 `PERF_SKIP_BUILD=1`, 일부만 돌리려면 `PERF_DATASETS=10k PERF_RUNS=1`
