@@ -11,12 +11,7 @@ import {
   deleteCategory,
   reorderCategories,
 } from '@/lib/supabase/categories';
-import {
-  fetchAllSessionsLazy,
-  insertSession,
-  updateSession,
-  deleteSession,
-} from '@/lib/supabase/sessions';
+import { fetchAllSessionsLazy, insertSession } from '@/lib/supabase/sessions';
 
 vi.mock('@/lib/supabase/tasks', () => ({
   fetchTasks: vi.fn(),
@@ -35,8 +30,6 @@ vi.mock('@/lib/supabase/categories', () => ({
 vi.mock('@/lib/supabase/sessions', () => ({
   fetchAllSessionsLazy: vi.fn(),
   insertSession: vi.fn(),
-  updateSession: vi.fn(),
-  deleteSession: vi.fn(),
 }));
 
 const mockFetchTasks = vi.mocked(fetchTasks);
@@ -53,8 +46,6 @@ const mockReorderCategories = vi.mocked(reorderCategories);
 
 const mockFetchSessions = vi.mocked(fetchAllSessionsLazy);
 const mockInsertSession = vi.mocked(insertSession);
-const mockUpdateSession = vi.mocked(updateSession);
-const mockDeleteSession = vi.mocked(deleteSession);
 
 let idCounter = 0;
 function nextId() {
@@ -84,8 +75,6 @@ beforeEach(() => {
   mockUpdateCategory.mockResolvedValue({ error: false });
   mockDeleteCategory.mockResolvedValue({ error: false, blocked: false });
   mockReorderCategories.mockResolvedValue({ error: false });
-  mockUpdateSession.mockResolvedValue({ error: false });
-  mockDeleteSession.mockResolvedValue({ error: false });
 });
 
 async function addNCategories(store: ReturnType<typeof createTaskStore>, n: number) {
@@ -254,7 +243,7 @@ describe('deleteTask', () => {
   });
 });
 
-describe('addSession / updateSessionNote / updateSessionRating / updateSessionTags / deleteSession', () => {
+describe('addSession', () => {
   it('addSession — 새 세션이 목록 맨 앞에 추가됨', async () => {
     const store = createTaskStore();
     await store.getState().addSession(makeSessionInput());
@@ -279,165 +268,6 @@ describe('addSession / updateSessionNote / updateSessionRating / updateSessionTa
     const store = createTaskStore();
     await store.getState().addSession(makeSessionInput());
     expect(store.getState().sessions).toHaveLength(0);
-  });
-
-  it('updateSessionFields — note가 그대로 갱신됨', async () => {
-    const store = createTaskStore();
-    await store.getState().addSession(makeSessionInput());
-    const id = store.getState().sessions[0].id;
-    await store.getState().updateSessionFields(id, { note: '잘했다' });
-    expect(store.getState().sessions[0].note).toBe('잘했다');
-  });
-
-  it('updateSessionFields — note를 null로 설정 가능', async () => {
-    const store = createTaskStore();
-    await store.getState().addSession(makeSessionInput({ note: '기존 메모' }));
-    const id = store.getState().sessions[0].id;
-    await store.getState().updateSessionFields(id, { note: null });
-    expect(store.getState().sessions[0].note).toBeNull();
-  });
-
-  it('updateSessionFields — 존재하지 않는 id면 아무 세션도 변경되지 않음', async () => {
-    const store = createTaskStore();
-    await store.getState().addSession(makeSessionInput({ note: '기존 메모' }));
-    await store.getState().updateSessionFields('no-such-id', { note: '변경 시도' });
-    expect(store.getState().sessions[0].note).toBe('기존 메모');
-  });
-
-  it('updateSessionFields — focusRating이 갱신됨', async () => {
-    const store = createTaskStore();
-    await store.getState().addSession(makeSessionInput());
-    const id = store.getState().sessions[0].id;
-    await store.getState().updateSessionFields(id, { focusRating: 2 });
-    expect(store.getState().sessions[0].focusRating).toBe(2);
-  });
-
-  it('updateSessionFields — focusRating을 null로 재설정하면 선택 해제됨', async () => {
-    const store = createTaskStore();
-    await store.getState().addSession(makeSessionInput({ focusRating: 3 }));
-    const id = store.getState().sessions[0].id;
-    await store.getState().updateSessionFields(id, { focusRating: null });
-    expect(store.getState().sessions[0].focusRating).toBeNull();
-  });
-
-  it('updateSessionFields — distractionTags 배열이 교체됨', async () => {
-    const store = createTaskStore();
-    await store.getState().addSession(makeSessionInput({ distractionTags: ['phone'] }));
-    const id = store.getState().sessions[0].id;
-    await store.getState().updateSessionFields(id, { distractionTags: ['noise', 'fatigue'] });
-    expect(store.getState().sessions[0].distractionTags).toEqual(['noise', 'fatigue']);
-  });
-
-  it('updateSessionFields — distractionTags를 빈 배열로 설정 가능', async () => {
-    const store = createTaskStore();
-    await store.getState().addSession(makeSessionInput({ distractionTags: ['phone'] }));
-    const id = store.getState().sessions[0].id;
-    await store.getState().updateSessionFields(id, { distractionTags: [] });
-    expect(store.getState().sessions[0].distractionTags).toEqual([]);
-  });
-
-  it('updateSessionFields — title이 갱신됨', async () => {
-    const store = createTaskStore();
-    await store.getState().addSession(makeSessionInput());
-    const id = store.getState().sessions[0].id;
-    await store.getState().updateSessionFields(id, { title: '알고리즘 스터디' });
-    expect(store.getState().sessions[0].title).toBe('알고리즘 스터디');
-  });
-
-  it('updateSessionFields — 여러 필드를 한 번에 갱신 가능', async () => {
-    const store = createTaskStore();
-    await store.getState().addSession(makeSessionInput());
-    const id = store.getState().sessions[0].id;
-    await store.getState().updateSessionFields(id, {
-      title: '집중 세션',
-      focusRating: 3,
-      distractionTags: ['phone'],
-      note: '메모',
-    });
-    const session = store.getState().sessions[0];
-    expect(session.title).toBe('집중 세션');
-    expect(session.focusRating).toBe(3);
-    expect(session.distractionTags).toEqual(['phone']);
-    expect(session.note).toBe('메모');
-  });
-
-  it('updateSessionFields — 저장 실패 시 롤백됨', async () => {
-    mockUpdateSession.mockResolvedValueOnce({ error: true });
-    const store = createTaskStore();
-    await store.getState().addSession(makeSessionInput({ note: '기존 메모' }));
-    const id = store.getState().sessions[0].id;
-    await store.getState().updateSessionFields(id, { note: '변경 시도' });
-    expect(store.getState().sessions[0].note).toBe('기존 메모');
-  });
-
-  it('deleteSession — 해당 id의 세션이 목록에서 제거됨', async () => {
-    const store = createTaskStore();
-    await store.getState().addSession(makeSessionInput());
-    const id = store.getState().sessions[0].id;
-    await store.getState().deleteSession(id);
-    expect(store.getState().sessions).toHaveLength(0);
-  });
-
-  it('addSession 저장 대기 중 같은 세션을 수정하면, insert 완료 후에도 수정 내용이 유지되고 실제 DB id로 저장됨', async () => {
-    const store = createTaskStore();
-    let resolveInsert!: (value: Session) => void;
-    mockInsertSession.mockImplementationOnce(
-      () => new Promise((resolve) => (resolveInsert = resolve)),
-    );
-
-    const addPromise = store.getState().addSession(makeSessionInput({ note: '원래 메모' }));
-    const tempId = store.getState().sessions[0].id;
-
-    const updatePromise = store.getState().updateSessionFields(tempId, { note: '수정된 메모' });
-
-    resolveInsert({ id: 'db-id-1', ...makeSessionInput({ note: '원래 메모' }) });
-    await addPromise;
-    await updatePromise;
-
-    const session = store.getState().sessions.find((s) => s.id === 'db-id-1');
-    expect(session?.note).toBe('수정된 메모');
-    expect(mockUpdateSession).toHaveBeenCalledWith(
-      'db-id-1',
-      expect.objectContaining({ note: '수정된 메모' }),
-    );
-  });
-
-  it('addSession 저장 대기 중 다른 세션을 삭제해도 삭제가 덮어써지지 않음(경쟁 상태 방지)', async () => {
-    const store = createTaskStore();
-    await store.getState().addSession(makeSessionInput({ startedAt: '2024-03-14T09:00:00.000Z' }));
-    const idToDelete = store.getState().sessions[0].id;
-
-    let resolveInsert!: (value: Session) => void;
-    mockInsertSession.mockImplementationOnce(
-      () => new Promise((resolve) => (resolveInsert = resolve)),
-    );
-
-    const addPromise = store
-      .getState()
-      .addSession(makeSessionInput({ startedAt: '2024-03-16T09:00:00.000Z' }));
-    await store.getState().deleteSession(idToDelete);
-    expect(store.getState().sessions.some((s) => s.id === idToDelete)).toBe(false);
-
-    resolveInsert({
-      id: 'db-id-new',
-      taskId: null,
-      title: null,
-      mode: 'pomodoro',
-      startedAt: '2024-03-16T09:00:00.000Z',
-      endedAt: '2024-03-16T09:30:00.000Z',
-      completedCycles: 1,
-      totalCycles: 4,
-      focusSeconds: 1500,
-      pausedSeconds: 0,
-      focusPeriods: [],
-      note: null,
-      focusRating: null,
-      distractionTags: [],
-    });
-    await addPromise;
-
-    expect(store.getState().sessions.some((s) => s.id === idToDelete)).toBe(false);
-    expect(store.getState().sessions.map((s) => s.startedAt)).toEqual(['2024-03-16T09:00:00.000Z']);
   });
 });
 
@@ -719,7 +549,7 @@ describe('refresh', () => {
     createdAt: '2026-01-01T00:00:00.000Z',
   };
 
-  it('다시 조회한 데이터로 바꾸고 refreshVersion을 올림', async () => {
+  it('다시 조회한 데이터로 바꿈', async () => {
     mockFetchTasks.mockResolvedValueOnce({ tasks: [task], invalidCount: 0 });
     mockFetchCategories.mockResolvedValueOnce({ categories: DEFAULT_CATEGORIES, invalidCount: 0 });
     mockFetchSessions.mockResolvedValueOnce({ sessions: [], invalidCount: 0 });
@@ -728,7 +558,6 @@ describe('refresh', () => {
     await store.getState().refresh();
 
     expect(store.getState().tasks).toEqual([task]);
-    expect(store.getState().refreshVersion).toBe(1);
   });
 
   it('조회에 실패한 항목은 기존 데이터를 유지', async () => {

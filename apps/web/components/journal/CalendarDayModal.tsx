@@ -15,7 +15,7 @@ interface Props {
   tasks: Task[];
   categories: Category[];
   selectedId: string | null;
-  onSelectSession: (session: Session) => void;
+  onSelectSession: (session: Session, sessionIndex: number) => void;
   onClose: () => void;
 }
 
@@ -89,7 +89,7 @@ export function CalendarDayModal({
                       category={category}
                       sessionIndex={sessions.length - 1 - displayIdx}
                       isSelected={selectedId === session.id}
-                      onSelect={() => onSelectSession(session)}
+                      onSelect={() => onSelectSession(session, sessions.length - 1 - displayIdx)}
                     />
                   );
                 })}

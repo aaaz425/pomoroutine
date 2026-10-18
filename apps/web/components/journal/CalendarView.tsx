@@ -1,35 +1,30 @@
 'use client';
 
-import { forwardRef, useImperativeHandle, useState } from 'react';
+import { useState } from 'react';
 import { CalendarMonthNav } from '@/components/journal/CalendarMonthNav';
 import { CalendarMonthGrid } from '@/components/journal/CalendarMonthGrid';
 import { CalendarDayModal } from '@/components/journal/CalendarDayModal';
 import { useMonthSessions } from '@/hooks/useMonthSessions';
 import { getMonthlyActivityData } from '@/lib/dashboard';
 import { getSessionsForDate } from '@/lib/sessionUtils';
+import { ErrorFallback } from '@/components/shared/ErrorFallback';
 import type { Category, Session, Task } from '@/types';
-import type { SessionSyncHandle } from '@/components/journal/ListView';
 
 interface Props {
   tasks: Task[];
   categories: Category[];
   selectedId: string | null;
-  onSelect: (session: Session) => void;
+  onSelect: (session: Session, sessionIndex: number) => void;
 }
 
 function addMonths(date: Date, delta: number): Date {
   return new Date(date.getFullYear(), date.getMonth() + delta, 1);
 }
 
-export const CalendarView = forwardRef<SessionSyncHandle, Props>(function CalendarView(
-  { tasks, categories, selectedId, onSelect },
-  ref,
-) {
+export function CalendarView({ tasks, categories, selectedId, onSelect }: Props) {
   const [viewedMonth, setViewedMonth] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const { items: monthSessions, updateItem, removeItem } = useMonthSessions(viewedMonth);
-
-  useImperativeHandle(ref, () => ({ updateItem, removeItem }), [updateItem, removeItem]);
+  const { items: monthSessions, isError, refetch } = useMonthSessions(viewedMonth);
 
   const monthData = getMonthlyActivityData(monthSessions, viewedMonth);
 
@@ -49,11 +44,15 @@ export const CalendarView = forwardRef<SessionSyncHandle, Props>(function Calend
         onNextYear={() => setViewedMonth((m) => addMonths(m, 12))}
         onToday={() => setViewedMonth(new Date())}
       />
-      <CalendarMonthGrid
-        data={monthData}
-        selectedDate={selectedDate}
-        onSelectDate={setSelectedDate}
-      />
+      {isError && monthSessions.length === 0 ? (
+        <ErrorFallback onRetry={refetch} />
+      ) : (
+        <CalendarMonthGrid
+          data={monthData}
+          selectedDate={selectedDate}
+          onSelectDate={setSelectedDate}
+        />
+      )}
 
       <CalendarDayModal
         date={selectedDate}
@@ -61,12 +60,12 @@ export const CalendarView = forwardRef<SessionSyncHandle, Props>(function Calend
         tasks={tasks}
         categories={categories}
         selectedId={selectedId}
-        onSelectSession={(session) => {
+        onSelectSession={(session, sessionIndex) => {
           setSelectedDate(null);
-          onSelect(session);
+          onSelect(session, sessionIndex);
         }}
         onClose={() => setSelectedDate(null)}
       />
     </div>
   );
-});
+}

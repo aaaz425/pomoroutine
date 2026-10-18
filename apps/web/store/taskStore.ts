@@ -20,12 +20,7 @@ import {
   deleteCategory as deleteCategoryRow,
   reorderCategories as reorderCategoriesRows,
 } from '@/lib/supabase/categories';
-import {
-  fetchAllSessionsLazy,
-  insertSession as insertSessionRow,
-  updateSession as updateSessionRow,
-  deleteSession as deleteSessionRow,
-} from '@/lib/supabase/sessions';
+import { fetchAllSessionsLazy, insertSession as insertSessionRow } from '@/lib/supabase/sessions';
 import { type Task, type Category, type Session, DEFAULT_CATEGORIES } from '@/types';
 import { TOAST_MESSAGES } from '@/lib/constants/messages';
 
@@ -45,18 +40,12 @@ interface TaskStore {
   categories: Category[];
   sessions: Session[];
   sessionsHydrated: boolean; // core(tasks/categories) hydrate와 별개로 sessions 전체 조회 완료 여부
-  refreshVersion: number;
 
   addTask: (input: { title: string; categoryId: string }) => Promise<string | null>;
   updateTask: (id: string, patch: Partial<Pick<Task, 'title' | 'categoryId'>>) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   /** 성공 여부를 반환 — 실패 시 호출부가 폼을 유지하고 재시도할 수 있도록 함 */
   addSession: (input: Omit<Session, 'id'>) => Promise<boolean>;
-  updateSessionFields: (
-    id: string,
-    patch: Partial<Pick<Session, 'title' | 'note' | 'focusRating' | 'distractionTags' | 'taskId'>>,
-  ) => Promise<boolean>;
-  deleteSession: (id: string) => Promise<boolean>;
   reorderTasks: (activeId: string, overId: string) => Promise<void>;
   addCategory: (input: { name: string; color: string }) => Promise<void>;
   updateCategory: (id: string, input: { name: string; color: string }) => Promise<void>;
@@ -73,7 +62,6 @@ interface TaskStoreOptions {
 export const createTaskStore = ({ onSessionsChanged }: TaskStoreOptions = {}) => {
   const pendingTaskIds: PendingIds = new Map();
   const pendingCategoryIds: PendingIds = new Map();
-  const pendingSessionIds: PendingIds = new Map();
   const tracker = createMutationTracker();
 
   return createStore<TaskStore>()((set, get) => ({
@@ -82,7 +70,6 @@ export const createTaskStore = ({ onSessionsChanged }: TaskStoreOptions = {}) =>
     categories: DEFAULT_CATEGORIES,
     sessions: [],
     sessionsHydrated: false,
-    refreshVersion: 0,
 
     addTask: tracker.track(async ({ title, categoryId }) => {
       const trimmed = title.trim();
@@ -163,52 +150,10 @@ export const createTaskStore = ({ onSessionsChanged }: TaskStoreOptions = {}) =>
         set((state) => ({ sessions: state.sessions.map((s) => (s.id === tempId ? inserted : s)) }));
         return inserted.id;
       })();
-      trackPendingId(pendingSessionIds, tempId, idPromise);
 
       const insertedId = await idPromise;
       if (!insertedId) {
         toast(TOAST_MESSAGES.sessionSaveFailed);
-        return false;
-      }
-      onSessionsChanged?.();
-      return true;
-    }),
-
-    updateSessionFields: tracker.track(async (id, patch) => {
-      const targetId = await resolvePendingId(pendingSessionIds, id);
-      if (!targetId) return false;
-      const original = get().sessions.find((s) => s.id === targetId);
-      if (!original) return false;
-      set((state) => ({
-        sessions: state.sessions.map((s) => (s.id === targetId ? { ...s, ...patch } : s)),
-      }));
-      const { error } = await updateSessionRow(targetId, patch);
-      if (error) {
-        set((state) => ({
-          sessions: state.sessions.map((s) => (s.id === targetId ? original : s)),
-        }));
-        toast(TOAST_MESSAGES.sessionSaveFailed);
-        return false;
-      }
-      onSessionsChanged?.();
-      return true;
-    }),
-
-    deleteSession: tracker.track(async (id) => {
-      const targetId = await resolvePendingId(pendingSessionIds, id);
-      if (!targetId) return false;
-      const index = get().sessions.findIndex((s) => s.id === targetId);
-      if (index === -1) return false;
-      const target = get().sessions[index];
-      set((state) => ({ sessions: state.sessions.filter((s) => s.id !== targetId) }));
-      const { error } = await deleteSessionRow(targetId);
-      if (error) {
-        set((state) => {
-          const sessions = [...state.sessions];
-          sessions.splice(Math.min(index, sessions.length), 0, target);
-          return { sessions };
-        });
-        toast(TOAST_MESSAGES.sessionDeleteFailed);
         return false;
       }
       onSessionsChanged?.();
@@ -342,7 +287,6 @@ export const createTaskStore = ({ onSessionsChanged }: TaskStoreOptions = {}) =>
             tasks: tasksResult?.tasks ?? state.tasks,
             categories: categoriesResult?.categories ?? state.categories,
             sessions: sessionsResult?.sessions ?? state.sessions,
-            refreshVersion: state.refreshVersion + 1,
           }));
         },
       ),

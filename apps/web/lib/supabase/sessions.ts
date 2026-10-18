@@ -1,9 +1,12 @@
 import { createClient } from '@/lib/supabase/client';
 import {
   DashboardSessionSchema,
+  InsightSessionSchema,
   SessionSchema,
   type DashboardSession,
+  type InsightSession,
   type Session,
+  type SessionEditableFields,
 } from '@/types';
 
 interface SessionRow {
@@ -119,12 +122,14 @@ export interface SessionsPageParams {
   limit: number;
   categoryIds?: string[];
   search?: string; // 작업 제목 검색
-  dateFrom?: string; // YYYY-MM-DD
-  dateTo?: string; // YYYY-MM-DD
+  startIso?: string;
+  endIso?: string;
+  withCount?: boolean;
 }
 
 export interface SessionsPageResult extends SessionListResult {
   nextCursor: string | null;
+  totalCount: number | null;
 }
 
 // 카테고리/검색 필터는 tasks와 inner join해 서버에서 처리 — 미분류 세션은 필터 활성 시 제외됨(클라이언트 필터와 동일 동작)
@@ -133,8 +138,9 @@ export async function fetchSessionsPage({
   limit,
   categoryIds,
   search,
-  dateFrom,
-  dateTo,
+  startIso,
+  endIso,
+  withCount,
 }: SessionsPageParams): Promise<SessionsPageResult | null> {
   const supabase = createClient();
   const needsTaskJoin = !!(categoryIds?.length || search?.trim());
@@ -144,23 +150,71 @@ export async function fetchSessionsPage({
 
   let query = supabase
     .from('sessions')
-    .select(selectColumns)
+    .select(selectColumns, withCount ? { count: 'exact' } : undefined)
     .order('started_at', { ascending: false })
     .limit(limit);
 
   if (cursor) query = query.lt('started_at', cursor);
   if (categoryIds?.length) query = query.in('tasks.category_id', categoryIds);
   if (search?.trim()) query = query.ilike('tasks.title', `%${search.trim()}%`);
-  if (dateFrom) query = query.gte('started_at', `${dateFrom}T00:00:00.000Z`);
-  if (dateTo) query = query.lt('started_at', `${dateTo}T23:59:59.999Z`);
+  if (startIso) query = query.gte('started_at', startIso);
+  if (endIso) query = query.lt('started_at', endIso);
 
-  const { data, error } = await query;
+  const { data, error, count } = await query;
   if (error || !data) return null;
 
   const rows = data as unknown as SessionRow[];
   const sessions = rows.map(toSession).filter((s): s is Session => s !== null);
   const nextCursor = rows.length === limit ? rows[rows.length - 1].started_at : null;
-  return { sessions, invalidCount: rows.length - sessions.length, nextCursor };
+  return {
+    sessions,
+    invalidCount: rows.length - sessions.length,
+    nextCursor,
+    totalCount: count ?? null,
+  };
+}
+
+export async function fetchSessionStartTimes(
+  startIso: string,
+  endIso: string,
+): Promise<string[] | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('started_at')
+    .gte('started_at', startIso)
+    .lt('started_at', endIso);
+  if (error || !data) return null;
+  return data.map((row) => row.started_at as string);
+}
+
+interface InsightSessionRow {
+  id: string;
+  task_id: string | null;
+  started_at: string;
+  focus_rating: number | null;
+  distraction_tags: string[];
+}
+
+export function toInsightSession(row: InsightSessionRow): InsightSession | null {
+  const parsed = InsightSessionSchema.safeParse({
+    id: row.id,
+    taskId: row.task_id,
+    startedAt: row.started_at,
+    focusRating: row.focus_rating,
+    distractionTags: row.distraction_tags,
+  });
+  return parsed.success ? parsed.data : null;
+}
+
+export async function fetchInsightSessions(startIso: string): Promise<InsightSession[] | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('id, task_id, started_at, focus_rating, distraction_tags')
+    .gte('started_at', startIso);
+  if (error || !data) return null;
+  return data.map(toInsightSession).filter((s): s is InsightSession => s !== null);
 }
 
 export async function insertSession(input: Omit<Session, 'id'>): Promise<Session | null> {
@@ -190,7 +244,7 @@ export async function insertSession(input: Omit<Session, 'id'>): Promise<Session
 
 export async function updateSession(
   id: string,
-  patch: Partial<Pick<Session, 'title' | 'note' | 'focusRating' | 'distractionTags' | 'taskId'>>,
+  patch: Partial<SessionEditableFields>,
 ): Promise<{ error: boolean }> {
   const supabase = createClient();
   const row: Record<string, unknown> = {};

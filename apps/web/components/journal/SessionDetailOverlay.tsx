@@ -9,6 +9,7 @@ import { useSheetDrag } from '@/hooks/useSheetDrag';
 
 interface Props {
   session: Session | null;
+  sessionIndex: number;
   task: Task | null;
   category: Category | null;
   onClose: () => void;
@@ -18,6 +19,7 @@ interface Props {
 
 export function SessionDetailOverlay({
   session,
+  sessionIndex,
   task,
   category,
   onClose,
@@ -52,6 +54,7 @@ export function SessionDetailOverlay({
           <div className="p-5 pt-3 sm:p-6">
             <JournalDetailPanel
               session={session}
+              sessionIndex={sessionIndex}
               task={task}
               category={category}
               onBack={onClose}
