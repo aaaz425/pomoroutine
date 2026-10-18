@@ -9,11 +9,20 @@ export interface SessionGroup<T> {
   sessions: T[];
 }
 
+export function formatCount(count: number): string {
+  return count.toLocaleString('ko-KR');
+}
+
 export function formatDuration(seconds: number): string {
   if (seconds < 60) return `${seconds}초`;
   const mins = Math.floor(seconds / 60);
   const hours = Math.floor(mins / 60);
   const remMins = mins % 60;
+  if (hours >= 24) {
+    const days = Math.floor(hours / 24);
+    const remHours = hours % 24;
+    return remHours === 0 ? `${days}일` : `${days}일 ${remHours}시간`;
+  }
   if (hours === 0) return `${mins}분`;
   if (remMins === 0) return `${hours}시간`;
   return `${hours}시간 ${remMins}분`;

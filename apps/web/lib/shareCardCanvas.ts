@@ -1,6 +1,7 @@
 import type { ShareCardPalette } from '@pomoroutine/shared';
 import type { ShareCardData } from '@/types';
 import { SHARE_CARD_SIZE } from '@/lib/constants/shareCard';
+import { formatCount } from '@/lib/sessionUtils';
 
 const SIZE = SHARE_CARD_SIZE;
 const PADDING = 80;
@@ -155,7 +156,7 @@ function drawSecondaryStats(
 
   ctx.fillStyle = colors.textPrimary;
   ctx.font = '600 48px Pretendard';
-  ctx.fillText(`${sessionCount}`, leftX, y + 60);
+  ctx.fillText(formatCount(sessionCount), leftX, y + 60);
   ctx.fillText(`${streakDays}일`, rightX, y + 60);
 
   ctx.strokeStyle = colors.divider;

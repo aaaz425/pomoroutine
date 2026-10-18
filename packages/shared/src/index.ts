@@ -44,6 +44,7 @@ export { getPhaseEndMessage } from './lib/phaseEndMessage';
 export type { PhaseEndMessageInput } from './lib/phaseEndMessage';
 export type { DeriveElapsedMinutesInput } from './lib/deriveElapsedMinutes';
 export {
+  formatCount,
   formatDuration,
   formatSessionProgressLabel,
   toLocalDateKey,

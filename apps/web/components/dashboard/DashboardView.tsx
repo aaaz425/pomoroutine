@@ -18,7 +18,7 @@ import { getEarnedBadgeIds, toBadgeProgress } from '@/lib/badges';
 import { getTabStats } from '@/lib/dashboard';
 import { buildShareCardData } from '@/lib/shareCard';
 import type { TabType } from '@/types';
-import { formatDuration } from '@/lib/sessionUtils';
+import { formatCount, formatDuration } from '@/lib/sessionUtils';
 import { useTaskStore } from '@/store/StoreProvider';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useDelayedFlag } from '@/hooks/useDelayedFlag';
@@ -38,7 +38,7 @@ function makeFocusSub(diff: number, label: string): string | undefined {
 function makeCountSub(diff: number, label: string): string | undefined {
   if (diff === 0) return undefined;
   const sign = diff > 0 ? '+' : '-';
-  return `${label} ${sign}${Math.abs(diff)}`;
+  return `${label} ${sign}${formatCount(Math.abs(diff))}건`;
 }
 
 export function DashboardView() {
@@ -153,7 +153,7 @@ export function DashboardView() {
         <StatCard
           label={sessionLabel}
           Icon={CircleCheck}
-          value={`${sessionCount}건`}
+          value={`${formatCount(sessionCount)}건`}
           sub={sessionCountSub}
         />
         <StatCard

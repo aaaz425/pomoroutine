@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import type { FocusPeriod, Session } from '@/types';
 import {
+  formatCount,
   formatDuration,
   formatFocusPeriodRanges,
   formatFullDate,
@@ -138,6 +139,13 @@ describe('getSessionOrdinalTitle', () => {
   });
 });
 
+describe('formatCount', () => {
+  it('천 단위마다 콤마를 넣음', () => {
+    expect(formatCount(999)).toBe('999');
+    expect(formatCount(10087)).toBe('10,087');
+  });
+});
+
 describe('formatDuration', () => {
   it('60초 미만이면 "N초"로 표시', () => {
     expect(formatDuration(45)).toBe('45초');
@@ -163,8 +171,18 @@ describe('formatDuration', () => {
     expect(formatDuration(5460)).toBe('1시간 31분');
   });
 
-  it('여러 시간 단위도 정확히 표시 (예: 25시간)', () => {
-    expect(formatDuration(25 * 3600)).toBe('25시간');
+  it('24시간 미만은 시간 단위로 표시', () => {
+    expect(formatDuration(23 * 3600 + 59 * 60)).toBe('23시간 59분');
+  });
+
+  it('24시간 이상이면 일과 시간으로 표시하고 분은 생략', () => {
+    expect(formatDuration(25 * 3600 + 30 * 60)).toBe('1일 1시간');
+    expect(formatDuration(140 * 3600 + 30 * 60)).toBe('5일 20시간');
+  });
+
+  it('시간이 딱 떨어지는 일 단위면 "N일"로 표시', () => {
+    expect(formatDuration(24 * 3600)).toBe('1일');
+    expect(formatDuration(24 * 3600 + 30 * 60)).toBe('1일');
   });
 });
 
