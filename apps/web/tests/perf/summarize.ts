@@ -10,6 +10,7 @@ const STEP_ORDER = [
   'tab-all',
   'journal-enter',
   'visibility-return',
+  'dashboard-reenter',
   'timer-setup',
   'session-save',
 ];
