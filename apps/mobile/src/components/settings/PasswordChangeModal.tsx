@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Modal as RNModal, Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '@/components/shared/Text';
+import { ConfirmModal } from '@/components/shared/ConfirmModal';
 import { useAuth } from '@/store/AuthProvider';
 import { PasswordField } from '@/components/auth/PasswordField';
 import { FONTS } from '@/constants/fonts';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
 import { toast } from '@/lib/toast';
-import { TOAST_MESSAGES } from '@pomoroutine/shared';
+import { NOTICE_MESSAGES, TOAST_MESSAGES } from '@pomoroutine/shared';
 
 interface Props {
   visible: boolean;
@@ -23,13 +24,22 @@ export function PasswordChangeModal({ visible, title, onClose }: Props) {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [confirmingDiscard, setConfirmingDiscard] = useState(false);
+  const dirty = password !== '' || passwordConfirm !== '';
 
   function handleClose() {
     setPassword('');
     setPasswordConfirm('');
     setError(null);
     setPending(false);
+    setConfirmingDiscard(false);
     onClose();
+  }
+
+  function requestClose() {
+    if (confirmingDiscard) setConfirmingDiscard(false);
+    else if (dirty) setConfirmingDiscard(true);
+    else handleClose();
   }
 
   async function handleSubmit() {
@@ -50,9 +60,9 @@ export function PasswordChangeModal({ visible, title, onClose }: Props) {
   }
 
   return (
-    <RNModal visible={visible} animationType="fade" transparent onRequestClose={handleClose}>
+    <RNModal visible={visible} animationType="fade" transparent onRequestClose={requestClose}>
       <View style={styles.backdrop}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={handleClose} />
+        <Pressable style={StyleSheet.absoluteFill} onPress={requestClose} />
         <Pressable
           onPress={() => {}}
           style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}
@@ -121,6 +131,15 @@ export function PasswordChangeModal({ visible, title, onClose }: Props) {
             </Pressable>
           </View>
         </Pressable>
+        <ConfirmModal
+          inline
+          visible={confirmingDiscard}
+          title={NOTICE_MESSAGES.discardTitle}
+          description={NOTICE_MESSAGES.discardMessage}
+          confirmLabel={NOTICE_MESSAGES.discardConfirm}
+          onConfirm={handleClose}
+          onCancel={() => setConfirmingDiscard(false)}
+        />
       </View>
     </RNModal>
   );

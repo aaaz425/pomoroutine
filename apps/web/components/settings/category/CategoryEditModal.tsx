@@ -26,8 +26,13 @@ export function CategoryEditModal({ category, onClose }: Props) {
   const addCategory = useTaskStore((s) => s.addCategory);
   const updateCategory = useTaskStore((s) => s.updateCategory);
 
-  const [name, setName] = useState(category?.name ?? '');
-  const [color, setColor] = useState(category?.color ?? CATEGORY_PRESET_COLORS[0].hex);
+  const [initial] = useState(() => ({
+    name: category?.name ?? '',
+    color: category?.color ?? CATEGORY_PRESET_COLORS[0].hex,
+  }));
+  const [name, setName] = useState(initial.name);
+  const [color, setColor] = useState(initial.color);
+  const dirty = name !== initial.name || color !== initial.color;
   const [showPicker, setShowPicker] = useState(false);
   const isValidColor = HEX_PATTERN.test(color);
   const isPreset = CATEGORY_PRESET_COLORS.some(({ hex }) => hex === color.toLowerCase());
@@ -50,6 +55,7 @@ export function CategoryEditModal({ category, onClose }: Props) {
       <Modal
         title={title}
         onClose={onClose}
+        dirty={dirty}
         widthClassName="sm:w-[360px]"
         footer={
           <>

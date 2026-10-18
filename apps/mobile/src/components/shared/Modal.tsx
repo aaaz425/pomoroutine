@@ -21,6 +21,8 @@ import Animated, {
 import { scheduleOnRN } from 'react-native-worklets';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
+import { NOTICE_MESSAGES } from '@pomoroutine/shared';
+import { ConfirmModal } from '@/components/shared/ConfirmModal';
 import { SheetGrabber } from '@/components/shared/SheetGrabber';
 import { Text } from '@/components/shared/Text';
 import { FONTS } from '@/constants/fonts';
@@ -44,6 +46,7 @@ interface Props {
   scrollable?: boolean;
   // 기본값 'never'는 빈 영역 첫 탭이 키보드만 내리고 그 아래 터치는 버림 — 입력창+버튼이 같이 있으면 'handled' 필요
   keyboardShouldPersistTaps?: 'always' | 'never' | 'handled';
+  dirty?: boolean;
 }
 
 // 백드롭과 시트를 형제로 분리(부모-자식 아님) — 감싸는 구조였을 때 ScrollView가 Pressable 두 겹과 경합해 스크롤이 안 먹혔음.
@@ -55,6 +58,7 @@ export function Modal({
   footer,
   scrollable = true,
   keyboardShouldPersistTaps = 'never',
+  dirty = false,
 }: Props) {
   const theme = useThemeTokens();
   const insets = useSafeAreaInsets();
@@ -70,6 +74,7 @@ export function Modal({
   // — 대신 시트가 실제로 레이아웃된 순간(onLayout)을 신호로 애니메이션을 시작한다
   const openAnimationStartedRef = useRef(false);
   const closeAnimationStarted = useSharedValue(false);
+  const [confirmingDiscard, setConfirmingDiscard] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -127,12 +132,23 @@ export function Modal({
     onClose();
   }
 
+  function requestClose() {
+    if (dirty) setConfirmingDiscard(true);
+    else handleClose();
+  }
+
+  function handleConfirmDiscard() {
+    setConfirmingDiscard(false);
+    handleClose();
+  }
+
   const dismissGesture = createSheetDismissGesture({
     translateY,
     sheetHeight,
-    onDismiss: handleClose,
+    onDismiss: requestClose,
+    snapBackOnDismiss: dirty,
   });
-  const onHardwareBackPress = useEffectEvent(handleClose);
+  const onHardwareBackPress = useEffectEvent(requestClose);
 
   // 네이티브 <Modal>이 없으니 안드로이드 물리 뒤로가기를 직접 처리
   useEffect(() => {
@@ -158,7 +174,7 @@ export function Modal({
       <Animated.View style={[styles.backdrop, backdropAnimatedStyle]}>
         <Pressable
           style={StyleSheet.absoluteFill}
-          onPress={keyboardHeight > 0 ? Keyboard.dismiss : handleClose}
+          onPress={keyboardHeight > 0 ? Keyboard.dismiss : requestClose}
         />
       </Animated.View>
       <View style={styles.sheetWrap} pointerEvents="box-none">
@@ -191,7 +207,7 @@ export function Modal({
                   >
                     {title}
                   </Text>
-                  <Pressable onPress={handleClose} hitSlop={8} accessibilityLabel="닫기">
+                  <Pressable onPress={requestClose} hitSlop={8} accessibilityLabel="닫기">
                     <X size={18} color={theme.mutedForeground} />
                   </Pressable>
                 </View>
@@ -223,6 +239,14 @@ export function Modal({
           </View>
         </Animated.View>
       </View>
+      <ConfirmModal
+        visible={confirmingDiscard}
+        title={NOTICE_MESSAGES.discardTitle}
+        description={NOTICE_MESSAGES.discardMessage}
+        confirmLabel={NOTICE_MESSAGES.discardConfirm}
+        onConfirm={handleConfirmDiscard}
+        onCancel={() => setConfirmingDiscard(false)}
+      />
     </View>
   );
 }
