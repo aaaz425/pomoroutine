@@ -8,7 +8,7 @@ import { PageSpinner } from '@/components/shared/PageSpinner';
 import { useJournalFilters } from '@/hooks/useJournalFilters';
 import { useSessionsPage } from '@/hooks/useSessionsPage';
 import { useTaskStore } from '@/store/StoreProvider';
-import { groupSessionsByDate } from '@/lib/sessionUtils';
+import { formatCount, groupSessionsByDate } from '@/lib/sessionUtils';
 import type { Category, Session, Task } from '@/types';
 
 export interface SessionSyncHandle {
@@ -89,7 +89,7 @@ export const ListView = forwardRef<SessionSyncHandle, Props>(function ListView(
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">{items.length}개의 기록</span>
+        <span className="text-xs text-muted-foreground">{formatCount(items.length)}개의 기록</span>
         {filterButton}
       </div>
       {loading && items.length === 0 ? (

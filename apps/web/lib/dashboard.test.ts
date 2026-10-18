@@ -7,6 +7,7 @@ import {
   getAllTimeFocusTrend,
   getDashboardRange,
   getTabStats,
+  limitCategoryFocus,
   getAvgSessionSeconds,
   getBusiestDayOfWeek,
   getFirstSessionDate,
@@ -478,5 +479,24 @@ describe('getTabStats', () => {
 
   it('전체 탭에 기록이 없으면 평균 0', () => {
     expect(getTabStats('all', [], makeSummary(), TASKS, CATEGORIES, TODAY).avgSeconds).toBe(0);
+  });
+});
+
+describe('limitCategoryFocus', () => {
+  const items = [40, 25, 15, 10, 6, 4].map((percent, i) => ({
+    name: `c${i}`,
+    minutes: percent,
+    percent,
+    color: '#000000',
+  }));
+
+  it('최대 개수 이하면 그대로 반환', () => {
+    expect(limitCategoryFocus(items.slice(0, 5), 5)).toHaveLength(5);
+  });
+
+  it('초과하면 상위 항목만 남기고 나머지를 하나로 합침', () => {
+    const result = limitCategoryFocus(items, 5);
+    expect(result.map((i) => i.name)).toEqual(['c0', 'c1', 'c2', 'c3', '그 외 2개']);
+    expect(result[4]).toMatchObject({ minutes: 10, percent: 10 });
   });
 });

@@ -1,4 +1,5 @@
 import {
+  formatCount,
   formatDuration,
   formatSessionProgressLabel,
   toLocalDateKey,
@@ -13,6 +14,7 @@ import {
 } from '@pomoroutine/shared';
 
 export {
+  formatCount,
   formatDuration,
   formatSessionProgressLabel,
   toLocalDateKey,

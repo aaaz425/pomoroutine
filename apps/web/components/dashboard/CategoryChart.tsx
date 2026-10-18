@@ -2,6 +2,8 @@
 
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 
+import { CATEGORY_CHART_MAX_ITEMS } from '@/lib/constants';
+import { limitCategoryFocus } from '@/lib/dashboard';
 import { formatDuration } from '@/lib/sessionUtils';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { SrOnlyDataTable } from '@/components/dashboard/SrOnlyDataTable';
@@ -13,6 +15,7 @@ interface Props {
 
 export function CategoryChart({ data }: Props) {
   const totalMinutes = data.reduce((sum, d) => sum + d.minutes, 0);
+  const chartData = limitCategoryFocus(data, CATEGORY_CHART_MAX_ITEMS);
   const hasData = data.length > 0;
 
   return (
@@ -27,6 +30,13 @@ export function CategoryChart({ data }: Props) {
             // 다크 모드는 그림자로 깊이를 표현하지 않는 원칙(design.md)이라 라이트 모드에만 적용
             className="relative shrink-0 w-[120px] h-[120px] dark:drop-shadow-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.25)]"
           >
+            {/* Center label */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span className="text-xs font-bold text-foreground leading-tight text-center max-w-[60px] break-keep">
+                {formatDuration(totalMinutes * 60)}
+              </span>
+              <span className="text-[10px] text-muted-foreground">총 집중</span>
+            </div>
             <ResponsiveContainer
               width="100%"
               height="100%"
@@ -35,7 +45,7 @@ export function CategoryChart({ data }: Props) {
             >
               <PieChart>
                 <Pie
-                  data={data}
+                  data={chartData}
                   dataKey="minutes"
                   nameKey="name"
                   cx="50%"
@@ -48,7 +58,7 @@ export function CategoryChart({ data }: Props) {
                   startAngle={90}
                   endAngle={-270}
                 >
-                  {data.map((entry) => (
+                  {chartData.map((entry) => (
                     <Cell key={entry.name} fill={entry.color} />
                   ))}
                 </Pie>
@@ -66,18 +76,11 @@ export function CategoryChart({ data }: Props) {
                 />
               </PieChart>
             </ResponsiveContainer>
-            {/* Center label */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-xs font-bold text-foreground leading-tight text-center max-w-[60px] break-keep">
-                {formatDuration(totalMinutes * 60)}
-              </span>
-              <span className="text-[10px] text-muted-foreground">총 집중</span>
-            </div>
           </div>
 
           {/* Legend — 시각용, 스크린리더에는 아래 sr-only 테이블을 대신 제공 */}
           <div aria-hidden="true" className="flex flex-col gap-2 flex-1 min-w-0">
-            {data.map((item) => (
+            {chartData.map((item) => (
               <div key={item.name} className="flex items-center justify-between gap-2 min-w-0">
                 <div className="flex items-center gap-2 min-w-0">
                   {/* 카테고리별 동적 hex 색상 — Tailwind 클래스로 표현 불가, 위 Cell fill과 동일한 예외 */}
