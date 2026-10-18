@@ -3,11 +3,9 @@
 import { Badge } from '@/components/shared/Badge';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { SrOnlyDataTable } from '@/components/dashboard/SrOnlyDataTable';
-import { getHourlyFocusSeconds } from '@/lib/dashboard';
-import type { Session } from '@/types';
 
 interface Props {
-  sessions: Session[];
+  hourly: number[];
 }
 
 function formatHourLabel(hour: number): string {
@@ -19,8 +17,7 @@ function formatHourLabel(hour: number): string {
 
 const X_LABEL_HOURS = [0, 6, 12, 18, 23];
 
-export function HourlyChart({ sessions }: Props) {
-  const hourly = getHourlyFocusSeconds(sessions);
+export function HourlyChart({ hourly }: Props) {
   const max = Math.max(...hourly, 1);
 
   const peakHour = hourly.indexOf(Math.max(...hourly));

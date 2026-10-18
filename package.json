@@ -9,7 +9,9 @@
     "format": "prettier --write .",
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e --filter=web",
-    "prepare": "lefthook install"
+    "prepare": "lefthook install",
+    "perf:seed": "node perf/seed/seed-sessions.mjs",
+    "perf:k6": "sh perf/k6/run.sh"
   },
   "devDependencies": {
     "lefthook": "^2.1.9",

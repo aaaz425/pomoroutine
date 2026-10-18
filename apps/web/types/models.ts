@@ -38,6 +38,11 @@ export interface Session {
   distractionTags: string[]; // DISTRACTION_TAGS의 id 배열, 옵션
 }
 
+export type DashboardSession = Pick<
+  Session,
+  'id' | 'taskId' | 'startedAt' | 'focusSeconds' | 'focusPeriods'
+>;
+
 export type { SoundType } from '@pomoroutine/shared';
 
 export type TabType = 'today' | 'week' | 'month' | 'all';
@@ -65,6 +70,29 @@ export interface DashboardSummary {
   prevDay: PeriodStat;
   prevWeek: PeriodStat;
   prevMonth: PeriodStat;
+  allTime: AllTimeStats;
+  badgeStats: BadgeStats;
+}
+
+export interface YearlyCategoryMinutes {
+  year: string; // yyyy
+  categoryId: string | null;
+  minutes: number;
+}
+
+export interface AllTimeStats {
+  focusSeconds: number;
+  count: number;
+  yearlyCategoryMinutes: YearlyCategoryMinutes[];
+  hourlySeconds: number[];
+}
+
+export interface BadgeStats {
+  categoryCount: number;
+  nightOwl: boolean;
+  weekendWarrior: boolean;
+  perfectSession: boolean;
+  marathon: boolean;
 }
 
 export interface FocusTrendItem {
@@ -75,6 +103,15 @@ export interface FocusTrendItem {
 export interface FocusTrendMeta {
   data: FocusTrendItem[];
   categories: Array<{ name: string; color: string }>;
+}
+
+export interface TabStats {
+  focusSeconds: number;
+  count: number;
+  avgSeconds: number;
+  focusTrend: FocusTrendMeta;
+  categoryFocus: CategoryFocusItem[];
+  hourlySeconds: number[];
 }
 
 export interface CategoryFocusItem {

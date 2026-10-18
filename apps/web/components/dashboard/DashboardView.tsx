@@ -1,32 +1,28 @@
 'use client';
 
 import { ChartColumn, CircleCheck, Flame, Share2, Timer } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import dynamic from 'next/dynamic';
 
 import { BadgeGallery } from '@/components/dashboard/BadgeGallery';
 import { CategoryChart } from '@/components/dashboard/CategoryChart';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
 import { DashboardTabs } from '@/components/dashboard/DashboardTabs';
+import { ErrorFallback } from '@/components/shared/ErrorFallback';
 import { FocusChart } from '@/components/dashboard/FocusChart';
 import { HourlyChart } from '@/components/dashboard/HourlyChart';
 import { MonthlyActivityCard } from '@/components/dashboard/MonthlyActivityCard';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { Button } from '@/components/ui/button';
-import {
-  filterSessionsByTab,
-  getAvgSessionSeconds,
-  getSessionCount,
-  getTotalFocusSeconds,
-} from '@/lib/dashboard';
-import { fetchDashboardSummary } from '@/lib/supabase/dashboard';
+import { getEarnedBadgeIds, toBadgeProgress } from '@/lib/badges';
+import { getTabStats } from '@/lib/dashboard';
 import { buildShareCardData } from '@/lib/shareCard';
-import type { DashboardSummary, TabType } from '@/types';
+import type { TabType } from '@/types';
 import { formatDuration } from '@/lib/sessionUtils';
 import { useTaskStore } from '@/store/StoreProvider';
+import { useDashboardData } from '@/hooks/useDashboardData';
+import { useDelayedFlag } from '@/hooks/useDelayedFlag';
 import { useDelayedHydration } from '@/hooks/useDelayedHydration';
-import { useSessionsHydrated } from '@/hooks/useSessionsHydrated';
-import { SKELETON_SHOW_DELAY_MS } from '@/lib/constants';
 
 // 캔버스 렌더링 로직이 무거운데 공유 버튼을 눌러야만 열리므로 초기 대시보드 번들에서 제외
 const ShareCardModal = dynamic(() =>
@@ -47,52 +43,45 @@ function makeCountSub(diff: number, label: string): string | undefined {
 
 export function DashboardView() {
   const { hydrated } = useDelayedHydration();
-  const { sessionsHydrated } = useSessionsHydrated();
   const [tab, setTab] = useState<TabType>('week');
   const [shareOpen, setShareOpen] = useState(false);
 
-  const sessions = useTaskStore((s) => s.sessions);
   const tasks = useTaskStore((s) => s.tasks);
   const categories = useTaskStore((s) => s.categories);
+  const { summary, periodSessions, isError, refetch } = useDashboardData();
 
-  const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const showSkeleton = useDelayedFlag(!hydrated || !summary || !periodSessions);
 
-  // 재조회 중에도 이전 summary를 유지해 화면이 스켈레톤으로 되돌아가지 않게 한다(stale-while-revalidate)
-  useEffect(() => {
-    let cancelled = false;
-    fetchDashboardSummary().then((result) => {
-      if (!cancelled && result) setSummary(result);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [sessions]);
+  if (hydrated && isError && (!summary || !periodSessions)) {
+    return <ErrorFallback onRetry={refetch} />;
+  }
 
-  // 모든 탭이 client에서 sessions를 필터링해 쓰므로 summary·sessions 둘 다 기다려야 한다
-  const loading = !hydrated || !sessionsHydrated || !summary;
-  const [loadingElapsed, setLoadingElapsed] = useState(false);
-  useEffect(() => {
-    if (!loading) return;
-    const timer = setTimeout(() => setLoadingElapsed(true), SKELETON_SHOW_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, [loading]);
+  if (!hydrated || !summary || !periodSessions) {
+    return showSkeleton ? <DashboardSkeleton /> : null;
+  }
 
-  const filtered = filterSessionsByTab(sessions, tab);
-  const shareCardData = buildShareCardData(filtered, sessions, tab);
+  const stats = getTabStats(tab, periodSessions, summary, tasks, categories);
+  const totalFocusSeconds = stats.focusSeconds;
+  const sessionCount = stats.count;
+  const avgSessionSeconds = stats.avgSeconds;
+  const shareCardData = buildShareCardData(
+    { focusSeconds: totalFocusSeconds, count: sessionCount },
+    summary.streakDays,
+    tab,
+  );
+  const earnedIds = getEarnedBadgeIds(toBadgeProgress(summary));
 
-  const totalFocusSeconds = getTotalFocusSeconds(filtered);
-  const sessionCount = getSessionCount(filtered);
-  const avgSessionSeconds = getAvgSessionSeconds(filtered);
-  const streakDays = summary?.streakDays ?? 0;
-  const maxStreakDays = summary?.maxStreakDays ?? 0;
-  const monthlyActivity = summary?.monthlyActivity ?? [];
-  const monthFocusSeconds = summary?.monthFocusSeconds ?? 0;
-  const busiestDay = summary?.busiestDay ?? null;
-  const firstSessionDate = summary?.firstSessionDate ? new Date(summary.firstSessionDate) : null;
-
-  const prevDay = summary?.prevDay ?? { focusSeconds: 0, count: 0 };
-  const prevWeek = summary?.prevWeek ?? { focusSeconds: 0, count: 0 };
-  const prevMonth = summary?.prevMonth ?? { focusSeconds: 0, count: 0 };
+  const {
+    streakDays,
+    maxStreakDays,
+    monthlyActivity,
+    monthFocusSeconds,
+    busiestDay,
+    prevDay,
+    prevWeek,
+    prevMonth,
+  } = summary;
+  const firstSessionDate = summary.firstSessionDate ? new Date(summary.firstSessionDate) : null;
 
   const focusLabel =
     tab === 'today'
@@ -133,8 +122,6 @@ export function DashboardView() {
       return makeCountSub(sessionCount - prevMonth.count, '전월 대비');
     return undefined;
   })();
-
-  if (loading) return loadingElapsed ? <DashboardSkeleton /> : null;
 
   return (
     <div className="flex flex-col gap-6 p-4 sm:p-6 md:p-8 lg:p-10">
@@ -185,13 +172,7 @@ export function DashboardView() {
 
       {/* Chart Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FocusChart
-          sessions={filtered}
-          tasks={tasks}
-          categories={categories}
-          tab={tab}
-          focusLabel={focusLabel}
-        />
+        <FocusChart trend={stats.focusTrend} focusLabel={focusLabel} />
 
         <MonthlyActivityCard
           monthlyActivity={monthlyActivity}
@@ -203,12 +184,12 @@ export function DashboardView() {
 
       {/* Bottom Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <CategoryChart sessions={filtered} tasks={tasks} categories={categories} />
-        <HourlyChart sessions={filtered} />
+        <CategoryChart data={stats.categoryFocus} />
+        <HourlyChart hourly={stats.hourlySeconds} />
       </div>
 
       {/* Badge Gallery */}
-      <BadgeGallery sessions={sessions} tasks={tasks} />
+      <BadgeGallery earnedIds={earnedIds} />
 
       {shareOpen && <ShareCardModal data={shareCardData} onClose={() => setShareOpen(false)} />}
     </div>

@@ -2,22 +2,17 @@
 
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
-import { getFocusTrendData } from '@/lib/dashboard';
-import type { TabType } from '@/types';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { SrOnlyDataTable } from '@/components/dashboard/SrOnlyDataTable';
-import type { Category, Session, Task } from '@/types';
+import type { FocusTrendMeta } from '@/types';
 
 interface Props {
-  sessions: Session[];
-  tasks: Task[];
-  categories: Category[];
-  tab: TabType;
+  trend: FocusTrendMeta;
   focusLabel: string;
 }
 
-export function FocusChart({ sessions, tasks, categories, tab, focusLabel }: Props) {
-  const { data, categories: usedCats } = getFocusTrendData(sessions, tasks, categories, tab);
+export function FocusChart({ trend, focusLabel }: Props) {
+  const { data, categories: usedCats } = trend;
 
   const hasData = usedCats.length > 0;
 

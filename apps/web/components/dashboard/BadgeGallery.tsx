@@ -3,7 +3,6 @@
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 
-import { getEarnedBadgeIds } from '@/lib/badges';
 import {
   BADGE_CATEGORY_LABELS,
   BADGE_DEFINITIONS,
@@ -11,19 +10,16 @@ import {
 } from '@/lib/constants/badges';
 import { BadgeMedal } from '@/components/dashboard/BadgeMedal';
 import { EmptyState } from '@/components/shared/EmptyState';
-import type { Session, Task } from '@/types';
 
 interface Props {
-  sessions: Session[];
-  tasks: Task[];
+  earnedIds: Set<string>;
 }
 
 const CATEGORY_ORDER: BadgeCategory[] = ['streak', 'total-time', 'diversity', 'special'];
 
-export function BadgeGallery({ sessions, tasks }: Props) {
+export function BadgeGallery({ earnedIds }: Props) {
   const [expanded, setExpanded] = useState(false);
 
-  const earnedIds = getEarnedBadgeIds(sessions, tasks);
   const earnedCount = earnedIds.size;
   const earnedBadges = BADGE_DEFINITIONS.filter((b) => earnedIds.has(b.id));
 

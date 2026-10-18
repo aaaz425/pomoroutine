@@ -2,21 +2,16 @@
 
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 
-import { getCategoryFocusData } from '@/lib/dashboard';
 import { formatDuration } from '@/lib/sessionUtils';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { SrOnlyDataTable } from '@/components/dashboard/SrOnlyDataTable';
-import type { Category, Session, Task } from '@/types';
+import type { CategoryFocusItem } from '@/types';
 
 interface Props {
-  sessions: Session[];
-  tasks: Task[];
-  categories: Category[];
+  data: CategoryFocusItem[];
 }
 
-export function CategoryChart({ sessions, tasks, categories }: Props) {
-  const data = getCategoryFocusData(sessions, tasks, categories);
-
+export function CategoryChart({ data }: Props) {
   const totalMinutes = data.reduce((sum, d) => sum + d.minutes, 0);
   const hasData = data.length > 0;
 

@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest",
     "test:e2e": "playwright test",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "perf:flow": "playwright test -c playwright.perf.config.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
@@ -19,6 +20,7 @@
     "@fontsource/pretendard": "^5.2.5",
     "@pomoroutine/shared": "workspace:*",
     "@supabase/ssr": "^0.12.4",
+    "@tanstack/react-query": "^5.104.3",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "class-variance-authority": "^0.7.1",
