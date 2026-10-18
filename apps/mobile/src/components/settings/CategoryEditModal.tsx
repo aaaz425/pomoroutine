@@ -28,8 +28,13 @@ function CategoryEditModalContent({ category, onClose }: Props) {
   const addCategory = useTaskStore((s) => s.addCategory);
   const updateCategory = useTaskStore((s) => s.updateCategory);
 
-  const [name, setName] = useState(category?.name ?? '');
-  const [color, setColor] = useState(category?.color ?? CATEGORY_PRESET_COLORS[0].hex);
+  const [initial] = useState(() => ({
+    name: category?.name ?? '',
+    color: category?.color ?? CATEGORY_PRESET_COLORS[0].hex,
+  }));
+  const [name, setName] = useState(initial.name);
+  const [color, setColor] = useState(initial.color);
+  const dirty = name !== initial.name || color !== initial.color;
   const [showPicker, setShowPicker] = useState(false);
   const isValidColor = HEX_PATTERN.test(color);
   const isPreset = CATEGORY_PRESET_COLORS.some(({ hex }) => hex === color.toLowerCase());
@@ -51,6 +56,7 @@ function CategoryEditModalContent({ category, onClose }: Props) {
         visible
         title={category ? '카테고리 편집' : '카테고리 추가'}
         onClose={onClose}
+        dirty={dirty}
         footer={
           <>
             <CategoryBadge
