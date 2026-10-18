@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest",
     "test:e2e": "playwright test",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "perf:flow": "playwright test -c playwright.perf.config.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
