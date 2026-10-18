@@ -2,10 +2,13 @@
 
 import { createContext, startTransition, useContext, useEffect, useState } from 'react';
 import { useStore } from 'zustand';
+import { QueryClientProvider, type QueryClient } from '@tanstack/react-query';
 import { WEBVIEW_TAB_FOCUS_EVENT } from '@pomoroutine/shared';
 import { createTimerStore } from '@/store/timerStore';
 import { createTaskStore } from '@/store/taskStore';
 import { createSettingsStore } from '@/store/settingsStore';
+import { createQueryClient } from '@/lib/query/client';
+import { sessionKeys } from '@/lib/query/keys';
 import type { TimerStoreApi, TimerStore } from '@/store/timerStore';
 import type { TaskStoreApi, TaskStore } from '@/store/taskStore';
 import type { SettingsStoreApi, SettingsStore } from '@/store/settingsStore';
@@ -42,8 +45,13 @@ export function useHydrated(): boolean {
 }
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
+  const [queryClient] = useState<QueryClient>(createQueryClient);
   const [timerStore] = useState<TimerStoreApi>(createTimerStore);
-  const [taskStore] = useState<TaskStoreApi>(createTaskStore);
+  const [taskStore] = useState<TaskStoreApi>(() =>
+    createTaskStore({
+      onSessionsChanged: () => void queryClient.invalidateQueries({ queryKey: sessionKeys.all }),
+    }),
+  );
   const [settingsStore] = useState<SettingsStoreApi>(createSettingsStore);
   const [hydrated, setHydrated] = useState(false);
 
@@ -66,13 +74,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     function handleVisibility() {
       if (document.visibilityState === 'visible') refresh();
     }
+    function handleWebViewTabFocus() {
+      refresh();
+      void queryClient.refetchQueries({ type: 'active' });
+    }
     document.addEventListener('visibilitychange', handleVisibility);
-    window.addEventListener(WEBVIEW_TAB_FOCUS_EVENT, refresh);
+    window.addEventListener(WEBVIEW_TAB_FOCUS_EVENT, handleWebViewTabFocus);
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility);
-      window.removeEventListener(WEBVIEW_TAB_FOCUS_EVENT, refresh);
+      window.removeEventListener(WEBVIEW_TAB_FOCUS_EVENT, handleWebViewTabFocus);
     };
-  }, [hydrated, taskStore, settingsStore]);
+  }, [hydrated, taskStore, settingsStore, queryClient]);
 
   useEffect(
     () =>
@@ -84,12 +96,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <TimerStoreContext.Provider value={timerStore}>
-      <TaskStoreContext.Provider value={taskStore}>
-        <SettingsStoreContext.Provider value={settingsStore}>
-          <HydrationContext.Provider value={hydrated}>{children}</HydrationContext.Provider>
-        </SettingsStoreContext.Provider>
-      </TaskStoreContext.Provider>
-    </TimerStoreContext.Provider>
+    <QueryClientProvider client={queryClient}>
+      <TimerStoreContext.Provider value={timerStore}>
+        <TaskStoreContext.Provider value={taskStore}>
+          <SettingsStoreContext.Provider value={settingsStore}>
+            <HydrationContext.Provider value={hydrated}>{children}</HydrationContext.Provider>
+          </SettingsStoreContext.Provider>
+        </TaskStoreContext.Provider>
+      </TimerStoreContext.Provider>
+    </QueryClientProvider>
   );
 }

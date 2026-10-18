@@ -66,7 +66,11 @@ interface TaskStore {
   refresh: () => Promise<void>;
 }
 
-export const createTaskStore = () => {
+interface TaskStoreOptions {
+  onSessionsChanged?: () => void;
+}
+
+export const createTaskStore = ({ onSessionsChanged }: TaskStoreOptions = {}) => {
   const pendingTaskIds: PendingIds = new Map();
   const pendingCategoryIds: PendingIds = new Map();
   const pendingSessionIds: PendingIds = new Map();
@@ -166,6 +170,7 @@ export const createTaskStore = () => {
         toast(TOAST_MESSAGES.sessionSaveFailed);
         return false;
       }
+      onSessionsChanged?.();
       return true;
     }),
 
@@ -185,6 +190,7 @@ export const createTaskStore = () => {
         toast(TOAST_MESSAGES.sessionSaveFailed);
         return false;
       }
+      onSessionsChanged?.();
       return true;
     }),
 
@@ -205,6 +211,7 @@ export const createTaskStore = () => {
         toast(TOAST_MESSAGES.sessionDeleteFailed);
         return false;
       }
+      onSessionsChanged?.();
       return true;
     }),
 
