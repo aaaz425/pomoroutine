@@ -13,12 +13,12 @@ interface BaseBadge {
 
 interface StreakBadge extends BaseBadge {
   category: 'streak';
-  days: number; // getMaxStreakDays 기준
+  days: number;
 }
 
 interface TotalTimeBadge extends BaseBadge {
   category: 'total-time';
-  hours: number; // getTotalFocusSeconds(전체 세션) 기준
+  hours: number;
 }
 
 interface DiversityBadge extends BaseBadge {

@@ -8,7 +8,6 @@ import { createTimerStore } from '@/store/timerStore';
 import { createTaskStore } from '@/store/taskStore';
 import { createSettingsStore } from '@/store/settingsStore';
 import { createQueryClient } from '@/lib/query/client';
-import { sessionKeys } from '@/lib/query/keys';
 import type { TimerStoreApi, TimerStore } from '@/store/timerStore';
 import type { TaskStoreApi, TaskStore } from '@/store/taskStore';
 import type { SettingsStoreApi, SettingsStore } from '@/store/settingsStore';
@@ -47,11 +46,7 @@ export function useHydrated(): boolean {
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState<QueryClient>(createQueryClient);
   const [timerStore] = useState<TimerStoreApi>(createTimerStore);
-  const [taskStore] = useState<TaskStoreApi>(() =>
-    createTaskStore({
-      onSessionsChanged: () => void queryClient.invalidateQueries({ queryKey: sessionKeys.all }),
-    }),
-  );
+  const [taskStore] = useState<TaskStoreApi>(createTaskStore);
   const [settingsStore] = useState<SettingsStoreApi>(createSettingsStore);
   const [hydrated, setHydrated] = useState(false);
 

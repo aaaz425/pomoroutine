@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { createTaskStore } from '@/store/taskStore';
 import { DEFAULT_CATEGORIES } from '@/types';
-import type { Category, Session, Task } from '@/types';
+import type { Category, Task } from '@/types';
 import { fetchTasks, insertTask, updateTask, deleteTask, reorderTasks } from '@/lib/supabase/tasks';
 import {
   fetchCategories,
@@ -11,7 +11,6 @@ import {
   deleteCategory,
   reorderCategories,
 } from '@/lib/supabase/categories';
-import { fetchAllSessionsLazy, insertSession } from '@/lib/supabase/sessions';
 
 vi.mock('@/lib/supabase/tasks', () => ({
   fetchTasks: vi.fn(),
@@ -27,10 +26,6 @@ vi.mock('@/lib/supabase/categories', () => ({
   deleteCategory: vi.fn(),
   reorderCategories: vi.fn(),
 }));
-vi.mock('@/lib/supabase/sessions', () => ({
-  fetchAllSessionsLazy: vi.fn(),
-  insertSession: vi.fn(),
-}));
 
 const mockFetchTasks = vi.mocked(fetchTasks);
 const mockInsertTask = vi.mocked(insertTask);
@@ -43,9 +38,6 @@ const mockInsertCategory = vi.mocked(insertCategory);
 const mockUpdateCategory = vi.mocked(updateCategory);
 const mockDeleteCategory = vi.mocked(deleteCategory);
 const mockReorderCategories = vi.mocked(reorderCategories);
-
-const mockFetchSessions = vi.mocked(fetchAllSessionsLazy);
-const mockInsertSession = vi.mocked(insertSession);
 
 let idCounter = 0;
 function nextId() {
@@ -68,7 +60,6 @@ beforeEach(() => {
     name: input.name,
     color: input.color,
   }));
-  mockInsertSession.mockImplementation(async (input) => ({ id: nextId(), ...input }));
   mockUpdateTask.mockResolvedValue({ error: false });
   mockDeleteTask.mockResolvedValue({ error: false });
   mockReorderTasks.mockResolvedValue({ error: false });
@@ -81,25 +72,6 @@ async function addNCategories(store: ReturnType<typeof createTaskStore>, n: numb
   for (let i = 0; i < n; i++) {
     await store.getState().addCategory({ name: `cat-${i}`, color: 'bg-blue-500' });
   }
-}
-
-function makeSessionInput(overrides: Partial<Omit<Session, 'id'>> = {}): Omit<Session, 'id'> {
-  return {
-    taskId: null,
-    title: null,
-    mode: 'pomodoro',
-    startedAt: '2024-03-15T09:00:00.000Z',
-    endedAt: '2024-03-15T09:30:00.000Z',
-    completedCycles: 1,
-    totalCycles: 4,
-    focusSeconds: 1500,
-    pausedSeconds: 0,
-    focusPeriods: [],
-    note: null,
-    focusRating: null,
-    distractionTags: [],
-    ...overrides,
-  };
 }
 
 describe('addTask', () => {
@@ -240,34 +212,6 @@ describe('deleteTask', () => {
 
     expect(store.getState().tasks).toHaveLength(0);
     expect(mockDeleteTask).toHaveBeenCalledWith('db-id-1');
-  });
-});
-
-describe('addSession', () => {
-  it('addSession — 새 세션이 목록 맨 앞에 추가됨', async () => {
-    const store = createTaskStore();
-    await store.getState().addSession(makeSessionInput());
-    await store.getState().addSession(makeSessionInput({ startedAt: '2024-03-16T09:00:00.000Z' }));
-    expect(store.getState().sessions.map((s) => s.startedAt)).toEqual([
-      '2024-03-16T09:00:00.000Z',
-      '2024-03-15T09:00:00.000Z',
-    ]);
-  });
-
-  it('addSession — focusRating/distractionTags가 그대로 저장됨', async () => {
-    const store = createTaskStore();
-    await store
-      .getState()
-      .addSession(makeSessionInput({ focusRating: 3, distractionTags: ['phone'] }));
-    expect(store.getState().sessions[0].focusRating).toBe(3);
-    expect(store.getState().sessions[0].distractionTags).toEqual(['phone']);
-  });
-
-  it('addSession — insert 실패 시 낙관적으로 추가했던 세션이 롤백됨', async () => {
-    mockInsertSession.mockResolvedValueOnce(null);
-    const store = createTaskStore();
-    await store.getState().addSession(makeSessionInput());
-    expect(store.getState().sessions).toHaveLength(0);
   });
 });
 
@@ -485,14 +429,8 @@ describe('reorderCategories', () => {
   });
 });
 
-// sessions는 hydrate()가 기다리지 않는 별도 fire-and-forget 조회라 마이크로태스크를 한 번 더 흘려보내야 반영됨
-async function flushSessionsFetch() {
-  await Promise.resolve();
-  await Promise.resolve();
-}
-
 describe('hydrate', () => {
-  it('fetchTasks/fetchCategories/fetchAllSessionsLazy 결과로 상태가 복원됨', async () => {
+  it('fetchTasks/fetchCategories 결과로 상태가 복원됨', async () => {
     const task: Task = {
       id: 't1',
       title: '저장된 작업',
@@ -501,43 +439,30 @@ describe('hydrate', () => {
     };
     mockFetchTasks.mockResolvedValueOnce({ tasks: [task], invalidCount: 0 });
     mockFetchCategories.mockResolvedValueOnce({ categories: DEFAULT_CATEGORIES, invalidCount: 0 });
-    mockFetchSessions.mockResolvedValueOnce({ sessions: [], invalidCount: 0 });
 
     const store = createTaskStore();
     await store.getState().hydrate();
     expect(store.getState().tasks).toEqual([task]);
     expect(store.getState().categories).toEqual(DEFAULT_CATEGORIES);
-
-    await flushSessionsFetch();
-    expect(store.getState().sessionsHydrated).toBe(true);
   });
 
   it('형식이 안 맞는 항목이 있으면 조용히 빼고 나머지만 복원됨', async () => {
     mockFetchTasks.mockResolvedValueOnce({ tasks: [], invalidCount: 2 });
     mockFetchCategories.mockResolvedValueOnce({ categories: DEFAULT_CATEGORIES, invalidCount: 0 });
-    mockFetchSessions.mockResolvedValueOnce({ sessions: [], invalidCount: 1 });
 
     const store = createTaskStore();
     await expect(store.getState().hydrate()).resolves.not.toThrow();
     expect(store.getState().tasks).toEqual([]);
-
-    await flushSessionsFetch();
-    expect(store.getState().sessions).toEqual([]);
   });
 
-  it('조회가 전부 실패(null)하면 tasks/sessions는 빈 배열, categories는 DEFAULT_CATEGORIES로 복원됨', async () => {
+  it('조회가 전부 실패(null)하면 tasks는 빈 배열, categories는 DEFAULT_CATEGORIES로 복원됨', async () => {
     mockFetchTasks.mockResolvedValueOnce(null);
     mockFetchCategories.mockResolvedValueOnce(null);
-    mockFetchSessions.mockResolvedValueOnce(null);
 
     const store = createTaskStore();
     await store.getState().hydrate();
     expect(store.getState().tasks).toEqual([]);
     expect(store.getState().categories).toEqual(DEFAULT_CATEGORIES);
-
-    await flushSessionsFetch();
-    expect(store.getState().sessions).toEqual([]);
-    expect(store.getState().sessionsHydrated).toBe(true);
   });
 });
 
@@ -552,7 +477,6 @@ describe('refresh', () => {
   it('다시 조회한 데이터로 바꿈', async () => {
     mockFetchTasks.mockResolvedValueOnce({ tasks: [task], invalidCount: 0 });
     mockFetchCategories.mockResolvedValueOnce({ categories: DEFAULT_CATEGORIES, invalidCount: 0 });
-    mockFetchSessions.mockResolvedValueOnce({ sessions: [], invalidCount: 0 });
 
     const store = createTaskStore();
     await store.getState().refresh();
@@ -563,7 +487,6 @@ describe('refresh', () => {
   it('조회에 실패한 항목은 기존 데이터를 유지', async () => {
     mockFetchTasks.mockResolvedValueOnce(null);
     mockFetchCategories.mockResolvedValueOnce(null);
-    mockFetchSessions.mockResolvedValueOnce(null);
 
     const store = createTaskStore();
     store.setState({ tasks: [task] });
@@ -583,7 +506,6 @@ describe('refresh', () => {
     const inserted: Task = { ...task, id: 'db-new', title: '새 작업' };
     mockFetchTasks.mockResolvedValueOnce({ tasks: [inserted], invalidCount: 0 });
     mockFetchCategories.mockResolvedValueOnce({ categories: DEFAULT_CATEGORIES, invalidCount: 0 });
-    mockFetchSessions.mockResolvedValueOnce({ sessions: [], invalidCount: 0 });
 
     const store = createTaskStore();
     const adding = store.getState().addTask({ title: '새 작업', categoryId: 'c1' });

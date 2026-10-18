@@ -10,6 +10,17 @@ function InsightCardSkeleton() {
   );
 }
 
+export function InsightsSkeleton() {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <InsightCardSkeleton />
+      <InsightCardSkeleton />
+      <InsightCardSkeleton />
+      <InsightCardSkeleton />
+    </div>
+  );
+}
+
 function SessionRowSkeleton() {
   return (
     <div className="flex flex-col gap-1.5 px-3.5 py-3 rounded-lg border border-border bg-card">
@@ -35,12 +46,7 @@ export function JournalSkeleton() {
         </div>
       </header>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <InsightCardSkeleton />
-        <InsightCardSkeleton />
-        <InsightCardSkeleton />
-        <InsightCardSkeleton />
-      </div>
+      <InsightsSkeleton />
 
       <div className="flex flex-col gap-5">
         <div className="flex flex-col gap-2">

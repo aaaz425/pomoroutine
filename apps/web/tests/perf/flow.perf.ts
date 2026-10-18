@@ -1,5 +1,5 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { expect, test, type Locator, type Page } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { SupabaseRecorder } from './recorder';
 
 const PASSWORD = 'perf1234';
@@ -18,17 +18,37 @@ function navLink(page: Page, name: string) {
   return page.getByRole('link', { name, exact: true }).filter({ visible: true }).first();
 }
 
+type Ready = string | RegExp | { absentText: string };
+
+async function waitReady(page: Page, ready: Ready) {
+  if (typeof ready === 'object' && 'absentText' in ready) {
+    await page.waitForFunction(
+      (text) => !document.body.innerText.includes(text),
+      ready.absentText,
+      {
+        polling: 'raf',
+      },
+    );
+    return;
+  }
+  const pattern =
+    typeof ready === 'string' ? ready.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : ready.source;
+  await page.waitForFunction((src) => new RegExp(src).test(document.body.innerText), pattern, {
+    polling: 'raf',
+  });
+}
+
 async function measure(
   page: Page,
   recorder: SupabaseRecorder,
   step: string,
   action: () => Promise<void>,
-  ready: () => Locator,
+  ready: Ready,
 ): Promise<StepResult> {
   recorder.setStep(step);
   const start = Date.now();
   await action();
-  await expect(ready()).toBeVisible();
+  await waitReady(page, ready);
   const readyMs = Date.now() - start;
   await recorder.waitForQuiet(page, QUIET_MS);
   return { step, readyMs, settleMs: Date.now() - start - QUIET_MS };
@@ -63,7 +83,7 @@ for (const dataset of DATASETS) {
           async () => {
             await page.goto('/dashboard');
           },
-          () => page.getByText('연속 집중일').first(),
+          '연속 집중일',
         ),
       );
 
@@ -79,7 +99,7 @@ for (const dataset of DATASETS) {
             recorder,
             `tab-${tab}`,
             () => page.getByRole('button', { name: label, exact: true }).click(),
-            () => page.getByText(focusLabel).first(),
+            focusLabel,
           ),
         );
       }
@@ -90,7 +110,7 @@ for (const dataset of DATASETS) {
           recorder,
           'journal-enter',
           () => navLink(page, '기록').click(),
-          () => page.getByText(/측정용 작업 \d+/).first(),
+          /측정용 작업 \d+/,
         ),
       );
 
@@ -104,7 +124,17 @@ for (const dataset of DATASETS) {
             await page.waitForTimeout(200);
             await setVisibility(page, 'visible');
           },
-          () => page.getByText(/측정용 작업 \d+/).first(),
+          /측정용 작업 \d+/,
+        ),
+      );
+
+      steps.push(
+        await measure(
+          page,
+          recorder,
+          'dashboard-reenter',
+          () => navLink(page, '통계').click(),
+          '연속 집중일',
         ),
       );
 
@@ -134,7 +164,7 @@ for (const dataset of DATASETS) {
           recorder,
           'session-save',
           () => saveConfirm.getByRole('button', { name: '저장' }).click(),
-          () => page.getByRole('button', { name: '시작' }),
+          { absentText: '기록 작성' },
         ),
       );
 

@@ -11,7 +11,7 @@ import {
   removeSessionFromPages,
   type SessionPages,
 } from '@/lib/query/sessionCache';
-import { deleteSession, updateSession } from '@/lib/supabase/sessions';
+import { deleteSession, insertSession, updateSession } from '@/lib/supabase/sessions';
 import type { Session, SessionEditableFields } from '@/types';
 
 type Snapshot = [QueryKey, unknown][];
@@ -41,6 +41,18 @@ export function useSessionMutations() {
       predicate: (query) => !LOCALLY_PATCHED.includes(String(query.queryKey[1])),
     });
   }
+
+  const add = useMutation({
+    mutationFn: async (input: Omit<Session, 'id'>) => {
+      const inserted = await insertSession(input);
+      if (!inserted) throw new Error('session insert failed');
+    },
+    onError: () => toast(TOAST_MESSAGES.sessionSaveFailed),
+    onSuccess: () => {
+      toast(TOAST_MESSAGES.sessionSaved);
+      void queryClient.invalidateQueries({ queryKey: sessionKeys.all });
+    },
+  });
 
   const update = useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<SessionEditableFields> }) => {
@@ -88,5 +100,10 @@ export function useSessionMutations() {
     onSettled: invalidateAggregates,
   });
 
-  return { updateSession: update.mutate, deleteSession: remove.mutate };
+  return {
+    addSession: add.mutate,
+    isAdding: add.isPending,
+    updateSession: update.mutate,
+    deleteSession: remove.mutate,
+  };
 }

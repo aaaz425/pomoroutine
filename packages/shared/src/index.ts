@@ -65,15 +65,8 @@ export {
   getHourlyFocusSeconds,
   getSessionCount,
   getAvgSessionSeconds,
-  getStreakDays,
-  getPrevDayStats,
-  getPrevWeekStats,
-  getPrevMonthStats,
-  getMaxStreakDays,
-  getBusiestDayOfWeek,
-  getFirstSessionDate,
 } from './lib/dashboard';
-export type { DayActivity, TabType, PeriodStats } from './lib/dashboard';
+export type { DayActivity, TabType } from './lib/dashboard';
 export { BADGE_CATEGORY_LABELS, BADGE_DEFINITIONS, getEarnedBadgeIds } from './lib/badges';
 export type {
   BadgeTier,
