@@ -22,8 +22,13 @@ export function TaskFormModal({ task, onClose, onCreated }: Props) {
   const addTask = useTaskStore((s) => s.addTask);
   const updateTask = useTaskStore((s) => s.updateTask);
 
-  const [title, setTitle] = useState(task?.title ?? '');
-  const [categoryId, setCategoryId] = useState(task?.categoryId ?? categories[0]?.id ?? '');
+  const [initial] = useState(() => ({
+    title: task?.title ?? '',
+    categoryId: task?.categoryId ?? categories[0]?.id ?? '',
+  }));
+  const [title, setTitle] = useState(initial.title);
+  const [categoryId, setCategoryId] = useState(initial.categoryId);
+  const dirty = title !== initial.title || categoryId !== initial.categoryId;
   // 저장이 비동기(Supabase 왕복)라 이게 없으면 응답 오기 전에 다시 눌러 중복 생성될 수 있음
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -47,6 +52,7 @@ export function TaskFormModal({ task, onClose, onCreated }: Props) {
       <Modal
         title={task ? '작업 수정' : '새 작업 추가'}
         onClose={onClose}
+        dirty={dirty}
         backdropClassName="bg-black/55 backdrop-blur-sm"
         maxHeightClassName="max-h-[80vh]"
         footer={

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { FocusRatingPicker } from '@/components/shared/FocusRatingPicker';
@@ -22,6 +22,7 @@ interface Props {
   onBack?: () => void;
   onUpdated: (patch: Partial<Session>) => void;
   onDeleted: () => void;
+  onDirtyChange?: (dirty: boolean) => void;
 }
 
 interface EditDraft {
@@ -40,6 +41,7 @@ export function JournalDetailPanel({
   onBack,
   onUpdated,
   onDeleted,
+  onDirtyChange,
 }: Props) {
   const { updateSession, deleteSession } = useSessionMutations();
   const tasks = useTaskStore((s) => s.tasks);
@@ -48,6 +50,14 @@ export function JournalDetailPanel({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState<EditDraft | null>(null);
+  const [initialDraft, setInitialDraft] = useState<EditDraft | null>(null);
+  const isDirty = isEditing && JSON.stringify(draft) !== JSON.stringify(initialDraft);
+
+  useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
+
+  useEffect(() => () => onDirtyChange?.(false), [onDirtyChange]);
   const [showTaskPicker, setShowTaskPicker] = useState(false);
 
   const displayTitle =
@@ -61,13 +71,15 @@ export function JournalDetailPanel({
     : category;
 
   function handleEdit() {
-    setDraft({
+    const initial = {
       title: displayTitle,
       taskId: session.taskId,
       focusRating: session.focusRating,
       distractionTags: session.distractionTags,
       note: session.note ?? '',
-    });
+    };
+    setDraft(initial);
+    setInitialDraft(initial);
     setIsEditing(true);
   }
 
