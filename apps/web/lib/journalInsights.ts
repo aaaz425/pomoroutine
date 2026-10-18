@@ -2,18 +2,18 @@ import { endOfDay, isWithinInterval, parseISO, startOfDay, subDays } from 'date-
 import type {
   Category,
   CategoryRatingItem,
+  CategoryRatingTotal,
   DistractionFrequency,
   FocusRating,
   FocusRatingTrend,
-  Session,
-  Task,
+  InsightSession,
 } from '@/types';
 
-function inWindow(session: Session, start: Date, end: Date): boolean {
+function inWindow(session: InsightSession, start: Date, end: Date): boolean {
   return isWithinInterval(parseISO(session.startedAt), { start, end });
 }
 
-function avgRating(sessions: Session[]): { avg: number | null; sampleSize: number } {
+function avgRating(sessions: InsightSession[]): { avg: number | null; sampleSize: number } {
   const ratings = sessions.map((s) => s.focusRating).filter((r): r is FocusRating => r !== null);
   if (ratings.length === 0) return { avg: null, sampleSize: 0 };
   return {
@@ -23,7 +23,7 @@ function avgRating(sessions: Session[]): { avg: number | null; sampleSize: numbe
 }
 
 export function getTopDistractions(
-  sessions: Session[],
+  sessions: InsightSession[],
   days = 14,
   today: Date = new Date(),
 ): DistractionFrequency[] {
@@ -44,7 +44,7 @@ export function getTopDistractions(
 }
 
 export function getFocusRatingTrend(
-  sessions: Session[],
+  sessions: InsightSession[],
   days = 7,
   today: Date = new Date(),
 ): FocusRatingTrend {
@@ -66,43 +66,24 @@ export function getFocusRatingTrend(
 }
 
 export function getCategoryFocusRatings(
-  sessions: Session[],
-  tasks: Task[],
+  totals: CategoryRatingTotal[],
   categories: Category[],
   minSamples = 3,
 ): CategoryRatingItem[] {
-  const taskMap = new Map(tasks.map((t) => [t.id, t]));
   const categoryMap = new Map(categories.map((c) => [c.id, c]));
-
-  const ratingsByCategory = new Map<string, FocusRating[]>();
-  for (const session of sessions) {
-    if (session.focusRating === null || session.taskId === null) continue;
-    const task = taskMap.get(session.taskId);
-    if (!task) continue;
-    const category = categoryMap.get(task.categoryId);
-    if (!category) continue;
-
-    const ratings = ratingsByCategory.get(category.id) ?? [];
-    ratings.push(session.focusRating);
-    ratingsByCategory.set(category.id, ratings);
-  }
-
-  const items: CategoryRatingItem[] = [];
-  for (const [categoryId, ratings] of ratingsByCategory) {
-    if (ratings.length < minSamples) continue;
-    items.push({
-      categoryId,
-      categoryName: categoryMap.get(categoryId)!.name,
-      avgRating: ratings.reduce((sum, r) => sum + r, 0) / ratings.length,
-      sampleSize: ratings.length,
-    });
-  }
-
-  return items.sort((a, b) => b.avgRating - a.avgRating);
+  return totals
+    .filter((t) => t.count >= minSamples && categoryMap.has(t.categoryId))
+    .map((t) => ({
+      categoryId: t.categoryId,
+      categoryName: categoryMap.get(t.categoryId)!.name,
+      avgRating: t.sum / t.count,
+      sampleSize: t.count,
+    }))
+    .sort((a, b) => b.avgRating - a.avgRating);
 }
 
 export function getLowestRatingDayOfWeek(
-  sessions: Session[],
+  sessions: InsightSession[],
   today: Date = new Date(),
 ): string | null {
   const start = subDays(startOfDay(today), 29);

@@ -1,35 +1,25 @@
 'use client';
 
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 import { JournalSessionList } from '@/components/journal/JournalSessionList';
 import { JournalFilterModal } from '@/components/journal/JournalFilterModal';
 import { PageSpinner } from '@/components/shared/PageSpinner';
+import { ErrorFallback } from '@/components/shared/ErrorFallback';
 import { useJournalFilters } from '@/hooks/useJournalFilters';
-import { useSessionsPage } from '@/hooks/useSessionsPage';
-import { useTaskStore } from '@/store/StoreProvider';
+import { useSessionsList } from '@/hooks/useSessionsList';
 import { formatCount, groupSessionsByDate } from '@/lib/sessionUtils';
 import type { Category, Session, Task } from '@/types';
-
-export interface SessionSyncHandle {
-  updateItem: (id: string, patch: Partial<Session>) => void;
-  removeItem: (id: string) => void;
-}
 
 interface Props {
   tasks: Task[];
   categories: Category[];
   selectedId: string | null;
-  onSelect: (session: Session) => void;
+  onSelect: (session: Session, sessionIndex: number) => void;
 }
 
-export const ListView = forwardRef<SessionSyncHandle, Props>(function ListView(
-  { tasks, categories, selectedId, onSelect },
-  ref,
-) {
+export function ListView({ tasks, categories, selectedId, onSelect }: Props) {
   const [filterOpen, setFilterOpen] = useState(false);
-  const allSessions = useTaskStore((s) => s.sessions);
-  const markedDates = new Set(allSessions.map((s) => s.startedAt.slice(0, 10)));
 
   const {
     searchQuery,
@@ -44,15 +34,13 @@ export const ListView = forwardRef<SessionSyncHandle, Props>(function ListView(
     reset: resetFilters,
   } = useJournalFilters();
 
-  const categoryIds = useMemo(() => Array.from(selectedCategoryIds), [selectedCategoryIds]);
-  const { items, hasMore, loading, loadMore, updateItem, removeItem } = useSessionsPage({
-    categoryIds,
-    search: searchQuery,
-    dateFrom,
-    dateTo,
-  });
-
-  useImperativeHandle(ref, () => ({ updateItem, removeItem }), [updateItem, removeItem]);
+  const { items, totalCount, isPending, isError, hasMore, isFetchingMore, loadMore, refetch } =
+    useSessionsList({
+      categoryIds: Array.from(selectedCategoryIds).sort(),
+      search: searchQuery,
+      dateFrom,
+      dateTo,
+    });
 
   const groups = groupSessionsByDate(items);
 
@@ -61,11 +49,11 @@ export const ListView = forwardRef<SessionSyncHandle, Props>(function ListView(
     const el = sentinelRef.current;
     if (!el) return;
     const observer = new IntersectionObserver((entries) => {
-      if (entries[0]?.isIntersecting && hasMore && !loading) loadMore();
+      if (entries[0]?.isIntersecting && hasMore && !isFetchingMore) loadMore();
     });
     observer.observe(el);
     return () => observer.disconnect();
-  }, [hasMore, loading, loadMore]);
+  }, [hasMore, isFetchingMore, loadMore]);
 
   const filterButton = (
     <button
@@ -89,11 +77,15 @@ export const ListView = forwardRef<SessionSyncHandle, Props>(function ListView(
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">{formatCount(items.length)}개의 기록</span>
+        <span className="text-xs text-muted-foreground">
+          {formatCount(totalCount ?? items.length)}개의 기록
+        </span>
         {filterButton}
       </div>
-      {loading && items.length === 0 ? (
+      {isPending ? (
         <PageSpinner />
+      ) : isError && items.length === 0 ? (
+        <ErrorFallback onRetry={refetch} />
       ) : groups.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-16 text-center">
           <p className="text-sm text-muted-foreground">검색 결과가 없어요</p>
@@ -111,7 +103,7 @@ export const ListView = forwardRef<SessionSyncHandle, Props>(function ListView(
             onSelect={onSelect}
           />
           <div ref={sentinelRef} className="flex justify-center py-4">
-            {loading && (
+            {isFetchingMore && (
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-primary" />
             )}
           </div>
@@ -131,8 +123,7 @@ export const ListView = forwardRef<SessionSyncHandle, Props>(function ListView(
         onDateFromChange={setDateFrom}
         onDateToChange={setDateTo}
         onReset={resetFilters}
-        markedDates={markedDates}
       />
     </div>
   );
-});
+}

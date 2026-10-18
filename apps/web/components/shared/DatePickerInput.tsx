@@ -94,8 +94,9 @@ export function DatePickerInput({
         type="button"
         onClick={() => {
           if (!open) {
-            const d = parseKey(value);
-            if (d) setViewDate(d);
+            const d = parseKey(value) ?? viewDate;
+            setViewDate(d);
+            onMonthChange?.(d.getFullYear(), d.getMonth() + 1);
           }
           setOpen((p) => !p);
         }}

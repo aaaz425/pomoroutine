@@ -139,6 +139,34 @@ export interface FocusRatingTrend {
   sampleSize: number; // recentAvg 계산에 쓰인 세션 수 — 신뢰도 판단용
 }
 
+export type InsightSession = Pick<
+  Session,
+  'id' | 'taskId' | 'startedAt' | 'focusRating' | 'distractionTags'
+>;
+
+export interface CategoryRatingTotal {
+  categoryId: string;
+  sum: number;
+  count: number;
+}
+
+export interface JournalSummary {
+  count: number;
+  categoryRatings: CategoryRatingTotal[];
+}
+
+export type SessionEditableFields = Pick<
+  Session,
+  'title' | 'note' | 'focusRating' | 'distractionTags' | 'taskId'
+>;
+
+export interface SessionListFilters {
+  categoryIds: string[];
+  search: string;
+  dateFrom: string; // YYYY-MM-DD
+  dateTo: string; // YYYY-MM-DD
+}
+
 export interface CategoryRatingItem {
   categoryId: string;
   categoryName: string;

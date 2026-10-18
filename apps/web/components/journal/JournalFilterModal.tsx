@@ -19,7 +19,6 @@ interface Props {
   onDateFromChange: (v: string) => void;
   onDateToChange: (v: string) => void;
   onReset: () => void;
-  markedDates?: Set<string>;
 }
 
 export function JournalFilterModal({
@@ -35,7 +34,6 @@ export function JournalFilterModal({
   onDateFromChange,
   onDateToChange,
   onReset,
-  markedDates,
 }: Props) {
   if (!open) return null;
 
@@ -65,7 +63,6 @@ export function JournalFilterModal({
         dateTo={dateTo}
         onDateFromChange={onDateFromChange}
         onDateToChange={onDateToChange}
-        markedDates={markedDates}
       />
     </Modal>
   );

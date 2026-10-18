@@ -1,13 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import { DatePickerInput } from '@/components/shared/DatePickerInput';
+import { useMarkedDates } from '@/hooks/useMarkedDates';
+import { toLocalDateKey } from '@/lib/sessionUtils';
 
 interface Props {
   dateFrom: string;
   dateTo: string;
   onDateFromChange: (v: string) => void;
   onDateToChange: (v: string) => void;
-  markedDates?: Set<string>;
 }
 
 type DatePreset = 'today' | 'week' | 'month';
@@ -18,16 +20,20 @@ const PRESETS: { label: string; preset: DatePreset }[] = [
   { label: '이번 달', preset: 'month' },
 ];
 
+function toKey(date: Date): string {
+  return toLocalDateKey(date.toISOString());
+}
+
 function getDateRange(preset: DatePreset): { from: string; to: string } {
   const today = new Date();
-  const toKey = today.toISOString().slice(0, 10);
-  if (preset === 'today') return { from: toKey, to: toKey };
+  const todayKey = toKey(today);
+  if (preset === 'today') return { from: todayKey, to: todayKey };
   if (preset === 'week') {
     const mon = new Date(today);
     mon.setDate(today.getDate() - (today.getDay() || 7) + 1);
-    return { from: mon.toISOString().slice(0, 10), to: toKey };
+    return { from: toKey(mon), to: todayKey };
   }
-  return { from: `${toKey.slice(0, 7)}-01`, to: toKey };
+  return { from: `${todayKey.slice(0, 7)}-01`, to: todayKey };
 }
 
 export function JournalDateRangeFilter({
@@ -35,9 +41,14 @@ export function JournalDateRangeFilter({
   dateTo,
   onDateFromChange,
   onDateToChange,
-  markedDates,
 }: Props) {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = toKey(new Date());
+  const [visibleMonth, setVisibleMonth] = useState<{ year: number; month: number } | null>(null);
+  const markedDates = useMarkedDates(visibleMonth);
+
+  function handleMonthChange(year: number, month: number) {
+    setVisibleMonth({ year, month });
+  }
 
   function isPresetActive(preset: DatePreset) {
     const { from, to } = getDateRange(preset);
@@ -77,6 +88,7 @@ export function JournalDateRangeFilter({
             max={dateTo && dateTo < today ? dateTo : today}
             placeholder="시작일"
             markedDates={markedDates}
+            onMonthChange={handleMonthChange}
           />
         </div>
         <span className="text-muted-foreground text-sm shrink-0">-</span>
@@ -88,6 +100,7 @@ export function JournalDateRangeFilter({
             max={today}
             placeholder="종료일"
             markedDates={markedDates}
+            onMonthChange={handleMonthChange}
           />
         </div>
       </div>

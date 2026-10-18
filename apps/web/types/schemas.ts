@@ -51,6 +51,21 @@ export const DashboardSessionSchema = SessionSchema.pick({
   focusPeriods: true,
 });
 
+export const InsightSessionSchema = SessionSchema.pick({
+  id: true,
+  taskId: true,
+  startedAt: true,
+  focusRating: true,
+  distractionTags: true,
+});
+
+export const JournalSummarySchema = z.object({
+  count: z.number(),
+  categoryRatings: z.array(
+    z.object({ categoryId: z.string(), sum: z.number(), count: z.number() }),
+  ),
+});
+
 const PeriodStatSchema = z.object({
   focusSeconds: z.number(),
   count: z.number(),

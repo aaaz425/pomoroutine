@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { Category, Session, Task } from '@/types';
+import type { Category, Session } from '@/types';
 import {
   getCategoryFocusRatings,
   getFocusRatingTrend,
@@ -103,48 +103,32 @@ describe('getCategoryFocusRatings', () => {
     { id: 'cat-study', name: '공부', color: 'bg-blue-500' },
     { id: 'cat-work', name: '업무', color: 'bg-green-500' },
   ];
-  const tasks: Task[] = [
-    {
-      id: 'task-study',
-      title: '공부하기',
-      categoryId: 'cat-study',
-      createdAt: '2024-01-01T00:00:00',
-    },
-    {
-      id: 'task-work',
-      title: '업무하기',
-      categoryId: 'cat-work',
-      createdAt: '2024-01-01T00:00:00',
-    },
-  ];
 
-  it('카테고리별 평균 집중도를 정확히 계산', () => {
-    const sessions = [
-      makeSession({ taskId: 'task-study', focusRating: 3 }),
-      makeSession({ taskId: 'task-study', focusRating: 1 }),
-      makeSession({ taskId: 'task-study', focusRating: 2 }),
-    ];
-    const result = getCategoryFocusRatings(sessions, tasks, categories, 3);
+  it('카테고리별 평균 집중도를 높은 순으로 반환', () => {
+    const result = getCategoryFocusRatings(
+      [
+        { categoryId: 'cat-study', sum: 6, count: 3 },
+        { categoryId: 'cat-work', sum: 9, count: 3 },
+      ],
+      categories,
+      3,
+    );
     expect(result).toEqual([
+      { categoryId: 'cat-work', categoryName: '업무', avgRating: 3, sampleSize: 3 },
       { categoryId: 'cat-study', categoryName: '공부', avgRating: 2, sampleSize: 3 },
     ]);
   });
 
   it('minSamples 미만인 카테고리는 결과에서 제외됨', () => {
-    const sessions = [
-      makeSession({ taskId: 'task-study', focusRating: 3 }),
-      makeSession({ taskId: 'task-study', focusRating: 2 }),
-    ];
-    expect(getCategoryFocusRatings(sessions, tasks, categories, 3)).toEqual([]);
+    expect(
+      getCategoryFocusRatings([{ categoryId: 'cat-study', sum: 5, count: 2 }], categories, 3),
+    ).toEqual([]);
   });
 
-  it('taskId가 null(미분류)인 세션은 카테고리 집계에서 제외됨', () => {
-    const sessions = [
-      makeSession({ taskId: null, focusRating: 3 }),
-      makeSession({ taskId: null, focusRating: 3 }),
-      makeSession({ taskId: null, focusRating: 3 }),
-    ];
-    expect(getCategoryFocusRatings(sessions, tasks, categories, 3)).toEqual([]);
+  it('현재 카테고리 목록에 없는 카테고리는 제외됨', () => {
+    expect(
+      getCategoryFocusRatings([{ categoryId: 'deleted', sum: 9, count: 3 }], categories, 3),
+    ).toEqual([]);
   });
 });
 

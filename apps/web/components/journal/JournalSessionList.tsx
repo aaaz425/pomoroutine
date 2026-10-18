@@ -9,7 +9,7 @@ interface Props {
   tasks: Task[];
   categories: Category[];
   selectedId: string | null;
-  onSelect: (session: Session) => void;
+  onSelect: (session: Session, sessionIndex: number) => void;
 }
 
 export function JournalSessionList({ groups, tasks, categories, selectedId, onSelect }: Props) {
@@ -45,7 +45,7 @@ export function JournalSessionList({ groups, tasks, categories, selectedId, onSe
                   category={category}
                   sessionIndex={sessionIndex}
                   isSelected={selectedId === session.id}
-                  onSelect={() => onSelect(session)}
+                  onSelect={() => onSelect(session, sessionIndex)}
                 />
               );
             })}

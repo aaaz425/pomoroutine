@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { toast } from '@/lib/toast';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { FocusRatingPicker } from '@/components/shared/FocusRatingPicker';
 import { DistractionTagPicker } from '@/components/shared/DistractionTagPicker';
@@ -11,12 +10,13 @@ import { SessionDetailHeader } from '@/components/journal/SessionDetailHeader';
 import { SessionStatsRow } from '@/components/journal/SessionStatsRow';
 import { SessionTaskReassignModal } from '@/components/journal/SessionTaskReassignModal';
 import { useTaskStore } from '@/store/StoreProvider';
+import { useSessionMutations } from '@/hooks/useSessionMutations';
 import { getSessionOrdinalTitle } from '@/lib/sessionUtils';
 import type { Category, FocusRating, Session, Task } from '@/types';
-import { TOAST_MESSAGES } from '@/lib/constants/messages';
 
 interface Props {
   session: Session;
+  sessionIndex: number;
   task: Task | null;
   category: Category | null;
   onBack?: () => void;
@@ -34,25 +34,16 @@ interface EditDraft {
 
 export function JournalDetailPanel({
   session,
+  sessionIndex,
   task,
   category,
   onBack,
   onUpdated,
   onDeleted,
 }: Props) {
-  const updateSessionFields = useTaskStore((s) => s.updateSessionFields);
-  const deleteSession = useTaskStore((s) => s.deleteSession);
-  const sessions = useTaskStore((s) => s.sessions);
+  const { updateSession, deleteSession } = useSessionMutations();
   const tasks = useTaskStore((s) => s.tasks);
   const categories = useTaskStore((s) => s.categories);
-
-  const sessionIndex = (() => {
-    const dateKey = session.startedAt.slice(0, 10);
-    const sorted = sessions
-      .filter((s) => s.startedAt.slice(0, 10) === dateKey)
-      .sort((a, b) => a.startedAt.localeCompare(b.startedAt));
-    return sorted.findIndex((s) => s.id === session.id);
-  })();
 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -94,16 +85,21 @@ export function JournalDetailPanel({
       distractionTags: draft.distractionTags,
       note: draft.note.trim() || null,
     };
-    void updateSessionFields(session.id, patch).then(
-      (ok) => ok && toast(TOAST_MESSAGES.sessionUpdated),
-    );
+    const previous = {
+      title: session.title,
+      taskId: session.taskId,
+      focusRating: session.focusRating,
+      distractionTags: session.distractionTags,
+      note: session.note,
+    };
+    updateSession({ id: session.id, patch }, { onError: () => onUpdated(previous) });
     onUpdated(patch);
     setIsEditing(false);
     setDraft(null);
   }
 
   function handleDelete() {
-    void deleteSession(session.id).then((ok) => ok && toast(TOAST_MESSAGES.sessionDeleted));
+    deleteSession(session.id);
     onDeleted();
   }
 

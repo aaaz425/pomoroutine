@@ -11,10 +11,10 @@ import { DISTRACTION_TAGS } from '@/lib/constants';
 import type {
   Category,
   CategoryRatingItem,
+  CategoryRatingTotal,
   DistractionFrequency,
   FocusRatingTrend,
-  Session,
-  Task,
+  InsightSession,
 } from '@/types';
 
 interface CardContent {
@@ -70,15 +70,15 @@ function lowestDayCopy(day: string | null): CardContent {
 }
 
 interface Props {
-  sessions: Session[];
-  tasks: Task[];
+  sessions: InsightSession[];
+  categoryRatings: CategoryRatingTotal[];
   categories: Category[];
 }
 
-export function InsightsSection({ sessions, tasks, categories }: Props) {
+export function InsightsSection({ sessions, categoryRatings: ratingTotals, categories }: Props) {
   const topDistractions = getTopDistractions(sessions);
   const ratingTrend = getFocusRatingTrend(sessions);
-  const categoryRatings = getCategoryFocusRatings(sessions, tasks, categories);
+  const categoryRatings = getCategoryFocusRatings(ratingTotals, categories);
   const lowestDay = getLowestRatingDayOfWeek(sessions);
 
   const cards = [
