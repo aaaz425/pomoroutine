@@ -105,7 +105,7 @@ function generateSessions(count, taskIds, seed) {
   const sessions = [];
   const kstMidnight = new Date();
   kstMidnight.setUTCHours(-9, 0, 0, 0);
-  let dayOffset = 0;
+  let dayOffset = 1;
   while (sessions.length < count) {
     const perDay = h.chance(0.1) ? 0 : h.int(1, 12);
     const dayStart = kstMidnight.getTime() - dayOffset * 86_400_000;
@@ -123,7 +123,7 @@ function generateSessions(count, taskIds, seed) {
         pausedSeconds + breakSeconds,
         h,
       );
-      if (endMs > Date.now()) break;
+      if (endMs > dayStart + 31 * 3_600_000) break;
       sessions.push({
         task_id: h.chance(0.1) ? null : h.pick(taskIds),
         mode: free ? 'free' : 'pomodoro',
