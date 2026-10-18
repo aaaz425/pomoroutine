@@ -34,7 +34,7 @@ export function HourlyChart({ hourly }: Props) {
         )}
       </div>
 
-      <div className="flex flex-col gap-1.5 flex-1">
+      <div className="flex flex-col justify-end gap-1.5 flex-1">
         {hasFocus && (
           <SrOnlyDataTable
             caption="시간대별 집중 분석"
@@ -47,7 +47,7 @@ export function HourlyChart({ hourly }: Props) {
           />
         )}
         {/* Bars */}
-        <div aria-hidden="true" className="flex items-end gap-0.5 flex-1">
+        <div aria-hidden="true" className="flex items-end gap-0.5 h-24">
           {hourly.map((val, i) => {
             const ratio = val / max;
             return (
