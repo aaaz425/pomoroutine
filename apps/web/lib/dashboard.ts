@@ -51,6 +51,7 @@ interface CategoryMinutesRow {
 }
 
 const UNCATEGORIZED = { name: '미분류', color: '#6b7280' };
+const OTHERS_COLOR = '#9ca3af';
 
 function resolveCategory(
   categoryId: string | null,
@@ -238,4 +239,22 @@ export function getTabStats(
     categoryFocus: getCategoryFocusData(filtered, tasks, categories),
     hourlySeconds: getHourlyFocusSeconds(filtered),
   };
+}
+
+export function limitCategoryFocus(
+  items: CategoryFocusItem[],
+  maxItems: number,
+): CategoryFocusItem[] {
+  if (items.length <= maxItems) return items;
+  const shown = items.slice(0, maxItems - 1);
+  const rest = items.slice(maxItems - 1);
+  return [
+    ...shown,
+    {
+      name: `그 외 ${rest.length}개`,
+      minutes: rest.reduce((sum, i) => sum + i.minutes, 0),
+      percent: rest.reduce((sum, i) => sum + i.percent, 0),
+      color: OTHERS_COLOR,
+    },
+  ];
 }

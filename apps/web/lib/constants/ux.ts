@@ -15,3 +15,5 @@ export const SOUND_TYPE_LABELS: Record<SoundType, string> = {
   bell: '벨',
   digital: '디지털',
 };
+
+export const CATEGORY_CHART_MAX_ITEMS = 5;
