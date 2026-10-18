@@ -19,13 +19,6 @@ import {
   getHourlyFocusSeconds,
   getSessionCount,
   getAvgSessionSeconds,
-  getStreakDays,
-  getPrevDayStats,
-  getPrevWeekStats,
-  getPrevMonthStats,
-  getMaxStreakDays,
-  getBusiestDayOfWeek,
-  getFirstSessionDate,
 } from '@pomoroutine/shared';
 
 export {
@@ -35,13 +28,6 @@ export {
   getHourlyFocusSeconds,
   getSessionCount,
   getAvgSessionSeconds,
-  getStreakDays,
-  getPrevDayStats,
-  getPrevWeekStats,
-  getPrevMonthStats,
-  getMaxStreakDays,
-  getBusiestDayOfWeek,
-  getFirstSessionDate,
 };
 
 interface CategoryMinutesRow {

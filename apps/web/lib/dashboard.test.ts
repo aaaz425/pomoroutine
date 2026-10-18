@@ -9,16 +9,9 @@ import {
   getTabStats,
   limitCategoryFocus,
   getAvgSessionSeconds,
-  getBusiestDayOfWeek,
-  getFirstSessionDate,
   getHourlyFocusSeconds,
-  getMaxStreakDays,
   getMonthlyActivityData,
-  getPrevDayStats,
-  getPrevMonthStats,
-  getPrevWeekStats,
   getSessionCount,
-  getStreakDays,
   getTotalFocusSeconds,
 } from './dashboard';
 
@@ -78,31 +71,6 @@ describe('filterSessionsByTab', () => {
   });
 });
 
-describe('getStreakDays', () => {
-  it('연속 3일', () => {
-    const sessions = [
-      makeSession('2024-03-15T10:00:00'),
-      makeSession('2024-03-14T10:00:00'),
-      makeSession('2024-03-13T10:00:00'),
-      makeSession('2024-03-10T10:00:00'), // 3일 공백 — streak 끊김
-    ];
-    expect(getStreakDays(sessions, TODAY)).toBe(3);
-  });
-
-  it('오늘 세션 없으면 streak 0', () => {
-    const sessions = [makeSession('2024-03-14T10:00:00'), makeSession('2024-03-13T10:00:00')];
-    expect(getStreakDays(sessions, TODAY)).toBe(0);
-  });
-
-  it('세션 없으면 0', () => {
-    expect(getStreakDays([], TODAY)).toBe(0);
-  });
-
-  it('오늘만 있으면 streak 1', () => {
-    expect(getStreakDays([makeSession('2024-03-15T10:00:00')], TODAY)).toBe(1);
-  });
-});
-
 describe('집계 함수', () => {
   const sessions = [
     makeSession('2024-03-15T09:00:00', 1800),
@@ -123,31 +91,6 @@ describe('집계 함수', () => {
 
   it('getAvgSessionSeconds — 빈 배열이면 0', () => {
     expect(getAvgSessionSeconds([])).toBe(0);
-  });
-});
-
-describe('이전 기간 비교 함수', () => {
-  const sessions = [
-    makeSession('2024-03-15T10:00:00', 1800), // 오늘
-    makeSession('2024-03-14T10:00:00', 900), // 어제
-    makeSession('2024-03-14T15:00:00', 600), // 어제
-    makeSession('2024-02-10T10:00:00', 1500), // 전월
-  ];
-
-  it('getPrevDayStats — 어제 집중 초 합산·세션 수', () => {
-    expect(getPrevDayStats(sessions, TODAY)).toEqual({ focusSeconds: 1500, count: 2 }); // 900 + 600
-  });
-
-  it('getPrevWeekStats — 지난주 집중 초 합산·세션 수', () => {
-    expect(getPrevWeekStats(sessions, TODAY)).toEqual({ focusSeconds: 0, count: 0 });
-  });
-
-  it('getPrevMonthStats — 전월 집중 초 합산·세션 수', () => {
-    expect(getPrevMonthStats(sessions, TODAY)).toEqual({ focusSeconds: 1500, count: 1 });
-  });
-
-  it('getPrevDayStats — 어제 세션 없으면 0', () => {
-    expect(getPrevDayStats([], TODAY)).toEqual({ focusSeconds: 0, count: 0 });
   });
 });
 
@@ -192,76 +135,6 @@ describe('getMonthlyActivityData', () => {
     const result = getMonthlyActivityData(sessions, TODAY);
     const march15 = result.find((d) => d.date === '2024-03-15');
     expect(march15?.focusMinutes).toBe(1);
-  });
-});
-
-describe('getMaxStreakDays', () => {
-  it('세션 없으면 0', () => {
-    expect(getMaxStreakDays([])).toBe(0);
-  });
-
-  it('하루만 있으면 1', () => {
-    expect(getMaxStreakDays([makeSession('2024-03-15T10:00:00')])).toBe(1);
-  });
-
-  it('연속 3일 + 끊김 + 연속 5일 → 5 반환', () => {
-    const sessions = [
-      makeSession('2024-03-01T10:00:00'),
-      makeSession('2024-03-02T10:00:00'),
-      makeSession('2024-03-03T10:00:00'),
-      makeSession('2024-03-10T10:00:00'),
-      makeSession('2024-03-11T10:00:00'),
-      makeSession('2024-03-12T10:00:00'),
-      makeSession('2024-03-13T10:00:00'),
-      makeSession('2024-03-14T10:00:00'),
-    ];
-    expect(getMaxStreakDays(sessions)).toBe(5);
-  });
-
-  it('오늘 세션 없어도 과거 최장 streak 반환', () => {
-    const sessions = [
-      makeSession('2024-03-01T10:00:00'),
-      makeSession('2024-03-02T10:00:00'),
-      makeSession('2024-03-03T10:00:00'),
-    ];
-    expect(getMaxStreakDays(sessions)).toBe(3);
-  });
-
-  it('같은 날 여러 세션은 1일로 계산', () => {
-    const sessions = [makeSession('2024-03-15T09:00:00'), makeSession('2024-03-15T14:00:00')];
-    expect(getMaxStreakDays(sessions)).toBe(1);
-  });
-});
-
-describe('getBusiestDayOfWeek', () => {
-  // 월 필터링은 호출부(filterSessionsByTab) 책임 — 여기선 받은 배열을 그대로 집계만 한다
-  it('세션 없으면 null', () => {
-    expect(getBusiestDayOfWeek([])).toBeNull();
-  });
-
-  it('가장 집중 시간이 많은 요일 반환', () => {
-    const sessions = [
-      makeSession('2024-03-11T10:00:00', 3600), // 월요일
-      makeSession('2024-03-11T14:00:00', 1800), // 월요일
-      makeSession('2024-03-12T10:00:00', 1200), // 화요일
-    ];
-    expect(getBusiestDayOfWeek(sessions)).toBe('월요일');
-  });
-});
-
-describe('getFirstSessionDate', () => {
-  it('가장 오래된 세션 날짜 반환', () => {
-    const sessions = [
-      makeSession('2024-03-15T10:00:00'),
-      makeSession('2024-01-05T10:00:00'),
-      makeSession('2024-03-01T10:00:00'),
-    ];
-    const result = getFirstSessionDate(sessions);
-    expect(result?.toISOString().startsWith('2024-01-05')).toBe(true);
-  });
-
-  it('세션 없으면 null', () => {
-    expect(getFirstSessionDate([])).toBeNull();
   });
 });
 
