@@ -8,6 +8,7 @@ import { BadgeGallery } from '@/components/dashboard/BadgeGallery';
 import { CategoryChart } from '@/components/dashboard/CategoryChart';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
 import { DashboardTabs } from '@/components/dashboard/DashboardTabs';
+import { ErrorFallback } from '@/components/shared/ErrorFallback';
 import { FocusChart } from '@/components/dashboard/FocusChart';
 import { HourlyChart } from '@/components/dashboard/HourlyChart';
 import { MonthlyActivityCard } from '@/components/dashboard/MonthlyActivityCard';
@@ -47,9 +48,13 @@ export function DashboardView() {
 
   const tasks = useTaskStore((s) => s.tasks);
   const categories = useTaskStore((s) => s.categories);
-  const { summary, periodSessions } = useDashboardData();
+  const { summary, periodSessions, isError, refetch } = useDashboardData();
 
   const showSkeleton = useDelayedFlag(!hydrated || !summary || !periodSessions);
+
+  if (hydrated && isError && (!summary || !periodSessions)) {
+    return <ErrorFallback onRetry={refetch} />;
+  }
 
   if (!hydrated || !summary || !periodSessions) {
     return showSkeleton ? <DashboardSkeleton /> : null;

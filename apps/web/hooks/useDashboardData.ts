@@ -28,5 +28,13 @@ export function useDashboardData() {
     },
   });
 
-  return { summary: summary.data, periodSessions: periodSessions.data };
+  return {
+    summary: summary.data,
+    periodSessions: periodSessions.data,
+    isError: summary.isError || periodSessions.isError,
+    refetch: () => {
+      void summary.refetch();
+      void periodSessions.refetch();
+    },
+  };
 }
