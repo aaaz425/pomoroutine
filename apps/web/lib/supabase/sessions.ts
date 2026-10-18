@@ -54,19 +54,6 @@ interface SessionListResult {
   invalidCount: number;
 }
 
-// 프로덕션도 Supabase 대시보드에서 Max Rows를 config.toml과 동일하게 올려야 함
-export async function fetchAllSessionsLazy(): Promise<SessionListResult | null> {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from('sessions')
-    .select(SELECT_COLUMNS)
-    .order('started_at', { ascending: false });
-  if (error || !data) return null;
-  const sessions = data.map(toSession).filter((s): s is Session => s !== null);
-  return { sessions, invalidCount: data.length - sessions.length };
-}
-
-// 캘린더 월 조회, 대시보드 today/week/month 탭 차트용 — 날짜 구간으로 자연스럽게 좁혀지므로 별도 상한 불필요.
 export async function fetchSessionsInRange(
   startIso: string,
   endIso: string,

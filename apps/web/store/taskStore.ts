@@ -20,8 +20,7 @@ import {
   deleteCategory as deleteCategoryRow,
   reorderCategories as reorderCategoriesRows,
 } from '@/lib/supabase/categories';
-import { fetchAllSessionsLazy, insertSession as insertSessionRow } from '@/lib/supabase/sessions';
-import { type Task, type Category, type Session, DEFAULT_CATEGORIES } from '@/types';
+import { type Task, type Category, DEFAULT_CATEGORIES } from '@/types';
 import { TOAST_MESSAGES } from '@/lib/constants/messages';
 
 type PendingIds = Map<string, Promise<string | null>>;
@@ -38,14 +37,10 @@ function resolvePendingId(pending: PendingIds, id: string): Promise<string | nul
 interface TaskStore {
   tasks: Task[];
   categories: Category[];
-  sessions: Session[];
-  sessionsHydrated: boolean; // core(tasks/categories) hydrate와 별개로 sessions 전체 조회 완료 여부
 
   addTask: (input: { title: string; categoryId: string }) => Promise<string | null>;
   updateTask: (id: string, patch: Partial<Pick<Task, 'title' | 'categoryId'>>) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
-  /** 성공 여부를 반환 — 실패 시 호출부가 폼을 유지하고 재시도할 수 있도록 함 */
-  addSession: (input: Omit<Session, 'id'>) => Promise<boolean>;
   reorderTasks: (activeId: string, overId: string) => Promise<void>;
   addCategory: (input: { name: string; color: string }) => Promise<void>;
   updateCategory: (id: string, input: { name: string; color: string }) => Promise<void>;
@@ -55,11 +50,7 @@ interface TaskStore {
   refresh: () => Promise<void>;
 }
 
-interface TaskStoreOptions {
-  onSessionsChanged?: () => void;
-}
-
-export const createTaskStore = ({ onSessionsChanged }: TaskStoreOptions = {}) => {
+export const createTaskStore = () => {
   const pendingTaskIds: PendingIds = new Map();
   const pendingCategoryIds: PendingIds = new Map();
   const tracker = createMutationTracker();
@@ -68,8 +59,6 @@ export const createTaskStore = ({ onSessionsChanged }: TaskStoreOptions = {}) =>
     // SSR hydration mismatch 방지 — 실제 데이터는 hydrate()로 반영
     tasks: [],
     categories: DEFAULT_CATEGORIES,
-    sessions: [],
-    sessionsHydrated: false,
 
     addTask: tracker.track(async ({ title, categoryId }) => {
       const trimmed = title.trim();
@@ -135,29 +124,6 @@ export const createTaskStore = ({ onSessionsChanged }: TaskStoreOptions = {}) =>
         });
         toast(TOAST_MESSAGES.taskDeleteFailed);
       }
-    }),
-
-    addSession: tracker.track(async (input) => {
-      const tempId = generateId();
-      set((state) => ({ sessions: [{ id: tempId, ...input }, ...state.sessions] }));
-
-      const idPromise = (async () => {
-        const inserted = await insertSessionRow(input);
-        if (!inserted) {
-          set((state) => ({ sessions: state.sessions.filter((s) => s.id !== tempId) }));
-          return null;
-        }
-        set((state) => ({ sessions: state.sessions.map((s) => (s.id === tempId ? inserted : s)) }));
-        return inserted.id;
-      })();
-
-      const insertedId = await idPromise;
-      if (!insertedId) {
-        toast(TOAST_MESSAGES.sessionSaveFailed);
-        return false;
-      }
-      onSessionsChanged?.();
-      return true;
     }),
 
     reorderTasks: tracker.track(async (activeId, overId) => {
@@ -269,24 +235,15 @@ export const createTaskStore = ({ onSessionsChanged }: TaskStoreOptions = {}) =>
       if (invalidCount > 0) {
         toast(TOAST_MESSAGES.sessionsInvalid(invalidCount));
       }
-
-      // core와 별도로 진행 — 타이머/작업목록 등의 진입을 막지 않는다
-      void fetchAllSessionsLazy().then((sessionsResult) => {
-        set({ sessions: sessionsResult?.sessions ?? [], sessionsHydrated: true });
-        if (sessionsResult?.invalidCount) {
-          toast(TOAST_MESSAGES.sessionsInvalid(sessionsResult.invalidCount));
-        }
-      });
     },
 
     refresh: () =>
       tracker.refreshWhenIdle(
-        () => Promise.all([fetchTasks(), fetchCategories(), fetchAllSessionsLazy()]),
-        ([tasksResult, categoriesResult, sessionsResult]) => {
+        () => Promise.all([fetchTasks(), fetchCategories()]),
+        ([tasksResult, categoriesResult]) => {
           set((state) => ({
             tasks: tasksResult?.tasks ?? state.tasks,
             categories: categoriesResult?.categories ?? state.categories,
-            sessions: sessionsResult?.sessions ?? state.sessions,
           }));
         },
       ),

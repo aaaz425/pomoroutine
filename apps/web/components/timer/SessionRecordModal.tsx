@@ -4,8 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog';
 import { Check } from 'lucide-react';
-import { toast } from '@/lib/toast';
-import { useTimerStore, useTaskStore, useHydrated } from '@/store/StoreProvider';
+import { useTimerStore, useHydrated } from '@/store/StoreProvider';
+import { useSessionMutations } from '@/hooks/useSessionMutations';
 import { useCurrentTask } from '@/hooks/useCurrentTask';
 import { useLoggedIn } from '@/hooks/useLoggedIn';
 import { CategoryBadge } from '@/components/shared/CategoryBadge';
@@ -19,7 +19,6 @@ import { DistractionTagPicker } from '@/components/shared/DistractionTagPicker';
 import { normalizeFocusPeriods } from '@/lib/focusPeriods';
 import { formatDuration } from '@/lib/sessionUtils';
 import type { FocusRating } from '@/types';
-import { TOAST_MESSAGES } from '@/lib/constants/messages';
 import { SheetGrabber } from '@/components/shared/SheetGrabber';
 import { useSheetDrag } from '@/hooks/useSheetDrag';
 
@@ -43,7 +42,7 @@ export function SessionRecordModal({ loggedInPromise }: Props) {
   const rawFocusPeriods = useTimerStore((s) => s.rawFocusPeriods);
 
   const { task, category } = useCurrentTask();
-  const addSession = useTaskStore((s) => s.addSession);
+  const { addSession, isAdding } = useSessionMutations();
 
   const [note, setNote] = useState('');
   const [focusRating, setFocusRating] = useState<FocusRating | null>(null);
@@ -54,7 +53,6 @@ export function SessionRecordModal({ loggedInPromise }: Props) {
     onDismiss: () => setPendingAction('skip'),
     snapBackOnDismiss: true,
   });
-  const [isSaving, setIsSaving] = useState(false);
 
   if (!hydrated || !sessionEnded || sessionEndedAt === null || loggedIn === null) return null;
 
@@ -126,9 +124,8 @@ export function SessionRecordModal({ loggedInPromise }: Props) {
     : accFocusSeconds;
   const pausedSeconds = Math.max(0, totalElapsed - accFocusSeconds);
 
-  async function handleSave() {
-    if (isSaving) return;
-    setIsSaving(true);
+  function handleSave() {
+    if (isAdding) return;
     const taskId = isTaskSession ? currentTaskId : selectedTaskId;
     const focusPeriods = normalizeFocusPeriods(
       rawFocusPeriods.map((p) => ({
@@ -136,31 +133,33 @@ export function SessionRecordModal({ loggedInPromise }: Props) {
         end: new Date(p.end).toISOString(),
       })),
     );
-    const success = await addSession({
-      taskId,
-      title: null,
-      mode,
-      startedAt: new Date(sessionStartedAt ?? now).toISOString(),
-      endedAt: new Date(now).toISOString(),
-      completedCycles: mode === 'free' ? 0 : cycleCount,
-      totalCycles: mode === 'free' ? 0 : totalCycles,
-      focusSeconds: accFocusSeconds,
-      pausedSeconds,
-      focusPeriods,
-      note: note.trim() || null,
-      focusRating,
-      distractionTags,
-    });
-    setPendingAction(null);
-    setIsSaving(false);
-    // 실패 시 폼을 그대로 유지해 재시도할 수 있게 함(토스트는 addSession 내부에서 이미 표시됨)
-    if (!success) return;
-    toast(TOAST_MESSAGES.sessionSaved);
-    dismissSessionRecord();
-    setNote('');
-    setFocusRating(null);
-    setDistractionTags([]);
-    setSelectedTaskId(null);
+    addSession(
+      {
+        taskId,
+        title: null,
+        mode,
+        startedAt: new Date(sessionStartedAt ?? now).toISOString(),
+        endedAt: new Date(now).toISOString(),
+        completedCycles: mode === 'free' ? 0 : cycleCount,
+        totalCycles: mode === 'free' ? 0 : totalCycles,
+        focusSeconds: accFocusSeconds,
+        pausedSeconds,
+        focusPeriods,
+        note: note.trim() || null,
+        focusRating,
+        distractionTags,
+      },
+      {
+        onSuccess: () => {
+          dismissSessionRecord();
+          setNote('');
+          setFocusRating(null);
+          setDistractionTags([]);
+          setSelectedTaskId(null);
+        },
+        onSettled: () => setPendingAction(null),
+      },
+    );
   }
 
   return (
@@ -296,7 +295,7 @@ export function SessionRecordModal({ loggedInPromise }: Props) {
         confirmLabel="저장"
         onConfirm={handleSave}
         onCancel={() => setPendingAction(null)}
-        loading={isSaving}
+        loading={isAdding}
       />
     </>
   );
