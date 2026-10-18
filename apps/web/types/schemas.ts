@@ -43,6 +43,14 @@ export const SessionSchema = z.object({
   distractionTags: z.array(z.string().max(INPUT_LIMITS.DISTRACTION_TAG_MAX_LENGTH)).default([]),
 });
 
+export const DashboardSessionSchema = SessionSchema.pick({
+  id: true,
+  taskId: true,
+  startedAt: true,
+  focusSeconds: true,
+  focusPeriods: true,
+});
+
 const PeriodStatSchema = z.object({
   focusSeconds: z.number(),
   count: z.number(),
@@ -51,6 +59,23 @@ const PeriodStatSchema = z.object({
 const DayActivitySchema = z.object({
   date: z.string(),
   focusMinutes: z.number(),
+});
+
+const AllTimeStatsSchema = z.object({
+  focusSeconds: z.number(),
+  count: z.number(),
+  yearlyCategoryMinutes: z.array(
+    z.object({ year: z.string(), categoryId: z.string().nullable(), minutes: z.number() }),
+  ),
+  hourlySeconds: z.array(z.number()).length(24),
+});
+
+const BadgeStatsSchema = z.object({
+  categoryCount: z.number(),
+  nightOwl: z.boolean(),
+  weekendWarrior: z.boolean(),
+  perfectSession: z.boolean(),
+  marathon: z.boolean(),
 });
 
 export const DashboardSummarySchema = z.object({
@@ -63,6 +88,8 @@ export const DashboardSummarySchema = z.object({
   prevDay: PeriodStatSchema,
   prevWeek: PeriodStatSchema,
   prevMonth: PeriodStatSchema,
+  allTime: AllTimeStatsSchema,
+  badgeStats: BadgeStatsSchema,
 });
 
 export const TimerSettingsSchema = z.object({

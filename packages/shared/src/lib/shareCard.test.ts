@@ -1,17 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { FocusPeriod } from '../types/timer';
 import { buildHeadline, buildShareCardData } from './shareCard';
-
-interface TestSession {
-  startedAt: string;
-  focusSeconds: number;
-  focusPeriods: FocusPeriod[];
-}
-
-function makeSession(startedAt: string, focusSeconds = 1500): TestSession {
-  return { startedAt, focusSeconds, focusPeriods: [] };
-}
 
 const TODAY = new Date('2024-03-15T12:00:00');
 
@@ -41,7 +30,7 @@ describe('buildHeadline', () => {
 
 describe('buildShareCardData', () => {
   it('세션이 없으면 0/기본값 반환', () => {
-    const data = buildShareCardData([], [], 'today', TODAY);
+    const data = buildShareCardData({ focusSeconds: 0, count: 0 }, 0, 'today', TODAY);
     expect(data.totalFocusLabel).toBe('0분');
     expect(data.sessionCount).toBe(0);
     expect(data.streakDays).toBe(0);
@@ -49,25 +38,30 @@ describe('buildShareCardData', () => {
   });
 
   it('탭별 periodLabel 매핑', () => {
-    expect(buildShareCardData([], [], 'today', TODAY).periodLabel).toBe('오늘');
-    expect(buildShareCardData([], [], 'week', TODAY).periodLabel).toBe('이번 주');
-    expect(buildShareCardData([], [], 'month', TODAY).periodLabel).toBe('이번 달');
-    expect(buildShareCardData([], [], 'all', TODAY).periodLabel).toBe('전체');
+    expect(buildShareCardData({ focusSeconds: 0, count: 0 }, 0, 'today', TODAY).periodLabel).toBe(
+      '오늘',
+    );
+    expect(buildShareCardData({ focusSeconds: 0, count: 0 }, 0, 'week', TODAY).periodLabel).toBe(
+      '이번 주',
+    );
+    expect(buildShareCardData({ focusSeconds: 0, count: 0 }, 0, 'month', TODAY).periodLabel).toBe(
+      '이번 달',
+    );
+    expect(buildShareCardData({ focusSeconds: 0, count: 0 }, 0, 'all', TODAY).periodLabel).toBe(
+      '전체',
+    );
   });
 
-  it('streakDays는 filteredSessions가 아닌 allSessions 기준', () => {
-    const allSessions = [
-      makeSession('2024-03-13T09:00:00'),
-      makeSession('2024-03-14T09:00:00'),
-      makeSession('2024-03-15T09:00:00'),
-    ];
-    const data = buildShareCardData([], allSessions, 'today', TODAY);
+  it('기간 합계와 스트릭을 그대로 반영', () => {
+    const data = buildShareCardData({ focusSeconds: 5400, count: 3 }, 3, 'week', TODAY);
     expect(data.streakDays).toBe(3);
-    expect(data.sessionCount).toBe(0); // filteredSessions는 빈 배열
+    expect(data.sessionCount).toBe(3);
+    expect(data.totalFocusLabel).toBe('1시간 30분');
+    expect(data.headline).toBe('꾸준함이 쌓이고 있어요 ✨');
   });
 
   it('generatedAtLabel은 yyyy.MM.dd 형식', () => {
-    const data = buildShareCardData([], [], 'today', TODAY);
+    const data = buildShareCardData({ focusSeconds: 0, count: 0 }, 0, 'today', TODAY);
     expect(data.generatedAtLabel).toBe('2024.03.15');
   });
 });

@@ -1,5 +1,10 @@
 import { createClient } from '@/lib/supabase/client';
-import { SessionSchema, type Session } from '@/types';
+import {
+  DashboardSessionSchema,
+  SessionSchema,
+  type DashboardSession,
+  type Session,
+} from '@/types';
 
 interface SessionRow {
   id: string;
@@ -73,6 +78,40 @@ export async function fetchSessionsInRange(
   if (error || !data) return null;
   const sessions = data.map(toSession).filter((s): s is Session => s !== null);
   return { sessions, invalidCount: data.length - sessions.length };
+}
+
+interface DashboardSessionRow {
+  id: string;
+  task_id: string | null;
+  started_at: string;
+  focus_seconds: number;
+  focus_periods: { start: string; end: string }[];
+}
+
+export function toDashboardSession(row: DashboardSessionRow): DashboardSession | null {
+  const parsed = DashboardSessionSchema.safeParse({
+    id: row.id,
+    taskId: row.task_id,
+    startedAt: row.started_at,
+    focusSeconds: row.focus_seconds,
+    focusPeriods: row.focus_periods,
+  });
+  return parsed.success ? parsed.data : null;
+}
+
+export async function fetchDashboardSessions(
+  startIso: string,
+  endIso: string,
+): Promise<DashboardSession[] | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('id, task_id, started_at, focus_seconds, focus_periods')
+    .gte('started_at', startIso)
+    .lt('started_at', endIso)
+    .order('started_at', { ascending: true });
+  if (error || !data) return null;
+  return data.map(toDashboardSession).filter((s): s is DashboardSession => s !== null);
 }
 
 export interface SessionsPageParams {

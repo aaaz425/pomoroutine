@@ -79,10 +79,11 @@ export type {
   BadgeIconKey,
   BadgeCategory,
   BadgeDefinition,
+  BadgeProgress,
   SpecialEventId,
 } from './lib/badges';
 export { buildHeadline, buildShareCardData } from './lib/shareCard';
-export type { ShareCardData } from './lib/shareCard';
+export type { ShareCardData, ShareCardTotals } from './lib/shareCard';
 export { COLOR_THEME_KEYS, COLOR_THEMES, DEFAULT_COLOR_THEME } from './constants/colorThemes';
 export type {
   ColorThemeKey,

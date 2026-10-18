@@ -1,23 +1,15 @@
 import { format } from 'date-fns';
 import type { TabType } from './dashboard';
-import { getSessionCount, getStreakDays, getTotalFocusSeconds } from './dashboard';
 import { formatDuration } from './sessionFormat';
-import type { FocusPeriod } from '../types/timer';
 
 export interface ShareCardData {
   periodLabel: string;
   headline: string;
   totalFocusLabel: string; // formatDuration() 결과, 0이면 '0분'
   sessionCount: number;
-  streakDays: number; // allSessions 기준 — 탭 필터와 무관
+  streakDays: number;
   generatedAtLabel: string; // 'yyyy.MM.dd'
 }
-
-type ShareCardSessionLike = {
-  startedAt: string;
-  focusSeconds: number;
-  focusPeriods: FocusPeriod[];
-};
 
 const PERIOD_LABELS: Record<TabType, string> = {
   today: '오늘',
@@ -34,20 +26,24 @@ export function buildHeadline(streakDays: number, totalFocusSeconds: number): st
   return '집중을 시작했어요';
 }
 
-export function buildShareCardData<T extends ShareCardSessionLike>(
-  filteredSessions: T[],
-  allSessions: T[],
+export interface ShareCardTotals {
+  focusSeconds: number;
+  count: number;
+}
+
+export function buildShareCardData(
+  totals: ShareCardTotals,
+  streakDays: number,
   tab: TabType,
   today: Date = new Date(),
 ): ShareCardData {
-  const totalFocusSeconds = getTotalFocusSeconds(filteredSessions);
-  const streakDays = getStreakDays(allSessions, today);
+  const totalFocusSeconds = totals.focusSeconds;
 
   return {
     periodLabel: PERIOD_LABELS[tab],
     headline: buildHeadline(streakDays, totalFocusSeconds),
     totalFocusLabel: totalFocusSeconds === 0 ? '0분' : formatDuration(totalFocusSeconds),
-    sessionCount: getSessionCount(filteredSessions),
+    sessionCount: totals.count,
     streakDays,
     generatedAtLabel: format(today, 'yyyy.MM.dd'),
   };

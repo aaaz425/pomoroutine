@@ -1,7 +1,3 @@
-import { parseISO } from 'date-fns';
-import type { FocusPeriod, TimerMode } from '../types/timer';
-import { getMaxStreakDays, getTotalFocusSeconds } from './dashboard';
-
 export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'platinum' | 'special';
 
 export type BadgeIconKey =
@@ -205,77 +201,31 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
   },
 ];
 
-type BadgeSessionLike = {
-  taskId: string | null;
-  mode: TimerMode;
-  startedAt: string;
-  focusSeconds: number;
-  focusPeriods: FocusPeriod[];
-  totalCycles: number;
-  completedCycles: number;
-};
-
-type BadgeTaskLike = {
-  id: string;
-  categoryId: string;
-};
-
-function countUniqueCategories<S extends BadgeSessionLike, T extends BadgeTaskLike>(
-  sessions: S[],
-  tasks: T[],
-): number {
-  const taskMap = new Map(tasks.map((t) => [t.id, t]));
-  const categoryIds = new Set<string>();
-  for (const session of sessions) {
-    if (!session.taskId) continue;
-    const task = taskMap.get(session.taskId);
-    if (task) categoryIds.add(task.categoryId);
-  }
-  return categoryIds.size;
+export interface BadgeProgress {
+  maxStreakDays: number;
+  totalFocusSeconds: number;
+  categoryCount: number;
+  specialEvents: Record<SpecialEventId, boolean>;
 }
 
-const SPECIAL_EVENT_CHECKS: Record<SpecialEventId, (sessions: BadgeSessionLike[]) => boolean> = {
-  'first-session': (sessions) => sessions.length > 0,
-  'night-owl': (sessions) =>
-    sessions.some((s) => {
-      const hour = parseISO(s.startedAt).getHours();
-      return hour >= 0 && hour < 5;
-    }),
-  'weekend-warrior': (sessions) =>
-    sessions.some((s) => {
-      const day = parseISO(s.startedAt).getDay();
-      return day === 0 || day === 6;
-    }),
-  'perfect-session': (sessions) =>
-    sessions.some(
-      (s) => s.mode === 'pomodoro' && s.totalCycles > 0 && s.completedCycles >= s.totalCycles,
-    ),
-  marathon: (sessions) => sessions.some((s) => s.focusSeconds >= 2 * 60 * 60),
-};
-
-export function getEarnedBadgeIds<S extends BadgeSessionLike, T extends BadgeTaskLike>(
-  sessions: S[],
-  tasks: T[],
-): Set<string> {
-  const maxStreakDays = getMaxStreakDays(sessions);
-  const totalHours = getTotalFocusSeconds(sessions) / 3600;
-  const categoryCount = countUniqueCategories(sessions, tasks);
+export function getEarnedBadgeIds(progress: BadgeProgress): Set<string> {
+  const totalHours = progress.totalFocusSeconds / 3600;
 
   const earned = new Set<string>();
   for (const badge of BADGE_DEFINITIONS) {
     let isEarned = false;
     switch (badge.category) {
       case 'streak':
-        isEarned = maxStreakDays >= badge.days;
+        isEarned = progress.maxStreakDays >= badge.days;
         break;
       case 'total-time':
         isEarned = totalHours >= badge.hours;
         break;
       case 'diversity':
-        isEarned = categoryCount >= badge.categoryCount;
+        isEarned = progress.categoryCount >= badge.categoryCount;
         break;
       case 'special':
-        isEarned = SPECIAL_EVENT_CHECKS[badge.eventId](sessions);
+        isEarned = progress.specialEvents[badge.eventId];
         break;
     }
     if (isEarned) earned.add(badge.id);

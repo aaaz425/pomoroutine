@@ -53,9 +53,13 @@
 
 ## 통계 데이터
 
-- 스트릭, 월간 히트맵, 직전 기간 비교, 가장 바쁜 요일은 RPC `get_dashboard_summary(p_timezone)`가 계산 — `lib/supabase/dashboard.ts`의 `fetchDashboardSummary()`로 호출하고 Zod 검증
-- 기간 탭 차트와 저널 목록은 클라이언트가 가진 sessions로 계산
-- 뱃지는 아직 전체 sessions를 받아 클라이언트에서 계산
+- 전체 기록을 훑어야 하는 값은 RPC `get_dashboard_summary(p_timezone)`가 계산 — 스트릭, 월간 히트맵, 직전 기간 비교, 가장 바쁜 요일, 전체 탭 통계와 차트, 뱃지 판정값
+- `lib/supabase/dashboard.ts`의 `fetchDashboardSummary()`로 호출하고 Zod 검증
+- 오늘, 이번 주, 이번 달 탭은 `fetchDashboardSessions()`로 이번 주와 이번 달을 덮는 구간만 받아 클라이언트에서 계산
+- 기록에서 파생된 서버 데이터는 TanStack Query로 조회, 쿼리 키는 `lib/query/keys.ts`의 `sessionKeys`
+- 기록 추가, 수정, 삭제가 성공하면 `['sessions']` 접두사 쿼리를 무효화, 화면 복귀 시에는 활성 쿼리가 다시 조회
+- 전체 탭의 시간대별 집중은 sessions `hourly_focus_seconds` 컬럼을 합산 — 기록 저장 시 트리거가 UTC 기준 24칸으로 계산하고, RPC가 사용자 시간대 오프셋만큼 회전
+- 오프셋을 현재 시점 하나로 회전하므로 30분 단위 시간대와 서머타임 지역의 과거 기록은 근사값
 
 ## 기기 로컬 저장
 
