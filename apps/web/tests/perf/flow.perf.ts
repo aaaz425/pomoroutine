@@ -38,7 +38,7 @@ async function setVisibility(page: Page, state: 'hidden' | 'visible') {
   await page.evaluate((s) => {
     Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => s });
     Object.defineProperty(document, 'hidden', { configurable: true, get: () => s === 'hidden' });
-    document.dispatchEvent(new Event('visibilitychange'));
+    document.dispatchEvent(new Event('visibilitychange', { bubbles: true }));
   }, state);
 }
 
