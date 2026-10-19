@@ -5,6 +5,7 @@ import { deriveTimerDisplay, getPhaseEndMessage } from '@pomoroutine/shared';
 import { useTimerStore, useSettingsStore, useHydrated } from '@/store/StoreProvider';
 import { playAlarm, sendNotification } from '@/lib/notifications';
 import { useWakeLock } from '@/hooks/useWakeLock';
+import { ALARM_MAX_OVERDUE_SECONDS } from '@/lib/constants/ux';
 
 // 싱글턴 tick 소유자 — layout에 한 번만 마운트. 개별 컴포넌트는 useTimer()로 읽기만 한다.
 export function TimerEngine() {
@@ -56,19 +57,12 @@ export function TimerEngine() {
       setRunningDisplaySeconds(result.displaySeconds);
 
       if (result.justCompleted) {
-        if (!notifiedRef.current) {
+        if (!notifiedRef.current && result.overdueSeconds <= ALARM_MAX_OVERDUE_SECONDS) {
           notifiedRef.current = true;
+          const message = getPhaseEndMessage({ phase, cycleCount, totalCycles, shortBreakMinutes });
           if (soundAlert)
             playAlarm({ type: soundType, volume: soundVolume, repeatCount: soundRepeatCount });
-          if (browserNotification) {
-            const { title, body } = getPhaseEndMessage({
-              phase,
-              cycleCount,
-              totalCycles,
-              shortBreakMinutes,
-            });
-            sendNotification(title, body);
-          }
+          if (browserNotification) sendNotification(message.title, message.body);
         }
         complete();
       }

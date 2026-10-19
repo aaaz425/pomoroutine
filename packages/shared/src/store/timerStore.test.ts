@@ -144,6 +144,69 @@ describe('timerStore', () => {
     expect(store.getState().sessionEnded).toBe(true);
   });
 
+  describe('늦게 감지한 완료 따라잡기', () => {
+    const T0 = new Date('2024-01-01T00:00:00.000Z').getTime();
+    const settings = { focusMinutes: 25, shortBreakMinutes: 5, totalCycles: 2 };
+
+    function runningStore() {
+      vi.setSystemTime(T0);
+      const store = createTimerStore();
+      store.getState().updateSettings(settings);
+      store.getState().start();
+      return store;
+    }
+
+    it('complete() — 다음 페이즈는 확인한 시각이 아니라 이전 페이즈의 예정 종료 시각부터 시작', () => {
+      const store = runningStore();
+      vi.setSystemTime(T0 + 27 * 60 * 1000);
+
+      store.getState().complete();
+
+      expect(store.getState().phase).toBe('short-break');
+      expect(store.getState().startedAt).toBe(T0 + 25 * 60 * 1000);
+    });
+
+    it('complete() — 휴식 종료도 예정 종료 시각부터 다음 집중을 시작', () => {
+      const store = runningStore();
+      vi.setSystemTime(T0 + 25 * 60 * 1000);
+      store.getState().complete();
+      vi.setSystemTime(T0 + 40 * 60 * 1000);
+
+      store.getState().complete();
+
+      expect(store.getState().phase).toBe('focus');
+      expect(store.getState().startedAt).toBe(T0 + 30 * 60 * 1000);
+    });
+
+    it('complete() 연속 호출 — 모든 사이클이 지났으면 예정대로 진행한 값으로 세션 종료', () => {
+      const store = runningStore();
+      vi.setSystemTime(T0 + 4 * 60 * 60 * 1000);
+
+      store.getState().complete();
+      store.getState().complete();
+      store.getState().complete();
+
+      const state = store.getState();
+      expect(state.sessionEnded).toBe(true);
+      expect(state.cycleCount).toBe(2);
+      expect(state.accFocusSeconds).toBe(50 * 60);
+      expect(state.sessionEndedAt).toBe(T0 + 55 * 60 * 1000);
+      expect(state.rawFocusPeriods).toEqual([
+        { start: T0, end: T0 + 25 * 60 * 1000 },
+        { start: T0 + 30 * 60 * 1000, end: T0 + 55 * 60 * 1000 },
+      ]);
+    });
+
+    it('completeCycle() — 예정 종료 전에 호출하면 호출한 시각부터 다음 페이즈 시작', () => {
+      const store = runningStore();
+      vi.setSystemTime(T0 + 10 * 60 * 1000);
+
+      store.getState().completeCycle();
+
+      expect(store.getState().startedAt).toBe(T0 + 10 * 60 * 1000);
+    });
+  });
+
   it('updateSettings() — settings 반영 및 현재 phase remainingSeconds 재계산', () => {
     const store = createTimerStore();
     store.getState().updateSettings({ focusMinutes: 30 });
@@ -672,6 +735,27 @@ describe('timerStore', () => {
       store.getState().dismissAbandonedPrompt();
 
       expect(store.getState().showAbandonedPrompt).toBe(false);
+    });
+    it('실행 중인 포모도로 타이머는 오래됐어도 방치로 보지 않음', () => {
+      const startedAt = new Date('2024-01-01T00:00:00.000Z').getTime();
+      const snapshot = savedSnapshot({ startedAt, lastActiveAt: startedAt });
+      vi.setSystemTime(new Date('2024-01-01T03:00:00.000Z'));
+
+      const store = createTimerStore({ loadSnapshot: () => snapshot });
+      store.getState().hydrate();
+
+      expect(store.getState().showAbandonedPrompt).toBe(false);
+    });
+
+    it('실행 중인 자유 모드는 집중 시간을 넘기면 방치로 봄', () => {
+      const startedAt = new Date('2024-01-01T00:00:00.000Z').getTime();
+      const snapshot = savedSnapshot({ mode: 'free', startedAt, lastActiveAt: startedAt });
+      vi.setSystemTime(new Date('2024-01-01T03:00:00.000Z'));
+
+      const store = createTimerStore({ loadSnapshot: () => snapshot });
+      store.getState().hydrate();
+
+      expect(store.getState().showAbandonedPrompt).toBe(true);
     });
   });
 

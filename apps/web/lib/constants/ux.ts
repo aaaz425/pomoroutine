@@ -5,6 +5,8 @@ export const SKELETON_SHOW_DELAY_MS = 200;
 
 export const SOUND_SEQUENCE_INTERVAL = 1.9;
 
+export const ALARM_MAX_OVERDUE_SECONDS = 90;
+
 export const DRAG_ACTIVATION_DISTANCE_PX = 5;
 
 import type { SoundType } from '@/types/models';

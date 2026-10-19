@@ -65,6 +65,10 @@ function phaseSeconds(settings: TimerSettings): Record<TimerPhase, number> {
   };
 }
 
+function phaseEndAt(startedAt: number, remainingSeconds: number, now: number): number {
+  return Math.min(now, startedAt + remainingSeconds * 1000);
+}
+
 function creditableElapsed(elapsed: number): number {
   return elapsed < FOCUS_PERIOD_LIMITS.MIN_FOCUS_SECONDS ? 0 : elapsed;
 }
@@ -173,7 +177,7 @@ export function createTimerStore(ports: TimerStorePorts = {}) {
       },
 
       complete: () => {
-        const { startedAt, phase, settings, mode } = get();
+        const { startedAt, phase, settings, mode, remainingSeconds } = get();
         if (!startedAt || mode === 'free') return; // free 모드는 자동 완료 없음 — 사용자가 endSession()으로 직접 종료
         if (phase === 'focus') {
           get().completeCycle();
@@ -183,7 +187,7 @@ export function createTimerStore(ports: TimerStorePorts = {}) {
           set({
             phase: 'focus',
             remainingSeconds: seconds.focus,
-            startedAt: now,
+            startedAt: phaseEndAt(startedAt, remainingSeconds, now),
             lastActiveAt: now,
           });
         }
@@ -211,6 +215,7 @@ export function createTimerStore(ports: TimerStorePorts = {}) {
           rawFocusPeriods,
         } = get();
         const now = Date.now();
+        const endedAt = startedAt ? phaseEndAt(startedAt, remainingSeconds, now) : now;
         const rawElapsed = startedAt ? Math.floor((now - startedAt) / 1000) : 0;
         // 탭 방치 등으로 실제 경과가 목표 시간을 넘어도, 목표 시간만큼만 집중 시간으로 인정
         const elapsed = creditableElapsed(Math.min(rawElapsed, remainingSeconds));
@@ -227,7 +232,7 @@ export function createTimerStore(ports: TimerStorePorts = {}) {
             sessionEnded: true,
             isFocusMode: false,
             accFocusSeconds: totalFocus,
-            sessionEndedAt: now,
+            sessionEndedAt: endedAt,
             rawFocusPeriods: closedPeriods,
             lastActiveAt: now,
           });
@@ -238,7 +243,7 @@ export function createTimerStore(ports: TimerStorePorts = {}) {
             cycleCount: next,
             phase: nextPhase,
             remainingSeconds: seconds[nextPhase],
-            startedAt: now,
+            startedAt: endedAt,
             accFocusSeconds: totalFocus,
             rawFocusPeriods: closedPeriods,
             lastActiveAt: now,
@@ -307,8 +312,17 @@ export function createTimerStore(ports: TimerStorePorts = {}) {
       dismissAbandonedPrompt: () => set({ showAbandonedPrompt: false, lastActiveAt: Date.now() }),
 
       checkAbandoned: () => {
-        const { sessionStarted, sessionEnded, lastActiveAt, sessionStartedAt, settings } = get();
+        const {
+          sessionStarted,
+          sessionEnded,
+          lastActiveAt,
+          sessionStartedAt,
+          settings,
+          startedAt,
+          mode,
+        } = get();
         if (!sessionStarted || sessionEnded) return;
+        if (startedAt !== null && mode === 'pomodoro') return;
         const thresholdMs = phaseSeconds(settings).focus * 1000;
         if (isSessionStale({ lastActiveAt, sessionStartedAt, thresholdMs })) {
           set({ showAbandonedPrompt: true });

@@ -42,6 +42,8 @@ export type { DeriveTimerDisplayInput, TimerDisplayState } from './lib/deriveTim
 export { deriveElapsedMinutes } from './lib/deriveElapsedMinutes';
 export { getPhaseEndMessage } from './lib/phaseEndMessage';
 export type { PhaseEndMessageInput } from './lib/phaseEndMessage';
+export { getPhaseEndSchedule } from './lib/phaseEndSchedule';
+export type { PhaseEndScheduleInput, PhaseEndAlert } from './lib/phaseEndSchedule';
 export type { DeriveElapsedMinutesInput } from './lib/deriveElapsedMinutes';
 export {
   formatCount,

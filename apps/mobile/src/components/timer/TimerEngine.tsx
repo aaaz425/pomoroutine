@@ -1,12 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
-import { deriveTimerDisplay, getPhaseEndMessage } from '@pomoroutine/shared';
+import { deriveTimerDisplay, getPhaseEndSchedule } from '@pomoroutine/shared';
 import { useTimerStore, useSettingsStore, useHydrated } from '@/store/StoreProvider';
-import {
-  scheduleTimerCompleteNotification,
-  cancelScheduledNotification,
-} from '@/lib/notifications';
+import { syncTimerNotifications } from '@/lib/notifications';
 import { playAlarm } from '@/lib/sound';
+import { ALARM_MAX_OVERDUE_SECONDS } from '@/constants/ux';
 import { useKeepAwake } from '@/hooks/useKeepAwake';
 
 // 싱글턴 tick 소유자 — (app)/_layout.tsx에 한 번만 마운트. 개별 컴포넌트는 useTimer()로 읽기만 한다.
@@ -17,9 +15,8 @@ export function TimerEngine() {
   const phase = useTimerStore((s) => s.phase);
   const mode = useTimerStore((s) => s.mode);
   const cycleCount = useTimerStore((s) => s.cycleCount);
-  const totalCycles = useTimerStore((s) => s.settings.totalCycles);
-  const focusMinutes = useTimerStore((s) => s.settings.focusMinutes);
-  const shortBreakMinutes = useTimerStore((s) => s.settings.shortBreakMinutes);
+  const settings = useTimerStore((s) => s.settings);
+  const focusMinutes = settings.focusMinutes;
   const accFocusSeconds = useTimerStore((s) => s.accFocusSeconds);
   const complete = useTimerStore((s) => s.complete);
   const setRunningDisplaySeconds = useTimerStore((s) => s.setRunningDisplaySeconds);
@@ -35,31 +32,23 @@ export function TimerEngine() {
   const notifiedRef = useRef(false);
 
   useEffect(() => {
+    if (!hydrated) return;
+    const alerts =
+      startedAt !== null && mode === 'pomodoro'
+        ? getPhaseEndSchedule({ phase, cycleCount, startedAt, remainingSeconds, settings })
+        : [];
+    void syncTimerNotifications(alerts, soundAlert);
+  }, [hydrated, startedAt, mode, phase, cycleCount, remainingSeconds, settings, soundAlert]);
+
+  useEffect(() => () => void syncTimerNotifications([], false), []);
+
+  useEffect(() => {
     if (!hydrated || !startedAt) {
       setRunningDisplaySeconds(null);
       return;
     }
 
     notifiedRef.current = false;
-    let scheduledId: string | null = null;
-
-    // 백그라운드에서도 phase 종료를 알 수 있게 미리 예약 — free 모드는 자동 완료가 없어 예약하지 않음
-    if (mode === 'pomodoro') {
-      const { title, body } = getPhaseEndMessage({
-        phase,
-        cycleCount,
-        totalCycles,
-        shortBreakMinutes,
-      });
-      scheduleTimerCompleteNotification({
-        title,
-        body,
-        secondsFromNow: remainingSeconds,
-        sound: soundAlert,
-      }).then((id) => {
-        scheduledId = id;
-      });
-    }
 
     const tick = () => {
       const result = deriveTimerDisplay({
@@ -77,13 +66,18 @@ export function TimerEngine() {
 
       if (result.justCompleted && !notifiedRef.current) {
         notifiedRef.current = true;
+        const isFresh =
+          AppState.currentState !== 'background' &&
+          result.overdueSeconds <= ALARM_MAX_OVERDUE_SECONDS;
         complete();
-        if (soundAlert) {
-          void playAlarm({
-            type: soundType,
-            volume: soundVolume,
-            repeatCount: soundRepeatCount,
-          });
+        if (isFresh) {
+          if (soundAlert) {
+            void playAlarm({
+              type: soundType,
+              volume: soundVolume,
+              repeatCount: soundRepeatCount,
+            });
+          }
         }
       }
     };
@@ -101,7 +95,6 @@ export function TimerEngine() {
       clearTimeout(firstTick);
       clearInterval(id);
       subscription.remove();
-      cancelScheduledNotification(scheduledId);
     };
   }, [
     hydrated,
@@ -113,8 +106,6 @@ export function TimerEngine() {
     accFocusSeconds,
     cycleCount,
     focusMinutes,
-    totalCycles,
-    shortBreakMinutes,
     soundAlert,
     soundType,
     soundVolume,
