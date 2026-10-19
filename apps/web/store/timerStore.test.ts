@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { toast } from '@/lib/toast';
+import { TOAST_MESSAGES } from '@/lib/constants/messages';
 import { createTimerStore } from '@/store/timerStore';
 import { STORAGE_KEYS } from '@/types';
 
@@ -67,6 +68,6 @@ describe('timerStore (web ports)', () => {
     vi.setSystemTime(new Date('2024-01-01T00:00:03.000Z'));
     store.getState().endSession();
 
-    expect(toast).toHaveBeenCalledOnce();
+    expect(toast).toHaveBeenCalledExactlyOnceWith(TOAST_MESSAGES.sessionTooShort);
   });
 });

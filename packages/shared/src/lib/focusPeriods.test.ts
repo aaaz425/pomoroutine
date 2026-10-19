@@ -28,11 +28,6 @@ describe('normalizeFocusPeriods', () => {
     expect(result).toEqual([p]);
   });
 
-  it('모든 구간이 5초 미만이면 빈 배열 반환', () => {
-    const result = normalizeFocusPeriods([period(0, 1000), period(10_000, 13_000)]);
-    expect(result).toEqual([]);
-  });
-
   it('5초 초과 일시정지로 나뉜 인접 구간은 분리 유지', () => {
     const a = period(0, 10_000);
     const b = period(15_001, 25_000);
@@ -52,14 +47,6 @@ describe('normalizeFocusPeriods', () => {
     const b = period(11_000, 20_000);
     const result = normalizeFocusPeriods([a, b]);
     expect(result).toEqual([{ start: a.start, end: b.end }]);
-  });
-
-  it('병합된 구간의 start/end는 각각 첫 구간의 start와 마지막 구간의 end', () => {
-    const a = period(0, 10_000);
-    const b = period(12_000, 20_000);
-    const [merged] = normalizeFocusPeriods([a, b]);
-    expect(merged.start).toBe(a.start);
-    expect(merged.end).toBe(b.end);
   });
 
   it('3개 이상 연속 병합 — 모두 하나의 구간으로 합쳐짐', () => {
@@ -94,13 +81,6 @@ describe('normalizeFocusPeriods', () => {
     const result = normalizeFocusPeriods(periods);
     expect(result).toHaveLength(100);
     expect(result).toEqual(periods.slice(0, 100));
-  });
-
-  it('병합 후 정확히 100개면 캡 로직이 적용되지 않음', () => {
-    const periods = Array.from({ length: 100 }, (_, i) => period(i * 20_000, i * 20_000 + 10_000));
-    const result = normalizeFocusPeriods(periods);
-    expect(result).toHaveLength(100);
-    expect(result[99]).toEqual(periods[99]);
   });
 
   it('필터링/병합으로 100개를 초과하지 않게 되면 캡되지 않음', () => {

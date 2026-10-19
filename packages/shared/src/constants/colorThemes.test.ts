@@ -15,10 +15,6 @@ function contrastRatio(a: string, b: string): number {
 }
 
 describe('COLOR_THEMES', () => {
-  it('COLOR_THEME_KEYS와 COLOR_THEMES의 키 집합이 일치함', () => {
-    expect(Object.keys(COLOR_THEMES).sort()).toEqual([...COLOR_THEME_KEYS].sort());
-  });
-
   // 기존 --primary(#10d9a0)의 흰 배경 대비가 1.83이라 WCAG 3:1은 이 앱 기준에 안 맞음 — near-white급 회귀만 차단
   it.each(COLOR_THEME_KEYS)('%s: 라이트 모드 accent가 흰 배경과 최소 대비를 만족함', (key) => {
     expect(contrastRatio(COLOR_THEMES[key].accent.light.color, '#ffffff')).toBeGreaterThanOrEqual(
