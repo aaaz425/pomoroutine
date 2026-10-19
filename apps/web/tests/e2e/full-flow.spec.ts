@@ -38,6 +38,7 @@ test('작업 생성 → 타이머 완료 → 메모 작성 → journal/dashboard
   const saveConfirm = page.getByRole('alertdialog');
   await expect(saveConfirm).toBeVisible();
   await saveConfirm.getByRole('button', { name: '저장' }).click();
+  await expect(page.getByText('기록을 저장했어요')).toBeVisible();
   await expect(recordModal).not.toBeVisible();
 
   await page.goto('/journal');
