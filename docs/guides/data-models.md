@@ -51,6 +51,13 @@
 - DB 제약을 Zod보다 엄격하게 만들지 않음
 - 카테고리 최대 개수처럼 여러 행에 걸친 제한은 트리거로 강제
 
+## 서버 데이터 조회
+
+- 작업, 카테고리, 설정은 shared `createTaskQueries`, `createSettingsQuery`로 조회하고 키는 shared `QUERY_KEYS`
+- 변경은 shared `getTaskActions`, `getSettingsActions` — 화면에 먼저 반영하고 실패하면 되돌림, 진행 중인 변경이 모두 끝나면 다시 조회
+- 작업과 카테고리 추가는 저장이 끝난 뒤 캐시에 넣음, 임시 id를 쓰지 않음
+- 마운트할 때는 다시 조회하지 않고 화면 복귀 때만 조회 — 웹은 visibilitychange, 앱은 AppState `focusManager`
+
 ## 통계 데이터
 
 - 전체 기록을 훑어야 하는 값은 RPC `get_dashboard_summary(p_timezone)`가 계산 — 스트릭, 월간 히트맵, 직전 기간 비교, 가장 바쁜 요일, 전체 탭 통계와 차트, 뱃지 판정값
