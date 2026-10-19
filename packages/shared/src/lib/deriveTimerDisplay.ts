@@ -16,6 +16,7 @@ export interface TimerDisplayState {
   displaySeconds: number;
   isRunning: boolean;
   justCompleted: boolean; // pomodoro 모드에서 remaining이 0에 도달한 tick 1회에서만 true
+  overdueSeconds: number;
   elapsedMinutes: number;
 }
 
@@ -35,6 +36,7 @@ export function deriveTimerDisplay(input: DeriveTimerDisplayInput): TimerDisplay
 
   let displaySeconds: number;
   let justCompleted = false;
+  let overdueSeconds = 0;
 
   if (mode === 'free') {
     displaySeconds = isRunning ? accFocusSeconds + elapsed : accFocusSeconds;
@@ -42,6 +44,7 @@ export function deriveTimerDisplay(input: DeriveTimerDisplayInput): TimerDisplay
     const runningRemaining = Math.max(0, remainingSeconds - elapsed);
     displaySeconds = isRunning ? runningRemaining : remainingSeconds;
     justCompleted = isRunning && runningRemaining === 0;
+    overdueSeconds = isRunning ? Math.max(0, elapsed - remainingSeconds) : 0;
   }
 
   const elapsedMinutes = deriveElapsedMinutes({
@@ -52,5 +55,5 @@ export function deriveTimerDisplay(input: DeriveTimerDisplayInput): TimerDisplay
     phase,
   });
 
-  return { displaySeconds, isRunning, justCompleted, elapsedMinutes };
+  return { displaySeconds, isRunning, justCompleted, overdueSeconds, elapsedMinutes };
 }

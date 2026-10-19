@@ -148,4 +148,18 @@ describe('deriveTimerDisplay', () => {
 
     expect(result.elapsedMinutes).toBe(3);
   });
+  it('pomodoro 실행 중 예정 종료를 지난 만큼 overdueSeconds로 반환', () => {
+    const result = deriveTimerDisplay({
+      phase: 'focus',
+      mode: 'pomodoro',
+      remainingSeconds: 60,
+      startedAt: NOW - 100_000,
+      accFocusSeconds: 0,
+      cycleCount: 0,
+      focusMinutes: 25,
+      now: NOW,
+    });
+
+    expect(result.overdueSeconds).toBe(40);
+  });
 });

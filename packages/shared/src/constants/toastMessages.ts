@@ -14,6 +14,7 @@ export const TOAST_MESSAGES = {
   sessionUpdated: success('기록을 수정했어요'),
   sessionDeleted: success('기록을 삭제했어요'),
   sessionTooShort: info('30초 미만은 기록되지 않아요'),
+  phaseEnded: ({ title, body }: { title: string; body: string }) => info(`${title} ${body}`),
   sessionSaveFailed: error('기록 저장에 실패했어요'),
   sessionDeleteFailed: error('기록 삭제에 실패했어요'),
   dataRefreshFailed: error('최신 데이터를 불러오지 못했어요'),

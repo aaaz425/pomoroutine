@@ -1,3 +1,5 @@
+import { format, isSameDay, subDays } from 'date-fns';
+import { ko } from 'date-fns/locale';
 import type { TimerMode, FocusPeriod } from '../types/timer';
 import { TIMER_LIMITS } from '../constants/limits';
 import { clampPeriodDuration } from './focusPeriods';
@@ -113,6 +115,13 @@ export function formatTimeRange(startedAt: string, endedAt: string): string {
       hour12: false,
     });
   return `${fmt(startedAt)} — ${fmt(endedAt)}`;
+}
+
+export function formatStartedAtLabel(startedAt: number, now = Date.now()): string {
+  const time = format(startedAt, 'a h:mm', { locale: ko });
+  if (isSameDay(startedAt, now)) return time;
+  if (isSameDay(startedAt, subDays(now, 1))) return `어제 ${time}`;
+  return `${format(startedAt, 'M월 d일', { locale: ko })} ${time}`;
 }
 
 export function formatFullDate(isoString: string): string {
