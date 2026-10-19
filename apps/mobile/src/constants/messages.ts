@@ -9,5 +9,3 @@ export const MOTIVATIONAL_MESSAGES: string[] = [
   '한 번에 하나씩, 천천히 확실하게',
   '지금 집중한 시간은 사라지지 않아요',
 ];
-
-export const MESSAGE_ROTATE_INTERVAL_MS = 5000;

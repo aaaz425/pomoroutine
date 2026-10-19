@@ -308,6 +308,9 @@ importers:
         specifier: ^4.4.0
         version: 4.4.0
     devDependencies:
+      '@supabase/supabase-js':
+        specifier: ^2.111.0
+        version: 2.111.0
       '@tanstack/react-query':
         specifier: ^5.104.3
         version: 5.104.3(react@19.2.8)
@@ -317,6 +320,9 @@ importers:
       vitest:
         specifier: ^4.1.9
         version: 4.1.10(@types/node@25.9.5)(jsdom@29.1.1)(vite@8.2.0(@types/node@25.9.5)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
       zustand:
         specifier: ^5.0.14
         version: 5.0.14(@types/react@19.2.18)(immer@11.1.15)(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))

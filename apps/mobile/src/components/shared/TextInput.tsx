@@ -1,5 +1,5 @@
 import { TextInput as RNTextInput, StyleSheet, type TextInputProps } from 'react-native';
-import { withAlpha } from '@/constants/timerColors';
+import { withAlpha } from '@pomoroutine/shared';
 import { FONTS, MAX_FONT_SIZE_MULTIPLIER } from '@/constants/fonts';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
 

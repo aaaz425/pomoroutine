@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Link } from 'expo-router';
 import { Mail } from 'lucide-react-native';
-import { AUTH_LIMITS } from '@pomoroutine/shared';
+import { AUTH_LIMITS, withAlpha } from '@pomoroutine/shared';
 import { Text } from '@/components/shared/Text';
 import { useAuth } from '@/store/AuthProvider';
 import { AuthShell } from '@/components/auth/AuthShell';
@@ -11,7 +11,6 @@ import { AuthConsentNotice } from '@/components/auth/AuthConsentNotice';
 import { KakaoButton } from '@/components/auth/KakaoButton';
 import { TextInput } from '@/components/shared/TextInput';
 import { PasswordField } from '@/components/auth/PasswordField';
-import { withAlpha } from '@/constants/timerColors';
 import { FONTS } from '@/constants/fonts';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
 

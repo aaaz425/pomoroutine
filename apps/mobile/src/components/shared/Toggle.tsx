@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
-import { withAlpha } from '@/constants/timerColors';
+import { withAlpha } from '@pomoroutine/shared';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
 
 interface Props {

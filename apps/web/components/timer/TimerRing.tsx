@@ -10,7 +10,7 @@ import {
 } from '@/lib/constants/timerColors';
 import { Badge } from '@/components/shared/Badge';
 import { TimerGlow } from '@/components/timer/TimerGlow';
-import { formatClock } from '@/lib/utils';
+import { formatClock } from '@pomoroutine/shared';
 
 const BASE = 240;
 const SW = 18;

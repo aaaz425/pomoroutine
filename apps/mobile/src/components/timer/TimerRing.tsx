@@ -11,9 +11,9 @@ import { Text } from '@/components/shared/Text';
 import { useTimerStore } from '@/store/StoreProvider';
 import { useTimer } from '@/hooks/useTimer';
 import { useThemeScheme, useColorTheme } from '@/hooks/use-theme-scheme';
-import { phaseHex, PHASE_LABELS, phaseBadge, THEME, withAlpha } from '@/constants/timerColors';
+import { phaseHex, PHASE_LABELS, phaseBadge, THEME } from '@/constants/timerColors';
+import { withAlpha, formatClock } from '@pomoroutine/shared';
 import { FONTS } from '@/constants/fonts';
-import { formatClock } from '@/lib/format';
 import { TimerGlow } from './TimerGlow';
 
 const BASE = 240;

@@ -5,7 +5,7 @@ export type {
   FocusPeriod,
   RawFocusPeriod,
 } from './types/timer';
-export type { FocusRating } from './types/session';
+export type { FocusRating, Session } from './types/session';
 export type { ShareCardAction, WebviewBridgeMessage } from './types/webviewBridge';
 export { TIMER_LIMITS, AUTH_LIMITS, INPUT_LIMITS, SOUND_LIMITS } from './constants/limits';
 export { DEFAULT_CATEGORIES, DEFAULT_APP_SETTINGS } from './constants/defaults';
@@ -20,13 +20,28 @@ export { createTaskQueries, getTaskActions } from './lib/taskData';
 export type { TaskDataApi } from './lib/taskData';
 export { createSettingsQuery, getSettingsActions, toMessageKeys } from './lib/settingsData';
 export type { SettingsDataApi } from './lib/settingsData';
+export { createTaskDataApi, createSettingsDataApi } from './lib/supabaseData';
+export {
+  TaskSchema,
+  ActiveTimerStateSchema,
+  LoginCredentialsSchema,
+  SignupCredentialsSchema,
+  ForgotPasswordSchema,
+  NewPasswordSchema,
+} from './schemas';
 export { FOCUS_RATING_OPTIONS, FOCUS_RATING_LABELS } from './constants/focusRating';
 export { DISTRACTION_TAGS } from './constants/distractionTags';
 export { LEGAL_DOCUMENTS } from './constants/legal';
 export { WEBVIEW_TAB_BLUR_EVENT, WEBVIEW_TAB_FOCUS_EVENT } from './constants/webviewBridge';
 export type { LegalDocType } from './constants/legal';
 export { normalizeFocusPeriods } from './lib/focusPeriods';
-export { hexToHsv, hsvToHex } from './lib/color';
+export { buildSessionRecord } from './lib/sessionRecord';
+export { hexToHsv, hsvToHex, withAlpha } from './lib/color';
+export {
+  MESSAGE_ROTATE_INTERVAL_MS,
+  CATEGORY_PRESET_COLORS,
+  SOUND_TYPE_LABELS,
+} from './constants/ui';
 export type { Hsv } from './lib/color';
 export { deriveTimerDisplay } from './lib/deriveTimerDisplay';
 export { deriveElapsedMinutes } from './lib/deriveElapsedMinutes';
@@ -47,6 +62,7 @@ export {
   formatFocusPeriodRanges,
   hasAbnormalFocusGap,
   formatSessionTimeSummary,
+  formatClock,
 } from './lib/sessionFormat';
 export type { SessionGroup } from './lib/sessionFormat';
 export {

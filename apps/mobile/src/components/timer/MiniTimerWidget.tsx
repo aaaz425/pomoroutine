@@ -5,10 +5,10 @@ import { Pause, Play } from 'lucide-react-native';
 import { Text } from '@/components/shared/Text';
 import { useTimer } from '@/hooks/useTimer';
 import { useTimerStore, useHydrated } from '@/store/StoreProvider';
-import { phaseBadge, withAlpha } from '@/constants/timerColors';
+import { phaseBadge } from '@/constants/timerColors';
+import { withAlpha, formatClock } from '@pomoroutine/shared';
 import { BOTTOM_NAV_HEIGHT } from '@/constants/navItems';
 import { FONTS } from '@/constants/fonts';
-import { formatClock } from '@/lib/format';
 import { useThemeScheme, useThemeTokens, useColorTheme } from '@/hooks/use-theme-scheme';
 
 // 타이머 탭이 아닌 다른 탭에 있을 때 하단 탭바 위에 캡슐형 위젯으로 진행 상황을 계속 보여준다

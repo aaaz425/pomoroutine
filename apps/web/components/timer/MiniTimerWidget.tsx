@@ -6,7 +6,7 @@ import { Pause, Play } from 'lucide-react';
 import { useTimer } from '@/hooks/useTimer';
 import { useTimerStore, useHydrated } from '@/store/StoreProvider';
 import { PHASE_BADGE_STYLES } from '@/lib/constants/timerColors';
-import { formatClock } from '@/lib/utils';
+import { formatClock } from '@pomoroutine/shared';
 
 export function MiniTimerWidget() {
   const hydrated = useHydrated();

@@ -9,10 +9,9 @@ import { Portal } from '@/components/shared/Portal';
 import { TextInput } from '@/components/shared/TextInput';
 import { CategoryBadge } from '@/components/shared/CategoryBadge';
 import { ColorPickerModal } from '@/components/settings/ColorPickerModal';
-import { CATEGORY_PRESET_COLORS } from '@/constants/categoryColors';
+import { CATEGORY_PRESET_COLORS, INPUT_LIMITS } from '@pomoroutine/shared';
 import { FONTS } from '@/constants/fonts';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
-import { INPUT_LIMITS } from '@pomoroutine/shared';
 import type { Category } from '@/types/tasks';
 
 const HEX_PATTERN = /^#[0-9a-f]{6}$/i;

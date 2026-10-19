@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { router } from 'expo-router';
-import { normalizeFocusPeriods, formatDuration, TOAST_MESSAGES } from '@pomoroutine/shared';
+import { buildSessionRecord, formatDuration, TOAST_MESSAGES } from '@pomoroutine/shared';
 import type { FocusRating } from '@pomoroutine/shared';
 import { Text } from '@/components/shared/Text';
 import { useTimerStore } from '@/store/StoreProvider';
@@ -32,7 +32,7 @@ function SessionCompleteSheetContent() {
   const sessionEnded = useTimerStore((s) => s.sessionEnded);
   const dismissSessionRecord = useTimerStore((s) => s.dismissSessionRecord);
   const cycleCount = useTimerStore((s) => s.cycleCount);
-  const totalCycles = useTimerStore((s) => s.settings.totalCycles);
+  const settings = useTimerStore((s) => s.settings);
   const mode = useTimerStore((s) => s.mode);
   const currentTaskId = useTimerStore((s) => s.currentTaskId);
   const sessionStartedAt = useTimerStore((s) => s.sessionStartedAt);
@@ -139,37 +139,29 @@ function SessionCompleteSheetContent() {
   }
 
   const isTaskSession = currentTaskId !== null;
-  const now = sessionEndedAt;
-  const totalElapsed = sessionStartedAt
-    ? Math.floor((now - sessionStartedAt) / 1000)
-    : accFocusSeconds;
-  const pausedSeconds = Math.max(0, totalElapsed - accFocusSeconds);
 
   async function handleSave() {
-    if (isSaving) return;
+    if (isSaving || sessionEndedAt === null) return;
     setIsSaving(true);
-    const taskId = isTaskSession ? currentTaskId : selectedTaskId;
-    const focusPeriods = normalizeFocusPeriods(
-      rawFocusPeriods.map((p) => ({
-        start: new Date(p.start).toISOString(),
-        end: new Date(p.end).toISOString(),
-      })),
+    const { error } = await insertSession(
+      buildSessionRecord(
+        {
+          mode,
+          cycleCount,
+          settings,
+          sessionStartedAt,
+          sessionEndedAt,
+          accFocusSeconds,
+          rawFocusPeriods,
+        },
+        {
+          taskId: isTaskSession ? currentTaskId : selectedTaskId,
+          note,
+          focusRating,
+          distractionTags,
+        },
+      ),
     );
-    const { error } = await insertSession({
-      taskId,
-      title: null,
-      mode,
-      startedAt: new Date(sessionStartedAt ?? now).toISOString(),
-      endedAt: new Date(now).toISOString(),
-      completedCycles: mode === 'free' ? 0 : cycleCount,
-      totalCycles: mode === 'free' ? 0 : totalCycles,
-      focusSeconds: accFocusSeconds,
-      pausedSeconds,
-      focusPeriods,
-      note: note.trim() || null,
-      focusRating,
-      distractionTags,
-    });
     setPendingAction(null);
     setIsSaving(false);
     if (error) {

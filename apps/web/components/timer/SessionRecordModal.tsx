@@ -1,6 +1,6 @@
 'use client';
 
-import { normalizeFocusPeriods, formatDuration } from '@pomoroutine/shared';
+import { buildSessionRecord, formatDuration } from '@pomoroutine/shared';
 import { useState } from 'react';
 import Link from 'next/link';
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog';
@@ -31,7 +31,7 @@ export function SessionRecordModal({ loggedInPromise }: Props) {
   const sessionEnded = useTimerStore((s) => s.sessionEnded);
   const dismissSessionRecord = useTimerStore((s) => s.dismissSessionRecord);
   const cycleCount = useTimerStore((s) => s.cycleCount);
-  const totalCycles = useTimerStore((s) => s.settings.totalCycles);
+  const settings = useTimerStore((s) => s.settings);
   const mode = useTimerStore((s) => s.mode);
   const currentTaskId = useTimerStore((s) => s.currentTaskId);
   const sessionStartedAt = useTimerStore((s) => s.sessionStartedAt);
@@ -117,37 +117,27 @@ export function SessionRecordModal({ loggedInPromise }: Props) {
   }
 
   const isTaskSession = currentTaskId !== null;
-  const now = sessionEndedAt;
-  const totalElapsed = sessionStartedAt
-    ? Math.floor((now - sessionStartedAt) / 1000)
-    : accFocusSeconds;
-  const pausedSeconds = Math.max(0, totalElapsed - accFocusSeconds);
 
   function handleSave() {
-    if (isAdding) return;
-    const taskId = isTaskSession ? currentTaskId : selectedTaskId;
-    const focusPeriods = normalizeFocusPeriods(
-      rawFocusPeriods.map((p) => ({
-        start: new Date(p.start).toISOString(),
-        end: new Date(p.end).toISOString(),
-      })),
-    );
+    if (isAdding || sessionEndedAt === null) return;
     addSession(
-      {
-        taskId,
-        title: null,
-        mode,
-        startedAt: new Date(sessionStartedAt ?? now).toISOString(),
-        endedAt: new Date(now).toISOString(),
-        completedCycles: mode === 'free' ? 0 : cycleCount,
-        totalCycles: mode === 'free' ? 0 : totalCycles,
-        focusSeconds: accFocusSeconds,
-        pausedSeconds,
-        focusPeriods,
-        note: note.trim() || null,
-        focusRating,
-        distractionTags,
-      },
+      buildSessionRecord(
+        {
+          mode,
+          cycleCount,
+          settings,
+          sessionStartedAt,
+          sessionEndedAt,
+          accFocusSeconds,
+          rawFocusPeriods,
+        },
+        {
+          taskId: isTaskSession ? currentTaskId : selectedTaskId,
+          note,
+          focusRating,
+          distractionTags,
+        },
+      ),
       {
         onSuccess: () => {
           dismissSessionRecord();
