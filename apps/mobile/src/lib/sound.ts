@@ -1,5 +1,5 @@
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
-import type { SoundType } from '@/types/settings';
+import type { SoundType } from '@pomoroutine/shared';
 import { toast } from '@/lib/toast';
 import { TOAST_MESSAGES } from '@pomoroutine/shared';
 

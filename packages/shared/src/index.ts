@@ -1,10 +1,4 @@
-export type {
-  TimerPhase,
-  TimerMode,
-  TimerSettings,
-  FocusPeriod,
-  RawFocusPeriod,
-} from './types/timer';
+export type { TimerPhase, TimerMode, TimerSettings } from './types/timer';
 export type { FocusRating, Session } from './types/session';
 export type { ShareCardAction, WebviewBridgeMessage } from './types/webviewBridge';
 export { TIMER_LIMITS, AUTH_LIMITS, INPUT_LIMITS, SOUND_LIMITS } from './constants/limits';
@@ -17,12 +11,9 @@ export type { ToastType, ToastMessage } from './constants/toastMessages';
 export type { SoundType, AppSettings } from './types/settings';
 export type { Task, Category } from './types/task';
 export { createTaskQueries, getTaskActions } from './lib/taskData';
-export type { TaskDataApi } from './lib/taskData';
 export { createSettingsQuery, getSettingsActions, toMessageKeys } from './lib/settingsData';
-export type { SettingsDataApi } from './lib/settingsData';
 export { createTaskDataApi, createSettingsDataApi } from './lib/supabaseData';
 export {
-  TaskSchema,
   ActiveTimerStateSchema,
   LoginCredentialsSchema,
   SignupCredentialsSchema,
@@ -34,7 +25,6 @@ export { DISTRACTION_TAGS } from './constants/distractionTags';
 export { LEGAL_DOCUMENTS } from './constants/legal';
 export { WEBVIEW_TAB_BLUR_EVENT, WEBVIEW_TAB_FOCUS_EVENT } from './constants/webviewBridge';
 export type { LegalDocType } from './constants/legal';
-export { normalizeFocusPeriods } from './lib/focusPeriods';
 export { buildSessionRecord } from './lib/sessionRecord';
 export { hexToHsv, hsvToHex, withAlpha } from './lib/color';
 export {

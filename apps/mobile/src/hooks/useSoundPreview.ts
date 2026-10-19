@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { SoundType } from '@/types/settings';
+import type { SoundType } from '@pomoroutine/shared';
 import { playAlarm, stopAlarm } from '@/lib/sound';
 
 export function useSoundPreview(type: SoundType, volume: number, repeatCount: number) {

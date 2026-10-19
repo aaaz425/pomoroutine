@@ -99,7 +99,6 @@ export const STORAGE_KEYS = {
 } as const;
 
 export {
-  TaskSchema,
   ActiveTimerStateSchema,
   LoginCredentialsSchema,
   SignupCredentialsSchema,

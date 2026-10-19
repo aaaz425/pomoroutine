@@ -48,7 +48,7 @@ export function moveItem<T>(list: T[], from: number, to: number): T[] | null {
 export function createTaskQueries(api: TaskDataApi) {
   function warnInvalid(client: QueryClient, queryKey: ListKey, invalidCount: number) {
     if (invalidCount > 0 && client.getQueryData(queryKey) === undefined) {
-      api.toast(TOAST_MESSAGES.sessionsInvalid(invalidCount));
+      api.toast(TOAST_MESSAGES.itemsInvalid(invalidCount));
     }
   }
 

@@ -62,7 +62,7 @@ describe('createTaskQueries', () => {
     await client.fetchQuery({ ...query, staleTime: 0 });
 
     expect(api.toast).toHaveBeenCalledTimes(1);
-    expect(api.toast).toHaveBeenCalledWith(TOAST_MESSAGES.sessionsInvalid(2));
+    expect(api.toast).toHaveBeenCalledWith(TOAST_MESSAGES.itemsInvalid(2));
   });
 });
 

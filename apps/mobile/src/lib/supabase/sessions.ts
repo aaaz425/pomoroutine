@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase/client';
-import type { Session } from '@/types/sessions';
+import type { Session } from '@pomoroutine/shared';
 
 export async function insertSession(input: Omit<Session, 'id'>): Promise<{ error: boolean }> {
   const { error } = await supabase.from('sessions').insert({
