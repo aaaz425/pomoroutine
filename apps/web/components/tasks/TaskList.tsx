@@ -5,7 +5,7 @@ import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Plus } from 'lucide-react';
-import { useTaskStore } from '@/store/StoreProvider';
+import { useTasks, useTaskActions } from '@/hooks/useTasks';
 import { useDelayedHydration } from '@/hooks/useDelayedHydration';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
@@ -31,9 +31,8 @@ export function TaskList({
   emptyStateClassName = 'py-4',
 }: Props) {
   const { hydrated, showSkeleton } = useDelayedHydration();
-  const tasks = useTaskStore((s) => s.tasks);
-  const reorderTasks = useTaskStore((s) => s.reorderTasks);
-  const deleteTask = useTaskStore((s) => s.deleteTask);
+  const tasks = useTasks();
+  const { reorderTasks, deleteTask } = useTaskActions();
 
   const [editTarget, setEditTarget] = useState<Task | 'new' | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
@@ -43,7 +42,10 @@ export function TaskList({
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (over && active.id !== over.id) {
-      reorderTasks(String(active.id), String(over.id));
+      reorderTasks(
+        tasks.findIndex((t) => t.id === active.id),
+        tasks.findIndex((t) => t.id === over.id),
+      );
     }
   }
 

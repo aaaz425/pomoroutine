@@ -16,9 +16,11 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
+    "@tanstack/react-query": "^5.104.3",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@tanstack/react-query": "^5.104.3",
     "typescript": "^6.0.3",
     "vitest": "^4.1.9",
     "zustand": "^5.0.14"

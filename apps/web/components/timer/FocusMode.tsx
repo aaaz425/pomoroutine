@@ -3,7 +3,8 @@
 import { useEffect } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { X, Square, Play, Pause } from 'lucide-react';
-import { useTimerStore, useSettingsStore } from '@/store/StoreProvider';
+import { useSettings } from '@/hooks/useSettings';
+import { useTimerStore } from '@/store/StoreProvider';
 import { useCurrentTask } from '@/hooks/useCurrentTask';
 import { useRotatingMessage } from '@/hooks/useRotatingMessage';
 import { useSessionEndFlow } from '@/hooks/useSessionEndFlow';
@@ -24,7 +25,7 @@ export function FocusMode() {
   const exitFocusMode = useTimerStore((s) => s.exitFocusMode);
   const { task, category } = useCurrentTask();
 
-  const messages = useSettingsStore((s) => s.motivationalMessages);
+  const messages = useSettings((s) => s.motivationalMessages);
   const message = useRotatingMessage(messages, MESSAGE_ROTATE_INTERVAL_MS, isFocusMode);
   const { showEndConfirm, requestEnd, confirmEnd, cancelEnd } = useSessionEndFlow({
     pauseOnRequest: false,

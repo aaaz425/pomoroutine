@@ -1,8 +1,8 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Bell, Eye, Pause, Play, Volume2 } from 'lucide-react-native';
 import { SOUND_LIMITS, type SoundType } from '@pomoroutine/shared';
+import { useSettings, useSettingsActions } from '@/hooks/useSettings';
 import { Text } from '@/components/shared/Text';
-import { useSettingsStore } from '@/store/StoreProvider';
 import { SoundTypeSelect } from '@/components/settings/SoundTypeSelect';
 import { StepperInput } from '@/components/shared/StepperInput';
 import { Toggle } from '@/components/shared/Toggle';
@@ -14,18 +14,20 @@ import { useThemeTokens } from '@/hooks/use-theme-scheme';
 export function NotificationSection() {
   const theme = useThemeTokens();
 
-  const browserNotification = useSettingsStore((s) => s.browserNotification);
-  const keepScreenAwake = useSettingsStore((s) => s.keepScreenAwake);
-  const soundAlert = useSettingsStore((s) => s.soundAlert);
-  const soundType = useSettingsStore((s) => s.soundType);
-  const soundVolume = useSettingsStore((s) => s.soundVolume);
-  const soundRepeatCount = useSettingsStore((s) => s.soundRepeatCount);
-  const setBrowserNotification = useSettingsStore((s) => s.setBrowserNotification);
-  const setKeepScreenAwake = useSettingsStore((s) => s.setKeepScreenAwake);
-  const setSoundAlert = useSettingsStore((s) => s.setSoundAlert);
-  const setSoundType = useSettingsStore((s) => s.setSoundType);
-  const setSoundVolume = useSettingsStore((s) => s.setSoundVolume);
-  const setSoundRepeatCount = useSettingsStore((s) => s.setSoundRepeatCount);
+  const browserNotification = useSettings((s) => s.browserNotification);
+  const keepScreenAwake = useSettings((s) => s.keepScreenAwake);
+  const soundAlert = useSettings((s) => s.soundAlert);
+  const soundType = useSettings((s) => s.soundType);
+  const soundVolume = useSettings((s) => s.soundVolume);
+  const soundRepeatCount = useSettings((s) => s.soundRepeatCount);
+  const {
+    setBrowserNotification,
+    setKeepScreenAwake,
+    setSoundAlert,
+    setSoundType,
+    setSoundVolume,
+    setSoundRepeatCount,
+  } = useSettingsActions();
 
   const {
     isPlaying,

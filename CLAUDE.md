@@ -9,7 +9,7 @@
 
 - 웹: Next.js 16 App Router, Tailwind CSS, shadcn/ui, Recharts, framer-motion, Vercel Analytics, Speed Insights
 - 앱: React Native, Expo Router, react-native-reanimated, react-native-webview
-- 공통: Zustand, Zod, date-fns
+- 공통: Zustand, TanStack Query, Zod, date-fns
 - 백엔드: Supabase Postgres, Auth, RLS, Edge Functions
 
 ## 모노레포 구조
@@ -45,6 +45,7 @@ pnpm --filter mobile start   # Expo 개발 서버 (apps/mobile)
 
 ### Zustand
 
+- Zustand에는 타이머 같은 클라이언트 상태만 둠 → Supabase에서 오는 서버 데이터는 TanStack Query로 조회
 - `create()` 전역 싱글톤 **금지** → `createStore()` 팩토리 + `StoreProvider` 패턴 사용 (SSR 버그 방지)
 - 컴포넌트에서 스토어 전체 구독 **금지** → slice 선택자 필수
 

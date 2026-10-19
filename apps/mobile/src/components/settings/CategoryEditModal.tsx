@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Pencil } from 'lucide-react-native';
+import { useTaskActions } from '@/hooks/useTasks';
 import { Text } from '@/components/shared/Text';
-import { useTaskStore } from '@/store/StoreProvider';
 import { Modal } from '@/components/shared/Modal';
 import { Portal } from '@/components/shared/Portal';
 import { TextInput } from '@/components/shared/TextInput';
@@ -25,8 +25,7 @@ interface Props {
 
 function CategoryEditModalContent({ category, onClose }: Props) {
   const theme = useThemeTokens();
-  const addCategory = useTaskStore((s) => s.addCategory);
-  const updateCategory = useTaskStore((s) => s.updateCategory);
+  const { addCategory, updateCategory } = useTaskActions();
 
   const [initial] = useState(() => ({
     name: category?.name ?? '',

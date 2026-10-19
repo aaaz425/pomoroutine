@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Check, Pencil, Trash2 } from 'lucide-react-native';
+import { useCategories } from '@/hooks/useTasks';
 import { Text } from '@/components/shared/Text';
-import { useTaskStore } from '@/store/StoreProvider';
 import { CategoryBadge } from '@/components/shared/CategoryBadge';
 import { withAlpha } from '@/constants/timerColors';
 import { FONTS } from '@/constants/fonts';
@@ -31,7 +31,7 @@ export function TaskItem({
   isDragging = false,
 }: Props) {
   const theme = useThemeTokens();
-  const categories = useTaskStore((s) => s.categories);
+  const categories = useCategories();
   const category = categories.find((c) => c.id === task.categoryId);
 
   return (

@@ -5,7 +5,8 @@ import { Plus, Trash2, Pencil, Check, X } from 'lucide-react';
 import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
-import { useSettingsStore } from '@/store/StoreProvider';
+import { toMessageKeys } from '@pomoroutine/shared';
+import { useSettings, useSettingsActions } from '@/hooks/useSettings';
 import { TextInput } from '@/components/shared/TextInput';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 
@@ -128,12 +129,9 @@ function MessageRow({
 }
 
 export function MotivationalSection() {
-  const messages = useSettingsStore((s) => s.motivationalMessages);
-  const messageIds = useSettingsStore((s) => s.messageIds);
-  const addMessage = useSettingsStore((s) => s.addMessage);
-  const updateMessage = useSettingsStore((s) => s.updateMessage);
-  const deleteMessage = useSettingsStore((s) => s.deleteMessage);
-  const reorderMessages = useSettingsStore((s) => s.reorderMessages);
+  const messages = useSettings((s) => s.motivationalMessages);
+  const messageIds = toMessageKeys(messages);
+  const { addMessage, updateMessage, deleteMessage, reorderMessages } = useSettingsActions();
 
   const [input, setInput] = useState('');
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -151,7 +149,7 @@ export function MotivationalSection() {
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (over && active.id !== over.id) {
-      reorderMessages(String(active.id), String(over.id));
+      reorderMessages(messageIds.indexOf(String(active.id)), messageIds.indexOf(String(over.id)));
     }
   }
 

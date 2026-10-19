@@ -14,8 +14,8 @@ version: 1.0
 
 **대상**
 - 브라우저 없이 돌아가는 순수 로직만 테스트, UI 컴포넌트는 제외
-- `packages/shared` — 타이머 스토어, focusPeriods 정규화, 뱃지, 공유 카드, 방치 감지
-- `apps/web/store` — 포트 주입한 저장과 복원, 낙관적 업데이트와 롤백
+- `packages/shared` — 타이머 스토어, 작업과 설정의 낙관적 반영과 롤백, focusPeriods 정규화, 뱃지, 공유 카드, 방치 감지
+- `apps/web/store` — 타이머 포트 주입한 저장과 복원
 - `apps/web/lib` — localStorage 파싱 실패 처리, DB row 변환과 Zod 검증 실패 처리
 
 **규칙**

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Pencil } from 'lucide-react';
-import { useTaskStore } from '@/store/StoreProvider';
+import { useTaskActions } from '@/hooks/useTasks';
 import { Modal } from '@/components/shared/Modal';
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/shared/TextInput';
@@ -23,8 +23,7 @@ interface Props {
 }
 
 export function CategoryEditModal({ category, onClose }: Props) {
-  const addCategory = useTaskStore((s) => s.addCategory);
-  const updateCategory = useTaskStore((s) => s.updateCategory);
+  const { addCategory, updateCategory } = useTaskActions();
 
   const [initial] = useState(() => ({
     name: category?.name ?? '',

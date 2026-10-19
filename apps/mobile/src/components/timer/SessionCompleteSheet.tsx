@@ -7,7 +7,7 @@ import { router } from 'expo-router';
 import { normalizeFocusPeriods, formatDuration, TOAST_MESSAGES } from '@pomoroutine/shared';
 import type { FocusRating } from '@pomoroutine/shared';
 import { Text } from '@/components/shared/Text';
-import { useTimerStore, useTaskStore } from '@/store/StoreProvider';
+import { useTimerStore } from '@/store/StoreProvider';
 import { useAuth } from '@/store/AuthProvider';
 import { useCurrentTask } from '@/hooks/useCurrentTask';
 import { ConfirmModal } from '@/components/shared/ConfirmModal';
@@ -18,6 +18,7 @@ import { DistractionTagPicker } from '@/components/shared/DistractionTagPicker';
 import { FONTS } from '@/constants/fonts';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
 import { toast } from '@/lib/toast';
+import { insertSession } from '@/lib/supabase/sessions';
 import { createSheetDismissGesture } from '@/lib/sheetDismissGesture';
 import { SessionCompleteHeader } from './SessionCompleteHeader';
 import { SessionTaskSummary } from './SessionTaskSummary';
@@ -40,7 +41,6 @@ function SessionCompleteSheetContent() {
   const rawFocusPeriods = useTimerStore((s) => s.rawFocusPeriods);
 
   const { task, category } = useCurrentTask();
-  const addSession = useTaskStore((s) => s.addSession);
 
   const [note, setNote] = useState('');
   const [focusRating, setFocusRating] = useState<FocusRating | null>(null);
@@ -155,7 +155,7 @@ function SessionCompleteSheetContent() {
         end: new Date(p.end).toISOString(),
       })),
     );
-    const success = await addSession({
+    const { error } = await insertSession({
       taskId,
       title: null,
       mode,
@@ -172,8 +172,10 @@ function SessionCompleteSheetContent() {
     });
     setPendingAction(null);
     setIsSaving(false);
-    // 실패 시 폼을 그대로 유지해 재시도할 수 있게 함(토스트는 addSession 내부에서 이미 표시됨)
-    if (!success) return;
+    if (error) {
+      toast(TOAST_MESSAGES.sessionSaveFailed);
+      return;
+    }
     toast(TOAST_MESSAGES.sessionSaved);
     dismissSessionRecord();
     setNote('');

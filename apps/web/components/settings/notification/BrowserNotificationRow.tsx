@@ -1,12 +1,12 @@
 'use client';
 
 import { Bell } from 'lucide-react';
-import { useSettingsStore } from '@/store/StoreProvider';
+import { useSettings, useSettingsActions } from '@/hooks/useSettings';
 import { Toggle } from '@/components/settings/notification/Toggle';
 
 export function BrowserNotificationRow() {
-  const browserNotification = useSettingsStore((s) => s.browserNotification);
-  const setBrowserNotification = useSettingsStore((s) => s.setBrowserNotification);
+  const browserNotification = useSettings((s) => s.browserNotification);
+  const { setBrowserNotification } = useSettingsActions();
 
   async function handleChange(enabled: boolean) {
     if (enabled && typeof window !== 'undefined' && 'Notification' in window) {

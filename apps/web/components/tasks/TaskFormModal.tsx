@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Tag } from 'lucide-react';
-import { useTaskStore } from '@/store/StoreProvider';
+import { useCategories, useTaskActions } from '@/hooks/useTasks';
 import { CategoryPills } from '@/components/shared/CategoryPills';
 import { CategoryModal } from '@/components/settings/category/CategoryModal';
 import { Button } from '@/components/ui/button';
@@ -18,9 +18,8 @@ interface Props {
 }
 
 export function TaskFormModal({ task, onClose, onCreated }: Props) {
-  const categories = useTaskStore((s) => s.categories);
-  const addTask = useTaskStore((s) => s.addTask);
-  const updateTask = useTaskStore((s) => s.updateTask);
+  const categories = useCategories();
+  const { addTask, updateTask } = useTaskActions();
 
   const [initial] = useState(() => ({
     title: task?.title ?? '',
