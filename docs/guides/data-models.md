@@ -6,10 +6,11 @@
 
 | 대상 | 위치 |
 |---|---|
-| 웹 인터페이스 | `apps/web/types/models.ts` |
-| 웹 Zod 스키마, 기본값, `STORAGE_KEYS` | `apps/web/types/schemas.ts` |
-| 모바일 타입과 스키마 | `apps/mobile/src/types/*.ts` |
-| 웹과 모바일 공용 타입 | `packages/shared/src/types` — `TimerPhase`, `TimerMode`, `TimerSettings`, `FocusPeriod`, `AppSettings` 등 |
+| 웹 전용 타입 | `apps/web/types/models.ts` |
+| 웹 전용 Zod 스키마, `STORAGE_KEYS` | `apps/web/types/schemas.ts` — 공용 스키마도 여기서 re-export |
+| 모바일 타입 | `apps/mobile/src/types/*.ts` — 대부분 shared re-export |
+| 웹과 모바일 공용 타입 | `packages/shared/src/types` — `Session`, `Task`, `Category`, `AppSettings`, `TimerSettings`, `FocusPeriod` 등 |
+| 웹과 모바일 공용 Zod 스키마 | `packages/shared/src/schemas.ts` — 작업, 카테고리, 설정, 활성 타이머, 인증 폼 |
 | 입력 제한 상수 | `packages/shared/src/constants/limits.ts` |
 | DB 스키마 | `supabase/migrations/` |
 
