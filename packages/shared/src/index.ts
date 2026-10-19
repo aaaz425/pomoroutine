@@ -18,13 +18,17 @@ export {
   INPUT_LIMITS,
   SOUND_LIMITS,
 } from './constants/limits';
-export { DEFAULT_TIMER_SETTINGS } from './constants/defaults';
+export { DEFAULT_TIMER_SETTINGS, DEFAULT_CATEGORIES } from './constants/defaults';
 export { MOTIVATIONAL_MESSAGES } from './constants/messages';
 export { TOAST_MESSAGES } from './constants/toastMessages';
 export { NOTICE_MESSAGES } from './constants/notices';
+export { QUERY_KEYS } from './constants/queryKeys';
 export { AUTH_ERROR_MESSAGES } from './constants/authMessages';
 export type { ToastType, ToastMessage } from './constants/toastMessages';
 export type { SoundType, AppSettings } from './types/settings';
+export type { Task, Category } from './types/task';
+export { createTaskQueries, getTaskActions } from './lib/taskData';
+export type { TaskDataApi, TaskActions } from './lib/taskData';
 export { FOCUS_RATING_OPTIONS, FOCUS_RATING_LABELS } from './constants/focusRating';
 export { DISTRACTION_TAGS } from './constants/distractionTags';
 export type { DistractionTag } from './constants/distractionTags';

@@ -3,8 +3,8 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import DraggableFlatList, { type RenderItemParams } from 'react-native-draggable-flatlist';
 import { Pencil, Plus, Trash2 } from 'lucide-react-native';
 import { INPUT_LIMITS } from '@pomoroutine/shared';
+import { useTasks, useCategories, useTaskActions } from '@/hooks/useTasks';
 import { Text } from '@/components/shared/Text';
-import { useTaskStore } from '@/store/StoreProvider';
 import { ConfirmModal } from '@/components/shared/ConfirmModal';
 import { CategoryEditModal } from '@/components/settings/CategoryEditModal';
 import { withAlpha } from '@/constants/timerColors';
@@ -60,10 +60,9 @@ function CategoryRow({
 
 export function CategorySection() {
   const theme = useThemeTokens();
-  const categories = useTaskStore((s) => s.categories);
-  const tasks = useTaskStore((s) => s.tasks);
-  const deleteCategory = useTaskStore((s) => s.deleteCategory);
-  const reorderCategories = useTaskStore((s) => s.reorderCategories);
+  const categories = useCategories();
+  const tasks = useTasks();
+  const { deleteCategory, reorderCategories } = useTaskActions();
   const isAtLimit = categories.length >= INPUT_LIMITS.CATEGORIES_MAX;
 
   const [editTarget, setEditTarget] = useState<Category | 'new' | null>(null);

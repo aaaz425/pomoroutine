@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import type { Category } from '@/types/models';
 import { TIMER_LIMITS, INPUT_LIMITS, SOUND_LIMITS, AUTH_LIMITS } from '@/lib/constants/limits';
 
 export const CategorySchema = z.object({
@@ -197,12 +196,4 @@ export const STORAGE_KEYS = {
   colorTheme: 'pomoroutine:color-theme',
 } as const;
 
-export const DEFAULT_CATEGORIES: Category[] = [
-  { id: '1', name: '공부', color: '#3b82f6' },
-  { id: '2', name: '업무', color: '#22c55e' },
-  { id: '3', name: '운동', color: '#f97316' },
-  { id: '4', name: '독서', color: '#a855f7' },
-  { id: '5', name: '기타', color: '#6b7280' },
-];
-
-export { DEFAULT_TIMER_SETTINGS } from '@pomoroutine/shared';
+export { DEFAULT_TIMER_SETTINGS, DEFAULT_CATEGORIES } from '@pomoroutine/shared';

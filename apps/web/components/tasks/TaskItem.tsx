@@ -2,7 +2,7 @@
 
 import { Pencil, Trash2 } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
-import { useTaskStore } from '@/store/StoreProvider';
+import { useCategories } from '@/hooks/useTasks';
 import { Badge } from '@/components/shared/Badge';
 import { CategoryBadge } from '@/components/shared/CategoryBadge';
 import type { Task } from '@/types';
@@ -25,7 +25,7 @@ export function TaskItem({
   onEdit,
   onDeleteRequest,
 }: Props) {
-  const categories = useTaskStore((s) => s.categories);
+  const categories = useCategories();
   const category = categories.find((c) => c.id === task.categoryId);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Tag } from 'lucide-react-native';
+import { useCategories, useTaskActions } from '@/hooks/useTasks';
 import { Text } from '@/components/shared/Text';
-import { useTaskStore } from '@/store/StoreProvider';
 import { Modal } from '@/components/shared/Modal';
 import { Portal } from '@/components/shared/Portal';
 import { TextInput } from '@/components/shared/TextInput';
@@ -22,9 +22,8 @@ interface Props {
 function TaskFormModalContent({ task, onClose, onCreated }: Props) {
   const theme = useThemeTokens();
 
-  const categories = useTaskStore((s) => s.categories);
-  const addTask = useTaskStore((s) => s.addTask);
-  const updateTask = useTaskStore((s) => s.updateTask);
+  const categories = useCategories();
+  const { addTask, updateTask } = useTaskActions();
 
   const [initial] = useState(() => ({
     title: task?.title ?? '',

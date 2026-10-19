@@ -5,7 +5,7 @@ import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
-import { useTaskStore } from '@/store/StoreProvider';
+import { useCategories, useTaskActions } from '@/hooks/useTasks';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { CategoryEditModal } from '@/components/settings/category/CategoryEditModal';
 import type { Category } from '@/types';
@@ -68,9 +68,8 @@ function CategoryRow({ category, onEdit, onDelete }: CategoryRowProps) {
 }
 
 export function CategorySection() {
-  const categories = useTaskStore((s) => s.categories);
-  const deleteCategory = useTaskStore((s) => s.deleteCategory);
-  const reorderCategories = useTaskStore((s) => s.reorderCategories);
+  const categories = useCategories();
+  const { deleteCategory, reorderCategories } = useTaskActions();
   const isAtLimit = categories.length >= INPUT_LIMITS.CATEGORIES_MAX;
 
   const [editTarget, setEditTarget] = useState<Category | 'new' | null>(null);
@@ -81,7 +80,10 @@ export function CategorySection() {
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (over && active.id !== over.id) {
-      reorderCategories(String(active.id), String(over.id));
+      reorderCategories(
+        categories.findIndex((c) => c.id === active.id),
+        categories.findIndex((c) => c.id === over.id),
+      );
     }
   }
 

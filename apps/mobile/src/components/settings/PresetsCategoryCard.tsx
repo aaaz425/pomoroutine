@@ -1,7 +1,8 @@
 import { StyleSheet, View } from 'react-native';
 import { ListChecks, MessageSquareQuote, Palette, Tags, Timer } from 'lucide-react-native';
 import { COLOR_THEMES } from '@pomoroutine/shared';
-import { useSettingsStore, useTaskStore } from '@/store/StoreProvider';
+import { useTasks, useCategories } from '@/hooks/useTasks';
+import { useSettingsStore } from '@/store/StoreProvider';
 import { SettingsMenuRow } from '@/components/shared/SettingsMenuRow';
 import { SettingsRowGroup } from '@/components/settings/SettingsRowGroup';
 import { useThemeMode, type ThemeMode } from '@/hooks/use-theme-scheme';
@@ -28,8 +29,8 @@ export function PresetsCategoryCard({
   onOpenMotivational,
 }: Props) {
   const { mode, colorTheme } = useThemeMode();
-  const taskCount = useTaskStore((s) => s.tasks.length);
-  const categoryCount = useTaskStore((s) => s.categories.length);
+  const taskCount = useTasks().length;
+  const categoryCount = useCategories().length;
   const defaultTimerSettings = useSettingsStore((s) => s.defaultTimerSettings);
   const motivationalCount = useSettingsStore((s) => s.motivationalMessages.length);
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import { useTasks, useCategories } from '@/hooks/useTasks';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { FocusRatingPicker } from '@/components/shared/FocusRatingPicker';
 import { DistractionTagPicker } from '@/components/shared/DistractionTagPicker';
@@ -9,7 +10,6 @@ import { MemoTextarea } from '@/components/shared/MemoTextarea';
 import { SessionDetailHeader } from '@/components/journal/SessionDetailHeader';
 import { SessionStatsRow } from '@/components/journal/SessionStatsRow';
 import { SessionTaskReassignModal } from '@/components/journal/SessionTaskReassignModal';
-import { useTaskStore } from '@/store/StoreProvider';
 import { useSessionMutations } from '@/hooks/useSessionMutations';
 import { getSessionOrdinalTitle } from '@/lib/sessionUtils';
 import type { Category, FocusRating, Session, Task } from '@/types';
@@ -44,8 +44,8 @@ export function JournalDetailPanel({
   onDirtyChange,
 }: Props) {
   const { updateSession, deleteSession } = useSessionMutations();
-  const tasks = useTaskStore((s) => s.tasks);
-  const categories = useTaskStore((s) => s.categories);
+  const tasks = useTasks();
+  const categories = useCategories();
 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isEditing, setIsEditing] = useState(false);

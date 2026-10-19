@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTasks, useCategories } from '@/hooks/useTasks';
 import { ListView } from '@/components/journal/ListView';
 import { CalendarView } from '@/components/journal/CalendarView';
 import { InsightsSection } from '@/components/journal/InsightsSection';
@@ -9,7 +10,7 @@ import { SessionDetailOverlay } from '@/components/journal/SessionDetailOverlay'
 import { JournalEmptyState } from '@/components/journal/JournalEmptyState';
 import { InsightsSkeleton, JournalSkeleton } from '@/components/journal/JournalSkeleton';
 import { ErrorFallback } from '@/components/shared/ErrorFallback';
-import { useHydrated, useTaskStore } from '@/store/StoreProvider';
+import { useHydrated } from '@/store/StoreProvider';
 import { useDelayedFlag } from '@/hooks/useDelayedFlag';
 import { useJournalData } from '@/hooks/useJournalData';
 import type { JournalTab, Session } from '@/types';
@@ -21,8 +22,8 @@ interface Selection {
 
 export function JournalView() {
   const hydrated = useHydrated();
-  const tasks = useTaskStore((s) => s.tasks);
-  const categories = useTaskStore((s) => s.categories);
+  const tasks = useTasks();
+  const categories = useCategories();
   const { summary, insightSessions, isError, refetch } = useJournalData();
 
   const [selection, setSelection] = useState<Selection | null>(null);

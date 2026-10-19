@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import DraggableFlatList, { type RenderItemParams } from 'react-native-draggable-flatlist';
 import { Plus } from 'lucide-react-native';
+import { useTasks, useTaskActions } from '@/hooks/useTasks';
 import { Text } from '@/components/shared/Text';
-import { useTaskStore } from '@/store/StoreProvider';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { ConfirmModal } from '@/components/shared/ConfirmModal';
 import { FONTS } from '@/constants/fonts';
@@ -28,9 +28,8 @@ export function TaskList({
   emptyStatePaddingVertical = 16,
 }: Props) {
   const theme = useThemeTokens();
-  const tasks = useTaskStore((s) => s.tasks);
-  const reorderTasks = useTaskStore((s) => s.reorderTasks);
-  const deleteTask = useTaskStore((s) => s.deleteTask);
+  const tasks = useTasks();
+  const { reorderTasks, deleteTask } = useTaskActions();
 
   const [editTarget, setEditTarget] = useState<Task | 'new' | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);

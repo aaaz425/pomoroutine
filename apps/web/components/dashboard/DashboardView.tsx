@@ -4,6 +4,7 @@ import { ChartColumn, CircleCheck, Flame, Share2, Timer } from 'lucide-react';
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 
+import { useTasks, useCategories } from '@/hooks/useTasks';
 import { BadgeGallery } from '@/components/dashboard/BadgeGallery';
 import { CategoryChart } from '@/components/dashboard/CategoryChart';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
@@ -19,7 +20,6 @@ import { getTabStats } from '@/lib/dashboard';
 import { buildShareCardData } from '@/lib/shareCard';
 import type { TabType } from '@/types';
 import { formatCount, formatDuration } from '@/lib/sessionUtils';
-import { useTaskStore } from '@/store/StoreProvider';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useDelayedFlag } from '@/hooks/useDelayedFlag';
 import { useDelayedHydration } from '@/hooks/useDelayedHydration';
@@ -46,8 +46,8 @@ export function DashboardView() {
   const [tab, setTab] = useState<TabType>('week');
   const [shareOpen, setShareOpen] = useState(false);
 
-  const tasks = useTaskStore((s) => s.tasks);
-  const categories = useTaskStore((s) => s.categories);
+  const tasks = useTasks();
+  const categories = useCategories();
   const { summary, periodSessions, isError, refetch } = useDashboardData();
 
   const showSkeleton = useDelayedFlag(!hydrated || !summary || !periodSessions);
