@@ -1,10 +1,10 @@
 'use client';
 
+import { formatDuration } from '@pomoroutine/shared';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 
 import { CATEGORY_CHART_MAX_ITEMS } from '@/lib/constants';
 import { limitCategoryFocus } from '@/lib/dashboard';
-import { formatDuration } from '@/lib/sessionUtils';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { SrOnlyDataTable } from '@/components/dashboard/SrOnlyDataTable';
 import type { CategoryFocusItem } from '@/types';

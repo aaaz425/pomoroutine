@@ -13,22 +13,12 @@ import type {
   YearlyCategoryMinutes,
 } from '@/types';
 import {
-  getMonthlyActivityData,
   filterSessionsByTab,
   getTotalFocusSeconds,
   getHourlyFocusSeconds,
   getSessionCount,
   getAvgSessionSeconds,
 } from '@pomoroutine/shared';
-
-export {
-  getMonthlyActivityData,
-  filterSessionsByTab,
-  getTotalFocusSeconds,
-  getHourlyFocusSeconds,
-  getSessionCount,
-  getAvgSessionSeconds,
-};
 
 interface CategoryMinutesRow {
   label: string;

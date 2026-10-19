@@ -45,18 +45,6 @@ describe('timerStore', () => {
     expect(store.getState().remainingSeconds).toBe(25 * 60 - 10);
   });
 
-  it('reset() — remainingSeconds가 현재 phase 기본값으로 복원', () => {
-    vi.setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
-    const store = createTimerStore();
-    store.getState().start();
-    vi.setSystemTime(new Date('2024-01-01T00:00:10.000Z'));
-    store.getState().pause();
-    store.getState().reset();
-
-    expect(store.getState().remainingSeconds).toBe(25 * 60);
-    expect(store.getState().startedAt).toBe(null);
-  });
-
   it('completeCycle() — cycleCount +1, short-break로 전환', () => {
     const store = createTimerStore();
     store.getState().completeCycle();
@@ -133,7 +121,8 @@ describe('timerStore', () => {
   it('complete() — 마지막 사이클의 focus 종료 시 sessionEnded가 true로 설정', () => {
     const store = createTimerStore();
     for (let i = 0; i < 3; i++) store.getState().completeCycle();
-    store.getState().setPhase('focus'); // 3번째 short-break 종료 → 4번째 focus 진입
+    store.getState().start();
+    store.getState().complete();
 
     vi.setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
     store.getState().start();

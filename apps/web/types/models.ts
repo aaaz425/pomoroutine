@@ -6,6 +6,8 @@ import type {
   FocusRating,
   Task,
   Category,
+  SessionGroup as SharedSessionGroup,
+  DayActivity,
 } from '@pomoroutine/shared';
 
 export type { TimerPhase, TimerMode, TimerSettings, FocusPeriod, FocusRating, Task, Category };
@@ -34,14 +36,10 @@ export type DashboardSession = Pick<
 
 export type { SoundType } from '@pomoroutine/shared';
 
-export type TabType = 'today' | 'week' | 'month' | 'all';
+export type { TabType } from '@pomoroutine/shared';
+export type { DayActivity };
 
 export type JournalTab = 'list' | 'calendar';
-
-export interface DayActivity {
-  date: string; // YYYY-MM-DD
-  focusMinutes: number;
-}
 
 export interface PeriodStat {
   focusSeconds: number;
@@ -110,12 +108,7 @@ export interface CategoryFocusItem {
   color: string;
 }
 
-export interface SessionGroup {
-  dateKey: string;
-  displayLabel: string;
-  totalFocusSeconds: number;
-  sessions: Session[];
-}
+export type SessionGroup = SharedSessionGroup<Session>;
 
 export interface DistractionFrequency {
   tagId: string;

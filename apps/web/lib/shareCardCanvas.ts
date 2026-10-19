@@ -1,7 +1,7 @@
+import { formatCount } from '@pomoroutine/shared';
 import type { ShareCardPalette } from '@pomoroutine/shared';
 import type { ShareCardData } from '@/types';
 import { SHARE_CARD_SIZE } from '@/lib/constants/shareCard';
-import { formatCount } from '@/lib/sessionUtils';
 
 const SIZE = SHARE_CARD_SIZE;
 const PADDING = 80;

@@ -1,5 +1,5 @@
+import { formatDuration } from '@pomoroutine/shared';
 import { ContributionCalendar } from '@/components/dashboard/ContributionCalendar';
-import { formatDuration } from '@/lib/sessionUtils';
 import type { DayActivity } from '@/types';
 
 interface Props {

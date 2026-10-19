@@ -12,11 +12,3 @@ export function formatClock(seconds: number): string {
   const ss = String(seconds % 60).padStart(2, '0');
   return hours > 0 ? `${hours}:${mm}:${ss}` : `${mm}:${ss}`;
 }
-
-export function generateId(): string {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  // crypto.randomUUID는 secure context(HTTPS/localhost)만 지원 — LAN IP 개발 환경(http://)용 폴백
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
-}

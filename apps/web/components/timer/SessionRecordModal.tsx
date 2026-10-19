@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeFocusPeriods, formatDuration } from '@pomoroutine/shared';
 import { useState } from 'react';
 import Link from 'next/link';
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog';
@@ -16,8 +17,6 @@ import { Button } from '@/components/ui/button';
 import { MemoTextarea } from '@/components/shared/MemoTextarea';
 import { FocusRatingPicker } from '@/components/shared/FocusRatingPicker';
 import { DistractionTagPicker } from '@/components/shared/DistractionTagPicker';
-import { normalizeFocusPeriods } from '@/lib/focusPeriods';
-import { formatDuration } from '@/lib/sessionUtils';
 import type { FocusRating } from '@/types';
 import { SheetGrabber } from '@/components/shared/SheetGrabber';
 import { useSheetDrag } from '@/hooks/useSheetDrag';

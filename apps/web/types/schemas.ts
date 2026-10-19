@@ -196,4 +196,4 @@ export const STORAGE_KEYS = {
   colorTheme: 'pomoroutine:color-theme',
 } as const;
 
-export { DEFAULT_TIMER_SETTINGS, DEFAULT_CATEGORIES } from '@pomoroutine/shared';
+export { DEFAULT_CATEGORIES } from '@pomoroutine/shared';

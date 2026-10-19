@@ -1,7 +1,7 @@
 'use client';
 
+import { formatDuration } from '@pomoroutine/shared';
 import { SessionListItem } from '@/components/journal/SessionListItem';
-import { formatDuration } from '@/lib/sessionUtils';
 import type { Category, Session, SessionGroup, Task } from '@/types';
 
 interface Props {

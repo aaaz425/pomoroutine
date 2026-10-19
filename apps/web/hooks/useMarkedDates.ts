@@ -1,9 +1,10 @@
 'use client';
 
+import { toLocalDateKey } from '@pomoroutine/shared';
 import { useQuery } from '@tanstack/react-query';
 import { sessionKeys } from '@/lib/query/keys';
 import { fetchSessionStartTimes } from '@/lib/supabase/sessions';
-import { getMonthRange, toLocalDateKey } from '@/lib/sessionUtils';
+import { getMonthRange } from '@/lib/sessionUtils';
 
 export function useMarkedDates(visibleMonth: { year: number; month: number } | null) {
   const range = visibleMonth ? getMonthRange(visibleMonth.year, visibleMonth.month - 1) : null;

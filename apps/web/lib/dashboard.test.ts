@@ -1,18 +1,20 @@
-import { describe, expect, it } from 'vitest';
-
-import type { Category, DashboardSummary, FocusPeriod, Session, Task } from '@/types';
 import {
   filterSessionsByTab,
-  getAllTimeCategoryFocus,
-  getAllTimeFocusTrend,
-  getDashboardRange,
-  getTabStats,
-  limitCategoryFocus,
   getAvgSessionSeconds,
   getHourlyFocusSeconds,
   getMonthlyActivityData,
   getSessionCount,
   getTotalFocusSeconds,
+} from '@pomoroutine/shared';
+import { describe, expect, it } from 'vitest';
+
+import type { Category, DashboardSummary, FocusPeriod, Session, Task } from '@/types';
+import {
+  getAllTimeCategoryFocus,
+  getAllTimeFocusTrend,
+  getDashboardRange,
+  getTabStats,
+  limitCategoryFocus,
 } from './dashboard';
 
 function makeSession(startedAt: string, focusSeconds = 1500): Session {

@@ -1,12 +1,6 @@
 import type { BadgeTier } from '@pomoroutine/shared';
 
-export type {
-  BadgeTier,
-  BadgeIconKey,
-  BadgeCategory,
-  BadgeDefinition,
-  SpecialEventId,
-} from '@pomoroutine/shared';
+export type { BadgeIconKey, BadgeCategory, BadgeDefinition } from '@pomoroutine/shared';
 export { BADGE_CATEGORY_LABELS, BADGE_DEFINITIONS } from '@pomoroutine/shared';
 
 // 등급별 메달 색상 — 실제 금속/보석 톤을 흉내낸 그라디언트 조합 (Tailwind 클래스라 웹 전용)

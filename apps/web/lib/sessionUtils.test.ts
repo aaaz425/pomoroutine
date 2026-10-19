@@ -1,11 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
-
-import type { FocusPeriod, Session } from '@/types';
 import {
   formatCount,
-  getDateFilterRange,
-  getMonthRange,
-  localDayStartIso,
   formatDuration,
   formatFocusPeriodRanges,
   formatFullDate,
@@ -16,7 +10,11 @@ import {
   getSessionsForDate,
   groupSessionsByDate,
   hasAbnormalFocusGap,
-} from './sessionUtils';
+} from '@pomoroutine/shared';
+import { describe, expect, it, vi } from 'vitest';
+
+import type { FocusPeriod, Session } from '@/types';
+import { getDateFilterRange, getMonthRange, localDayStartIso } from './sessionUtils';
 
 function makeSession(startedAt: string, focusSeconds = 1500): Session {
   return {

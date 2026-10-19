@@ -1,7 +1,5 @@
-import { getEarnedBadgeIds, type BadgeProgress } from '@pomoroutine/shared';
+import type { BadgeProgress } from '@pomoroutine/shared';
 import type { DashboardSummary } from '@/types';
-
-export { getEarnedBadgeIds };
 
 export function toBadgeProgress(summary: DashboardSummary): BadgeProgress {
   const { badgeStats } = summary;

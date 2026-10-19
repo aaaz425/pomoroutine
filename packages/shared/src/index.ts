@@ -6,24 +6,9 @@ export type {
   RawFocusPeriod,
 } from './types/timer';
 export type { FocusRating } from './types/session';
-export type {
-  ShareCardAction,
-  ShareCardBridgeMessage,
-  WebviewBridgeMessage,
-} from './types/webviewBridge';
-export {
-  TIMER_LIMITS,
-  FOCUS_PERIOD_LIMITS,
-  AUTH_LIMITS,
-  INPUT_LIMITS,
-  SOUND_LIMITS,
-} from './constants/limits';
-export {
-  DEFAULT_TIMER_SETTINGS,
-  DEFAULT_CATEGORIES,
-  DEFAULT_APP_SETTINGS,
-} from './constants/defaults';
-export { MOTIVATIONAL_MESSAGES } from './constants/messages';
+export type { ShareCardAction, WebviewBridgeMessage } from './types/webviewBridge';
+export { TIMER_LIMITS, AUTH_LIMITS, INPUT_LIMITS, SOUND_LIMITS } from './constants/limits';
+export { DEFAULT_CATEGORIES, DEFAULT_APP_SETTINGS } from './constants/defaults';
 export { TOAST_MESSAGES } from './constants/toastMessages';
 export { NOTICE_MESSAGES } from './constants/notices';
 export { QUERY_KEYS } from './constants/queryKeys';
@@ -32,27 +17,22 @@ export type { ToastType, ToastMessage } from './constants/toastMessages';
 export type { SoundType, AppSettings } from './types/settings';
 export type { Task, Category } from './types/task';
 export { createTaskQueries, getTaskActions } from './lib/taskData';
-export type { TaskDataApi, TaskActions } from './lib/taskData';
+export type { TaskDataApi } from './lib/taskData';
 export { createSettingsQuery, getSettingsActions, toMessageKeys } from './lib/settingsData';
-export type { SettingsDataApi, SettingsActions } from './lib/settingsData';
+export type { SettingsDataApi } from './lib/settingsData';
 export { FOCUS_RATING_OPTIONS, FOCUS_RATING_LABELS } from './constants/focusRating';
 export { DISTRACTION_TAGS } from './constants/distractionTags';
-export type { DistractionTag } from './constants/distractionTags';
 export { LEGAL_DOCUMENTS } from './constants/legal';
 export { WEBVIEW_TAB_BLUR_EVENT, WEBVIEW_TAB_FOCUS_EVENT } from './constants/webviewBridge';
-export type { LegalDocType, LegalDocument, LegalBlock } from './constants/legal';
-export { normalizeFocusPeriods, clampPeriodDuration } from './lib/focusPeriods';
+export type { LegalDocType } from './constants/legal';
+export { normalizeFocusPeriods } from './lib/focusPeriods';
 export { hexToHsv, hsvToHex } from './lib/color';
 export type { Hsv } from './lib/color';
-export { isSessionStale } from './lib/sessionStale';
 export { deriveTimerDisplay } from './lib/deriveTimerDisplay';
-export type { DeriveTimerDisplayInput, TimerDisplayState } from './lib/deriveTimerDisplay';
 export { deriveElapsedMinutes } from './lib/deriveElapsedMinutes';
 export { getPhaseEndMessage } from './lib/phaseEndMessage';
-export type { PhaseEndMessageInput } from './lib/phaseEndMessage';
 export { getPhaseEndSchedule } from './lib/phaseEndSchedule';
-export type { PhaseEndScheduleInput, PhaseEndAlert } from './lib/phaseEndSchedule';
-export type { DeriveElapsedMinutesInput } from './lib/deriveElapsedMinutes';
+export type { PhaseEndAlert } from './lib/phaseEndSchedule';
 export {
   formatCount,
   formatDuration,
@@ -85,17 +65,10 @@ export type {
   BadgeCategory,
   BadgeDefinition,
   BadgeProgress,
-  SpecialEventId,
 } from './lib/badges';
-export { buildHeadline, buildShareCardData } from './lib/shareCard';
-export type { ShareCardData, ShareCardTotals } from './lib/shareCard';
+export { buildShareCardData } from './lib/shareCard';
+export type { ShareCardData } from './lib/shareCard';
 export { COLOR_THEME_KEYS, COLOR_THEMES, DEFAULT_COLOR_THEME } from './constants/colorThemes';
-export type {
-  ColorThemeKey,
-  AccentPair,
-  ColorThemeAccent,
-  ShareCardPalette,
-  ColorThemeDefinition,
-} from './constants/colorThemes';
+export type { ColorThemeKey, ShareCardPalette } from './constants/colorThemes';
 export { createTimerStore } from './store/timerStore';
 export type { TimerStore, TimerStoreApi, TimerSnapshot, TimerStorePorts } from './store/timerStore';
