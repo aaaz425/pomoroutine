@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { useSettings } from '@/hooks/useSettings';
 import { useTasks, useCategories } from '@/hooks/useTasks';
 import { toast } from '@/lib/toast';
 import { NOTICE_MESSAGES, TOAST_MESSAGES } from '@/lib/constants/messages';
@@ -35,7 +36,6 @@ import { MotivationalModal } from '@/components/settings/motivational/Motivation
 import { SettingsMenuRow } from '@/components/shared/SettingsMenuRow';
 import { SettingsSkeleton } from '@/components/settings/SettingsSkeleton';
 import { GuestPrompt } from '@/components/shared/GuestPrompt';
-import { useSettingsStore } from '@/store/StoreProvider';
 import { useDelayedHydration } from '@/hooks/useDelayedHydration';
 import { useTheme, type ThemeMode } from '@/hooks/useTheme';
 import { useAccentTheme } from '@/hooks/useAccentTheme';
@@ -87,12 +87,12 @@ export function SettingsView({ userPromise }: Props) {
 
   const { mode } = useTheme();
   const { colorTheme } = useAccentTheme();
-  const defaultTimerSettings = useSettingsStore((s) => s.defaultTimerSettings);
+  const defaultTimerSettings = useSettings((s) => s.defaultTimerSettings);
   const taskCount = useTasks().length;
   const categoryCount = useCategories().length;
-  const motivationalCount = useSettingsStore((s) => s.motivationalMessages.length);
-  const browserNotification = useSettingsStore((s) => s.browserNotification);
-  const soundAlert = useSettingsStore((s) => s.soundAlert);
+  const motivationalCount = useSettings((s) => s.motivationalMessages.length);
+  const browserNotification = useSettings((s) => s.browserNotification);
+  const soundAlert = useSettings((s) => s.soundAlert);
 
   useEffect(() => {
     let active = true;

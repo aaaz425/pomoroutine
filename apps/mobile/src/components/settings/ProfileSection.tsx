@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Check, User } from 'lucide-react-native';
 import { INPUT_LIMITS } from '@pomoroutine/shared';
+import { useSettings, useSettingsActions } from '@/hooks/useSettings';
 import { Text } from '@/components/shared/Text';
-import { useSettingsStore } from '@/store/StoreProvider';
 import { TextInput } from '@/components/shared/TextInput';
 import { FONTS } from '@/constants/fonts';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
@@ -11,8 +11,8 @@ import { useThemeTokens } from '@/hooks/use-theme-scheme';
 export function ProfileSection() {
   const theme = useThemeTokens();
 
-  const nickname = useSettingsStore((s) => s.nickname);
-  const setNickname = useSettingsStore((s) => s.setNickname);
+  const nickname = useSettings((s) => s.nickname);
+  const { setNickname } = useSettingsActions();
 
   const [draft, setDraft] = useState(nickname);
   const [saved, setSaved] = useState(false);

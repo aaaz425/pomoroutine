@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Check, User } from 'lucide-react';
-import { useSettingsStore } from '@/store/StoreProvider';
+import { useSettings, useSettingsActions } from '@/hooks/useSettings';
 import { TextInput } from '@/components/shared/TextInput';
 import { INPUT_LIMITS } from '@/lib/constants/limits';
 
 export function ProfileSection() {
-  const nickname = useSettingsStore((s) => s.nickname);
-  const setNickname = useSettingsStore((s) => s.setNickname);
+  const nickname = useSettings((s) => s.nickname);
+  const { setNickname } = useSettingsActions();
 
   const [draft, setDraft] = useState(nickname);
   const [saved, setSaved] = useState(false);

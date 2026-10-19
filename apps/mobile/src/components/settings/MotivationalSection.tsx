@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import DraggableFlatList, { type RenderItemParams } from 'react-native-draggable-flatlist';
 import { Check, Pencil, Plus, Trash2, X } from 'lucide-react-native';
-import { INPUT_LIMITS } from '@pomoroutine/shared';
+import { INPUT_LIMITS, toMessageKeys } from '@pomoroutine/shared';
+import { useSettings, useSettingsActions } from '@/hooks/useSettings';
 import { Text } from '@/components/shared/Text';
-import { useSettingsStore } from '@/store/StoreProvider';
 import { TextInput } from '@/components/shared/TextInput';
 import { ConfirmModal } from '@/components/shared/ConfirmModal';
 import { withAlpha } from '@/constants/timerColors';
@@ -93,12 +93,9 @@ function MessageRow({
 export function MotivationalSection() {
   const theme = useThemeTokens();
 
-  const messages = useSettingsStore((s) => s.motivationalMessages);
-  const messageIds = useSettingsStore((s) => s.messageIds);
-  const addMessage = useSettingsStore((s) => s.addMessage);
-  const updateMessage = useSettingsStore((s) => s.updateMessage);
-  const deleteMessage = useSettingsStore((s) => s.deleteMessage);
-  const reorderMessages = useSettingsStore((s) => s.reorderMessages);
+  const messages = useSettings((s) => s.motivationalMessages);
+  const messageIds = toMessageKeys(messages);
+  const { addMessage, updateMessage, deleteMessage, reorderMessages } = useSettingsActions();
 
   const [input, setInput] = useState('');
   const [editingIndex, setEditingIndex] = useState<number | null>(null);

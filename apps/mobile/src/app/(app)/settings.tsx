@@ -11,8 +11,9 @@ import {
   User,
   type LucideIcon,
 } from 'lucide-react-native';
+import { useSettings } from '@/hooks/useSettings';
 import { Text } from '@/components/shared/Text';
-import { useHydrated, useSettingsStore } from '@/store/StoreProvider';
+import { useHydrated } from '@/store/StoreProvider';
 import { useAuth } from '@/store/AuthProvider';
 import { SettingsMenuRow } from '@/components/shared/SettingsMenuRow';
 import { NoticeScreen } from '@/components/shared/NoticeScreen';
@@ -71,8 +72,8 @@ export default function SettingsScreen() {
   const { user } = useAuth();
   const hydrated = useHydrated();
 
-  const browserNotification = useSettingsStore((s) => s.browserNotification);
-  const soundAlert = useSettingsStore((s) => s.soundAlert);
+  const browserNotification = useSettings((s) => s.browserNotification);
+  const soundAlert = useSettings((s) => s.soundAlert);
 
   const [activeCategory, setActiveCategory] = useState<CategoryKey | null>(null);
 

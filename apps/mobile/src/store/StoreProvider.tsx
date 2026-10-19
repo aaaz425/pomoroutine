@@ -1,27 +1,18 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { AppState } from 'react-native';
 import { useStore } from 'zustand';
 import { QueryClientProvider, type QueryClient } from '@tanstack/react-query';
+import { QUERY_KEYS, type AppSettings } from '@pomoroutine/shared';
 import { createTimerStore, preloadTimerSnapshot } from '@/store/timerStore';
-import { createSettingsStore } from '@/store/settingsStore';
 import { createQueryClient } from '@/lib/query/client';
 import { taskQueries } from '@/lib/query/tasks';
+import { settingsQuery } from '@/lib/query/settings';
 import type { TimerStoreApi, TimerStore } from '@/store/timerStore';
-import type { SettingsStoreApi, SettingsStore } from '@/store/settingsStore';
 
 const TimerStoreContext = createContext<TimerStoreApi | null>(null);
 
 export function useTimerStore<T>(selector: (state: TimerStore) => T): T {
   const store = useContext(TimerStoreContext);
   if (!store) throw new Error('useTimerStore must be used within StoreProvider');
-  return useStore(store, selector);
-}
-
-const SettingsStoreContext = createContext<SettingsStoreApi | null>(null);
-
-export function useSettingsStore<T>(selector: (state: SettingsStore) => T): T {
-  const store = useContext(SettingsStoreContext);
-  if (!store) throw new Error('useSettingsStore must be used within StoreProvider');
   return useStore(store, selector);
 }
 
@@ -35,7 +26,6 @@ export function useHydrated(): boolean {
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [timerStore] = useState<TimerStoreApi>(createTimerStore);
   const [queryClient] = useState<QueryClient>(createQueryClient);
-  const [settingsStore] = useState<SettingsStoreApi>(createSettingsStore);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -43,34 +33,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       preloadTimerSnapshot().then(() => timerStore.getState().hydrate()),
       queryClient.prefetchQuery(taskQueries.tasks),
       queryClient.prefetchQuery(taskQueries.categories),
-      settingsStore.getState().hydrate(),
+      queryClient.prefetchQuery(settingsQuery),
     ]).finally(() => setHydrated(true));
-  }, [timerStore, queryClient, settingsStore]);
+  }, [timerStore, queryClient]);
 
   useEffect(() => {
-    if (!hydrated) return;
-    const subscription = AppState.addEventListener('change', (state) => {
-      if (state !== 'active') return;
-      void settingsStore.getState().refresh();
+    let synced: AppSettings['defaultTimerSettings'] | null = null;
+    return queryClient.getQueryCache().subscribe(({ query }) => {
+      if (query.queryKey[0] !== QUERY_KEYS.settings[0]) return;
+      const defaults = (query.state.data as AppSettings | undefined)?.defaultTimerSettings;
+      if (!defaults || defaults === synced) return;
+      synced = defaults;
+      timerStore.getState().syncDefaultSettings(defaults);
     });
-    return () => subscription.remove();
-  }, [hydrated, settingsStore]);
-
-  useEffect(
-    () =>
-      settingsStore.subscribe((state, prev) => {
-        if (state.defaultTimerSettings === prev.defaultTimerSettings) return;
-        timerStore.getState().syncDefaultSettings(state.defaultTimerSettings);
-      }),
-    [timerStore, settingsStore],
-  );
+  }, [queryClient, timerStore]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <TimerStoreContext.Provider value={timerStore}>
-        <SettingsStoreContext.Provider value={settingsStore}>
-          <HydrationContext.Provider value={hydrated}>{children}</HydrationContext.Provider>
-        </SettingsStoreContext.Provider>
+        <HydrationContext.Provider value={hydrated}>{children}</HydrationContext.Provider>
       </TimerStoreContext.Provider>
     </QueryClientProvider>
   );

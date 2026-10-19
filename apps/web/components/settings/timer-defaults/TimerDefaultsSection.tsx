@@ -1,11 +1,11 @@
 'use client';
 
-import { useSettingsStore } from '@/store/StoreProvider';
+import { useSettings, useSettingsActions } from '@/hooks/useSettings';
 import { TimerSettingsGroup } from '@/components/shared/TimerSettingsGroup';
 
 export function TimerDefaultsSection() {
-  const defaultTimerSettings = useSettingsStore((s) => s.defaultTimerSettings);
-  const setTimerDefaults = useSettingsStore((s) => s.setTimerDefaults);
+  const defaultTimerSettings = useSettings((s) => s.defaultTimerSettings);
+  const { setTimerDefaults } = useSettingsActions();
 
   return (
     <TimerSettingsGroup

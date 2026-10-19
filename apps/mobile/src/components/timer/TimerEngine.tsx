@@ -6,7 +6,8 @@ import {
   getPhaseEndSchedule,
   TOAST_MESSAGES,
 } from '@pomoroutine/shared';
-import { useTimerStore, useSettingsStore, useHydrated } from '@/store/StoreProvider';
+import { useSettings } from '@/hooks/useSettings';
+import { useTimerStore, useHydrated } from '@/store/StoreProvider';
 import { syncTimerNotifications } from '@/lib/notifications';
 import { playAlarm } from '@/lib/sound';
 import { toast } from '@/lib/toast';
@@ -26,11 +27,11 @@ export function TimerEngine() {
   const accFocusSeconds = useTimerStore((s) => s.accFocusSeconds);
   const complete = useTimerStore((s) => s.complete);
   const setRunningDisplaySeconds = useTimerStore((s) => s.setRunningDisplaySeconds);
-  const soundAlert = useSettingsStore((s) => s.soundAlert);
-  const soundType = useSettingsStore((s) => s.soundType);
-  const soundVolume = useSettingsStore((s) => s.soundVolume);
-  const soundRepeatCount = useSettingsStore((s) => s.soundRepeatCount);
-  const keepScreenAwake = useSettingsStore((s) => s.keepScreenAwake);
+  const soundAlert = useSettings((s) => s.soundAlert);
+  const soundType = useSettings((s) => s.soundType);
+  const soundVolume = useSettings((s) => s.soundVolume);
+  const soundRepeatCount = useSettings((s) => s.soundRepeatCount);
+  const keepScreenAwake = useSettings((s) => s.keepScreenAwake);
 
   useKeepAwake(keepScreenAwake && startedAt !== null);
 

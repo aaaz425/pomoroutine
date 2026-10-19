@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Volume2, Play, Pause } from 'lucide-react';
-import { useSettingsStore } from '@/store/StoreProvider';
+import { useSettings, useSettingsActions } from '@/hooks/useSettings';
 import { useSoundPreview } from '@/hooks/useSoundPreview';
 import { StepperInput } from '@/components/shared/StepperInput';
 import { Toggle } from '@/components/settings/notification/Toggle';
@@ -11,14 +11,11 @@ import type { SoundType } from '@/types';
 import { SOUND_LIMITS } from '@/lib/constants/limits';
 
 export function SoundAlertSettings() {
-  const soundAlert = useSettingsStore((s) => s.soundAlert);
-  const soundType = useSettingsStore((s) => s.soundType);
-  const soundVolume = useSettingsStore((s) => s.soundVolume);
-  const soundRepeatCount = useSettingsStore((s) => s.soundRepeatCount);
-  const setSoundAlert = useSettingsStore((s) => s.setSoundAlert);
-  const setSoundType = useSettingsStore((s) => s.setSoundType);
-  const setSoundVolume = useSettingsStore((s) => s.setSoundVolume);
-  const setSoundRepeatCount = useSettingsStore((s) => s.setSoundRepeatCount);
+  const soundAlert = useSettings((s) => s.soundAlert);
+  const soundType = useSettings((s) => s.soundType);
+  const soundVolume = useSettings((s) => s.soundVolume);
+  const soundRepeatCount = useSettings((s) => s.soundRepeatCount);
+  const { setSoundAlert, setSoundType, setSoundVolume, setSoundRepeatCount } = useSettingsActions();
 
   const [draftVolume, setDraftVolume] = useState<number | null>(null);
   const volume = draftVolume ?? soundVolume;

@@ -1,12 +1,12 @@
 'use client';
 
 import { Eye } from 'lucide-react';
-import { useSettingsStore } from '@/store/StoreProvider';
+import { useSettings, useSettingsActions } from '@/hooks/useSettings';
 import { Toggle } from '@/components/settings/notification/Toggle';
 
 export function KeepScreenAwakeRow() {
-  const keepScreenAwake = useSettingsStore((s) => s.keepScreenAwake);
-  const setKeepScreenAwake = useSettingsStore((s) => s.setKeepScreenAwake);
+  const keepScreenAwake = useSettings((s) => s.keepScreenAwake);
+  const { setKeepScreenAwake } = useSettingsActions();
 
   return (
     <div className="flex items-center justify-between gap-4">
