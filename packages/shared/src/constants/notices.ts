@@ -6,6 +6,14 @@ export const NOTICE_MESSAGES = {
   discardTitle: '저장하지 않고 닫을까요?',
   discardMessage: '입력한 내용은 저장되지 않아요',
   discardConfirm: '닫기',
+  abandonedTitle: '이전 타이머가 남아있어요',
+  abandonedMessage: (startedLabel: string | null) =>
+    startedLabel
+      ? `${startedLabel}에 시작한 타이머가 아직 끝나지 않았어요. 어떻게 할까요?`
+      : '아직 끝나지 않은 타이머가 있어요. 어떻게 할까요?',
+  abandonedContinue: '이어가기',
+  abandonedEnd: '종료하고 기록',
+  abandonedDiscard: '폐기',
   sessionExpiredTitle: '로그인이 만료됐어요',
   sessionExpiredMessage: '다시 로그인해 주세요',
   relogin: '다시 로그인',

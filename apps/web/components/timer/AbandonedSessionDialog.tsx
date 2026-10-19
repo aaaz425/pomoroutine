@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { formatStartedAtLabel } from '@pomoroutine/shared';
+import { formatStartedAtLabel, NOTICE_MESSAGES } from '@pomoroutine/shared';
 import { useTimerStore, useHydrated } from '@/store/StoreProvider';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { SESSION_LIMITS } from '@/lib/constants/limits';
@@ -42,20 +42,16 @@ export function AbandonedSessionDialog() {
   return (
     <ConfirmDialog
       open={showAbandonedPrompt}
-      title="이전 타이머가 남아있어요"
-      description={
-        startedLabel
-          ? `${startedLabel}에 시작한 타이머가 아직 끝나지 않았어요. 어떻게 할까요?`
-          : '아직 끝나지 않은 타이머가 있어요. 어떻게 할까요?'
-      }
-      cancelLabel="이어가기"
+      title={NOTICE_MESSAGES.abandonedTitle}
+      description={NOTICE_MESSAGES.abandonedMessage(startedLabel)}
+      cancelLabel={NOTICE_MESSAGES.abandonedContinue}
       onCancel={dismissAbandonedPrompt}
-      confirmLabel="종료하고 기록"
+      confirmLabel={NOTICE_MESSAGES.abandonedEnd}
       onConfirm={() => {
         endSession();
         dismissAbandonedPrompt();
       }}
-      tertiaryLabel="폐기"
+      tertiaryLabel={NOTICE_MESSAGES.abandonedDiscard}
       onTertiary={dismissSessionRecord}
     />
   );
