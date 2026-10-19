@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { isValidRedirectTarget } from '@/lib/supabase/redirect';
+import { toSafeRedirectPath } from '@/lib/supabase/redirect';
 
 // 카카오 첫 가입 판별용 — last_sign_in_at은 기존 계정에 카카오가 새로 연결될 때 오판할 수 있어,
 // auth.users 행이 방금(이 오차 이내) 생성됐는지만 본다. 이메일 인증은 next 유무로 따로 걸러낸다.
@@ -26,9 +26,7 @@ export async function GET(request: NextRequest) {
         ? '/welcome'
         : isFirstSignIn(data.user)
           ? '/welcome'
-          : isValidRedirectTarget(next)
-            ? next
-            : '/';
+          : toSafeRedirectPath(next, '/');
       return NextResponse.redirect(`${origin}${destination}`);
     }
   }
