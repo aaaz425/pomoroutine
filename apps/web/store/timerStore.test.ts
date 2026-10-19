@@ -24,25 +24,24 @@ describe('timerStore (web ports)', () => {
     expect(JSON.parse(raw!).startedAt).toBe(store.getState().startedAt);
   });
 
-  it('hydrate() — localStorage에 저장된 유효한 스냅샷을 Zod 검증 후 반영함', () => {
-    localStorage.setItem(
-      STORAGE_KEYS.activeTimer,
-      JSON.stringify({
-        phase: 'focus',
-        mode: 'pomodoro',
-        remainingSeconds: 10 * 60,
-        startedAt: null,
-        cycleCount: 2,
-        currentTaskId: null,
-        settings: { focusMinutes: 25, shortBreakMinutes: 5, totalCycles: 4 },
-        sessionEnded: false,
-        sessionStarted: true,
-        sessionStartedAt: new Date('2024-01-01T00:00:00.000Z').getTime(),
-        sessionEndedAt: null,
-        accFocusSeconds: 900,
-        rawFocusPeriods: [],
-      }),
-    );
+  const snapshot = {
+    phase: 'focus',
+    mode: 'pomodoro',
+    remainingSeconds: 10 * 60,
+    startedAt: null,
+    cycleCount: 2,
+    currentTaskId: null,
+    settings: { focusMinutes: 25, shortBreakMinutes: 5, totalCycles: 4 },
+    sessionEnded: false,
+    sessionStarted: true,
+    sessionStartedAt: new Date('2024-01-01T00:00:00.000Z').getTime(),
+    sessionEndedAt: null,
+    accFocusSeconds: 900,
+    rawFocusPeriods: [],
+  };
+
+  it('hydrate() — 저장된 스냅샷을 Zod로 검증해 반영함', () => {
+    localStorage.setItem(STORAGE_KEYS.activeTimer, JSON.stringify(snapshot));
 
     const store = createTimerStore();
     store.getState().hydrate();
@@ -51,13 +50,17 @@ describe('timerStore (web ports)', () => {
     expect(store.getState().cycleCount).toBe(2);
   });
 
-  it('hydrate() — localStorage 값이 스키마와 맞지 않으면 기본값으로 안전하게 시작함', () => {
-    localStorage.setItem(STORAGE_KEYS.activeTimer, JSON.stringify({ broken: true }));
+  it('hydrate() — 필드 하나라도 스키마와 맞지 않으면 버리고 기본값으로 시작함', () => {
+    localStorage.setItem(
+      STORAGE_KEYS.activeTimer,
+      JSON.stringify({ ...snapshot, phase: 'unknown' }),
+    );
 
     const store = createTimerStore();
     store.getState().hydrate();
 
     expect(store.getState().remainingSeconds).toBe(25 * 60);
+    expect(store.getState().cycleCount).toBe(0);
   });
 
   it('onSessionTooShort() — 30초 미만 세션 폐기 시 실제 toast()가 호출됨', () => {

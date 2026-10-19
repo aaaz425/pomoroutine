@@ -31,7 +31,6 @@ version: 1.0
 | `timer.spec.ts` | 시작, 일시정지, 종료 |
 | `tasks.spec.ts` | 작업 생성과 타이머 연결 |
 | `settings.spec.ts` | 카테고리와 동기부여 메시지 추가, 수정, 삭제 |
-| `dashboard.spec.ts` | 통계 화면 렌더링과 탭 전환 |
 
 **실행 환경**
 - Chromium 하나로 실행, CI에서는 실패 시 2회 재시도

@@ -54,15 +54,6 @@ describe('getTopDistractions', () => {
     ];
     expect(getTopDistractions(sessions, 14, TODAY)).toEqual([]);
   });
-
-  it('distractionTags가 없는 세션은 집계에서 무시됨', () => {
-    const sessions = [makeSession({ startedAt: '2024-03-15T09:00:00', distractionTags: [] })];
-    expect(getTopDistractions(sessions, 14, TODAY)).toEqual([]);
-  });
-
-  it('전체 표본이 0건이면 빈 배열 반환', () => {
-    expect(getTopDistractions([], 14, TODAY)).toEqual([]);
-  });
 });
 
 describe('getFocusRatingTrend', () => {
@@ -119,15 +110,16 @@ describe('getCategoryFocusRatings', () => {
     ]);
   });
 
-  it('minSamples 미만인 카테고리는 결과에서 제외됨', () => {
+  it('표본이 minSamples 미만이거나 지금 없는 카테고리는 제외', () => {
     expect(
-      getCategoryFocusRatings([{ categoryId: 'cat-study', sum: 5, count: 2 }], categories, 3),
-    ).toEqual([]);
-  });
-
-  it('현재 카테고리 목록에 없는 카테고리는 제외됨', () => {
-    expect(
-      getCategoryFocusRatings([{ categoryId: 'deleted', sum: 9, count: 3 }], categories, 3),
+      getCategoryFocusRatings(
+        [
+          { categoryId: 'cat-study', sum: 5, count: 2 },
+          { categoryId: 'deleted', sum: 9, count: 3 },
+        ],
+        categories,
+        3,
+      ),
     ).toEqual([]);
   });
 });

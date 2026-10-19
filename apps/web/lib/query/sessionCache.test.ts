@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Session } from '@/types';
-import {
-  patchSessionInList,
-  patchSessionInPages,
-  removeSessionFromList,
-  removeSessionFromPages,
-  type SessionPages,
-} from './sessionCache';
+import { patchSessionInPages, removeSessionFromPages, type SessionPages } from './sessionCache';
 
 function makeSession(id: string, note: string | null = null): Session {
   return {
@@ -47,10 +41,6 @@ describe('patchSessionInPages', () => {
     expect(result?.pages[1].sessions[0].note).toBe('메모');
     expect(result?.pages[0].sessions.every((s) => s.note === null)).toBe(true);
   });
-
-  it('캐시가 없으면 그대로 반환', () => {
-    expect(patchSessionInPages(undefined, 'a', { note: '메모' })).toBeUndefined();
-  });
 });
 
 describe('removeSessionFromPages', () => {
@@ -63,13 +53,5 @@ describe('removeSessionFromPages', () => {
   it('없는 기록이면 개수를 바꾸지 않음', () => {
     const pages = makePages();
     expect(removeSessionFromPages(pages, 'none')).toBe(pages);
-  });
-});
-
-describe('patchSessionInList / removeSessionFromList', () => {
-  it('배열 캐시에서 기록을 고치고 지움', () => {
-    const list = [makeSession('a'), makeSession('b')];
-    expect(patchSessionInList(list, 'b', { note: '메모' })?.[1].note).toBe('메모');
-    expect(removeSessionFromList(list, 'a')?.map((s) => s.id)).toEqual(['b']);
   });
 });

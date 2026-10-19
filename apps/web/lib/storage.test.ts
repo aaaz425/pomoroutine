@@ -22,12 +22,9 @@ describe('loadFromStorage', () => {
     expect(loadFromStorage('k', schema, fallback)).toEqual({ id: '1' });
   });
 
-  it('JSON 파싱에 실패하면 fallback 반환', () => {
+  it('JSON이 깨졌거나 스키마와 맞지 않으면 fallback 반환', () => {
     localStorage.setItem('k', 'not json{');
     expect(loadFromStorage('k', schema, fallback)).toBe(fallback);
-  });
-
-  it('JSON은 유효하지만 스키마 검증에 실패하면 fallback 반환', () => {
     localStorage.setItem('k', JSON.stringify({ wrong: 'shape' }));
     expect(loadFromStorage('k', schema, fallback)).toBe(fallback);
   });

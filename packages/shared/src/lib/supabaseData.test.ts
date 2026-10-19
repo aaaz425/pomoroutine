@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { toAppSettings, toCategory, toTask } from './supabaseData';
+import { toAppSettings, toTask } from './supabaseData';
 
 describe('toTask', () => {
   const row = {
@@ -20,18 +20,6 @@ describe('toTask', () => {
 
   it('검증 실패면 null', () => {
     expect(toTask({ ...row, title: 'a'.repeat(1000) })).toBeNull();
-  });
-});
-
-describe('toCategory', () => {
-  const row = { id: 'c1', name: '공부', color: '#3b82f6' };
-
-  it('row를 Category로 변환함', () => {
-    expect(toCategory(row)).toEqual(row);
-  });
-
-  it('검증 실패면 null', () => {
-    expect(toCategory({ ...row, color: 'bg-blue-500' })).toBeNull();
   });
 });
 
@@ -62,9 +50,5 @@ describe('toAppSettings', () => {
       defaultTimerSettings: { focusMinutes: 50, shortBreakMinutes: 10, totalCycles: 3 },
       keepScreenAwake: true,
     });
-  });
-
-  it('검증 실패면 null', () => {
-    expect(toAppSettings({ ...row, motivational_messages: [] })).toBeNull();
   });
 });

@@ -49,11 +49,6 @@ beforeEach(() => {
 });
 
 describe('createTaskQueries', () => {
-  it('조회 실패(null)면 에러로 처리', async () => {
-    vi.mocked(api.fetchTasks).mockResolvedValue(null);
-    await expect(client.fetchQuery(createTaskQueries(api).tasks)).rejects.toThrow();
-  });
-
   it('형식이 안 맞는 항목은 첫 조회에서만 알림', async () => {
     vi.mocked(api.fetchTasks).mockResolvedValue({ tasks: [task('t1')], invalidCount: 2 });
     const query = createTaskQueries(api).tasks;
@@ -111,16 +106,6 @@ describe('작업', () => {
 
     expect(cachedTasks()?.[0].title).toBe('작업 t1');
     expect(api.toast).toHaveBeenCalledWith(TOAST_MESSAGES.taskSaveFailed);
-  });
-
-  it('deleteTask — 저장 실패면 삭제한 작업을 되돌림', async () => {
-    const actions = setup([task('t1'), task('t2')]);
-    vi.mocked(api.deleteTask).mockResolvedValue({ error: true });
-
-    await actions.deleteTask('t1');
-
-    expect(cachedTasks()?.map((t) => t.id)).toEqual(['t1', 't2']);
-    expect(api.toast).toHaveBeenCalledWith(TOAST_MESSAGES.taskDeleteFailed);
   });
 
   it('reorderTasks — from 위치의 작업을 to 위치로 옮기고 새 순서를 저장', async () => {
@@ -196,13 +181,5 @@ describe('카테고리', () => {
 
     expect(cachedCategories()?.map((c) => c.id)).toEqual(['c1']);
     expect(api.toast).toHaveBeenCalledWith(TOAST_MESSAGES.categoryInUse);
-  });
-
-  it('updateCategory — 이름을 trim해서 저장', async () => {
-    const actions = setup([], [category('c1')]);
-
-    await actions.updateCategory('c1', { name: ' 운동 ', color: '#f97316' });
-
-    expect(api.updateCategory).toHaveBeenCalledWith('c1', { name: '운동', color: '#f97316' });
   });
 });

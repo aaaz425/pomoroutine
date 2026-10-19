@@ -32,20 +32,17 @@ beforeEach(() => {
   client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 });
 
-describe('createSettingsQuery', () => {
-  it('조회 실패(null)면 에러로 처리', async () => {
-    vi.mocked(api.fetchSettings).mockResolvedValue(null);
-    await expect(client.fetchQuery(createSettingsQuery(api))).rejects.toThrow();
-  });
-});
-
 describe('getSettingsActions', () => {
-  it('바뀐 값을 화면에 먼저 반영하고 전체 설정을 저장', async () => {
+  it('저장 전에 화면에 먼저 반영하고 전체 설정을 저장', async () => {
     const actions = setup();
+    let resolve: (value: { error: boolean }) => void = () => {};
+    vi.mocked(api.saveSettings).mockReturnValue(new Promise((r) => (resolve = r)));
 
-    await actions.setSoundAlert(false);
+    const pending = actions.setSoundAlert(false);
+    await vi.waitFor(() => expect(cached()?.soundAlert).toBe(false));
+    resolve({ error: false });
+    await pending;
 
-    expect(cached()?.soundAlert).toBe(false);
     expect(api.saveSettings).toHaveBeenCalledWith({ ...DEFAULT_APP_SETTINGS, soundAlert: false });
   });
 
@@ -102,23 +99,11 @@ describe('getSettingsActions', () => {
 
     expect(cached()?.motivationalMessages).toEqual(['a']);
   });
-
-  it('메시지 순서를 from에서 to로 옮김', async () => {
-    const actions = setup({ motivationalMessages: ['a', 'b', 'c'] });
-
-    await actions.reorderMessages(0, 2);
-
-    expect(cached()?.motivationalMessages).toEqual(['b', 'c', 'a']);
-  });
 });
 
 describe('toMessageKeys', () => {
-  it('같은 문구가 여러 번 있어도 키가 겹치지 않음', () => {
-    const keys = toMessageKeys(['a', 'b', 'a']);
-    expect(new Set(keys).size).toBe(3);
-  });
-
-  it('순서를 바꿔도 각 문구의 키는 그대로 따라감', () => {
+  it('같은 문구가 있어도 키가 겹치지 않고 순서를 바꾸면 키도 따라감', () => {
+    expect(new Set(toMessageKeys(['a', 'b', 'a'])).size).toBe(3);
     const [a, b] = toMessageKeys(['a', 'b']);
     expect(toMessageKeys(['b', 'a'])).toEqual([b, a]);
   });

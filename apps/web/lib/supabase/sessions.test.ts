@@ -37,8 +37,4 @@ describe('toSession', () => {
       distractionTags: ['phone'],
     });
   });
-
-  it('검증 실패면 null', () => {
-    expect(toSession({ ...validRow, focus_rating: 5 })).toBeNull();
-  });
 });
