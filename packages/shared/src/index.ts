@@ -55,6 +55,7 @@ export {
   getSessionOrdinalTitle,
   formatTimeRange,
   formatFullDate,
+  formatStartedAtLabel,
   formatFocusPeriodRanges,
   hasAbnormalFocusGap,
   formatSessionTimeSummary,

@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { formatDistanceToNow } from 'date-fns';
-import { ko } from 'date-fns/locale';
+import { formatStartedAtLabel } from '@pomoroutine/shared';
 import { useTimerStore, useHydrated } from '@/store/StoreProvider';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { SESSION_LIMITS } from '@/lib/constants/limits';
@@ -38,9 +37,7 @@ export function AbandonedSessionDialog() {
 
   if (!hydrated || !showAbandonedPrompt) return null;
 
-  const startedLabel = sessionStartedAt
-    ? formatDistanceToNow(sessionStartedAt, { addSuffix: true, locale: ko })
-    : null;
+  const startedLabel = sessionStartedAt ? formatStartedAtLabel(sessionStartedAt) : null;
 
   return (
     <ConfirmDialog
@@ -48,7 +45,7 @@ export function AbandonedSessionDialog() {
       title="이전 타이머가 남아있어요"
       description={
         startedLabel
-          ? `${startedLabel} 시작한 타이머가 아직 끝나지 않았어요. 어떻게 할까요?`
+          ? `${startedLabel}에 시작한 타이머가 아직 끝나지 않았어요. 어떻게 할까요?`
           : '아직 끝나지 않은 타이머가 있어요. 어떻게 할까요?'
       }
       cancelLabel="이어가기"
