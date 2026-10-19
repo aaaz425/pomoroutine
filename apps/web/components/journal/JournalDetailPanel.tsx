@@ -48,9 +48,9 @@ export function JournalDetailPanel({
   const categories = useCategories();
 
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState<EditDraft | null>(null);
   const [initialDraft, setInitialDraft] = useState<EditDraft | null>(null);
+  const isEditing = draft !== null;
   const isDirty = isEditing && JSON.stringify(draft) !== JSON.stringify(initialDraft);
 
   useEffect(() => {
@@ -80,11 +80,9 @@ export function JournalDetailPanel({
     };
     setDraft(initial);
     setInitialDraft(initial);
-    setIsEditing(true);
   }
 
   function handleCancelEdit() {
-    setIsEditing(false);
     setDraft(null);
   }
 
@@ -106,7 +104,6 @@ export function JournalDetailPanel({
     };
     updateSession({ id: session.id, patch }, { onError: () => onUpdated(previous) });
     onUpdated(patch);
-    setIsEditing(false);
     setDraft(null);
   }
 

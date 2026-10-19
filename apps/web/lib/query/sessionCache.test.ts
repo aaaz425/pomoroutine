@@ -33,11 +33,10 @@ function makePages(): SessionPages {
     pages: [
       {
         sessions: [makeSession('a'), makeSession('b')],
-        invalidCount: 0,
         nextCursor: 'cursor',
         totalCount: 3,
       },
-      { sessions: [makeSession('c')], invalidCount: 0, nextCursor: null, totalCount: null },
+      { sessions: [makeSession('c')], nextCursor: null, totalCount: null },
     ],
   };
 }

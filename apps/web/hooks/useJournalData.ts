@@ -13,20 +13,12 @@ export function useJournalData() {
 
   const summary = useQuery({
     queryKey: sessionKeys.journalSummary,
-    queryFn: async () => {
-      const result = await fetchJournalSummary();
-      if (!result) throw new Error('journal summary fetch failed');
-      return result;
-    },
+    queryFn: fetchJournalSummary,
   });
 
   const insightSessions = useQuery({
     queryKey: sessionKeys.insights(insightStartIso),
-    queryFn: async () => {
-      const result = await fetchInsightSessions(insightStartIso);
-      if (!result) throw new Error('insight sessions fetch failed');
-      return result;
-    },
+    queryFn: () => fetchInsightSessions(insightStartIso),
   });
 
   return {

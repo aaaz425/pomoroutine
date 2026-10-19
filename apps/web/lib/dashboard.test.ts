@@ -3,7 +3,6 @@ import {
   getAvgSessionSeconds,
   getHourlyFocusSeconds,
   getMonthlyActivityData,
-  getSessionCount,
   getTotalFocusSeconds,
 } from '@pomoroutine/shared';
 import { describe, expect, it } from 'vitest';
@@ -81,10 +80,6 @@ describe('집계 함수', () => {
 
   it('getTotalFocusSeconds', () => {
     expect(getTotalFocusSeconds(sessions)).toBe(2700);
-  });
-
-  it('getSessionCount', () => {
-    expect(getSessionCount(sessions)).toBe(2);
   });
 
   it('getAvgSessionSeconds', () => {

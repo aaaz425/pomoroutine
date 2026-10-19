@@ -107,10 +107,6 @@ export function getHourlyFocusSeconds<T extends SessionLike>(sessions: T[]): num
   return totals;
 }
 
-export function getSessionCount<T extends SessionLike>(sessions: T[]): number {
-  return sessions.length;
-}
-
 export function getAvgSessionSeconds<T extends SessionLike>(sessions: T[]): number {
   if (sessions.length === 0) return 0;
   return Math.round(getTotalFocusSeconds(sessions) / sessions.length);

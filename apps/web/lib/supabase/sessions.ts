@@ -49,25 +49,19 @@ export function toSession(row: SessionRow): Session | null {
   return parsed.success ? parsed.data : null;
 }
 
-interface SessionListResult {
-  sessions: Session[];
-  invalidCount: number;
+function parseRows<R, T>(rows: R[], parse: (row: R) => T | null): T[] {
+  return rows.map(parse).filter((item): item is T => item !== null);
 }
 
-export async function fetchSessionsInRange(
-  startIso: string,
-  endIso: string,
-): Promise<SessionListResult | null> {
-  const supabase = createClient();
-  const { data, error } = await supabase
+export async function fetchSessionsInRange(startIso: string, endIso: string): Promise<Session[]> {
+  const { data, error } = await createClient()
     .from('sessions')
     .select(SELECT_COLUMNS)
     .gte('started_at', startIso)
     .lt('started_at', endIso)
     .order('started_at', { ascending: true });
-  if (error || !data) return null;
-  const sessions = data.map(toSession).filter((s): s is Session => s !== null);
-  return { sessions, invalidCount: data.length - sessions.length };
+  if (error) throw error;
+  return parseRows(data, toSession);
 }
 
 interface DashboardSessionRow {
@@ -78,7 +72,7 @@ interface DashboardSessionRow {
   focus_periods: { start: string; end: string }[];
 }
 
-export function toDashboardSession(row: DashboardSessionRow): DashboardSession | null {
+function toDashboardSession(row: DashboardSessionRow): DashboardSession | null {
   const parsed = DashboardSessionSchema.safeParse({
     id: row.id,
     taskId: row.task_id,
@@ -92,19 +86,18 @@ export function toDashboardSession(row: DashboardSessionRow): DashboardSession |
 export async function fetchDashboardSessions(
   startIso: string,
   endIso: string,
-): Promise<DashboardSession[] | null> {
-  const supabase = createClient();
-  const { data, error } = await supabase
+): Promise<DashboardSession[]> {
+  const { data, error } = await createClient()
     .from('sessions')
     .select('id, task_id, started_at, focus_seconds, focus_periods')
     .gte('started_at', startIso)
     .lt('started_at', endIso)
     .order('started_at', { ascending: true });
-  if (error || !data) return null;
-  return data.map(toDashboardSession).filter((s): s is DashboardSession => s !== null);
+  if (error) throw error;
+  return parseRows(data, toDashboardSession);
 }
 
-export interface SessionsPageParams {
+interface SessionsPageParams {
   cursor?: string | null; // 이전 페이지 마지막 세션의 startedAt — 타이머 세션은 한 번에 하나씩만 생기므로 startedAt 단독으로 안정적인 커서가 된다
   limit: number;
   categoryIds?: string[];
@@ -114,7 +107,8 @@ export interface SessionsPageParams {
   withCount?: boolean;
 }
 
-export interface SessionsPageResult extends SessionListResult {
+export interface SessionsPageResult {
+  sessions: Session[];
   nextCursor: string | null;
   totalCount: number | null;
 }
@@ -128,14 +122,13 @@ export async function fetchSessionsPage({
   startIso,
   endIso,
   withCount,
-}: SessionsPageParams): Promise<SessionsPageResult | null> {
-  const supabase = createClient();
+}: SessionsPageParams): Promise<SessionsPageResult> {
   const needsTaskJoin = !!(categoryIds?.length || search?.trim());
   const selectColumns = needsTaskJoin
     ? `${SELECT_COLUMNS}, tasks!inner(category_id, title)`
     : SELECT_COLUMNS;
 
-  let query = supabase
+  let query = createClient()
     .from('sessions')
     .select(selectColumns, withCount ? { count: 'exact' } : undefined)
     .order('started_at', { ascending: false })
@@ -148,30 +141,23 @@ export async function fetchSessionsPage({
   if (endIso) query = query.lt('started_at', endIso);
 
   const { data, error, count } = await query;
-  if (error || !data) return null;
+  if (error) throw error;
 
   const rows = data as unknown as SessionRow[];
-  const sessions = rows.map(toSession).filter((s): s is Session => s !== null);
-  const nextCursor = rows.length === limit ? rows[rows.length - 1].started_at : null;
   return {
-    sessions,
-    invalidCount: rows.length - sessions.length,
-    nextCursor,
+    sessions: parseRows(rows, toSession),
+    nextCursor: rows.length === limit ? rows[rows.length - 1].started_at : null,
     totalCount: count ?? null,
   };
 }
 
-export async function fetchSessionStartTimes(
-  startIso: string,
-  endIso: string,
-): Promise<string[] | null> {
-  const supabase = createClient();
-  const { data, error } = await supabase
+export async function fetchSessionStartTimes(startIso: string, endIso: string): Promise<string[]> {
+  const { data, error } = await createClient()
     .from('sessions')
     .select('started_at')
     .gte('started_at', startIso)
     .lt('started_at', endIso);
-  if (error || !data) return null;
+  if (error) throw error;
   return data.map((row) => row.started_at as string);
 }
 
@@ -183,7 +169,7 @@ interface InsightSessionRow {
   distraction_tags: string[];
 }
 
-export function toInsightSession(row: InsightSessionRow): InsightSession | null {
+function toInsightSession(row: InsightSessionRow): InsightSession | null {
   const parsed = InsightSessionSchema.safeParse({
     id: row.id,
     taskId: row.task_id,
@@ -194,46 +180,38 @@ export function toInsightSession(row: InsightSessionRow): InsightSession | null 
   return parsed.success ? parsed.data : null;
 }
 
-export async function fetchInsightSessions(startIso: string): Promise<InsightSession[] | null> {
-  const supabase = createClient();
-  const { data, error } = await supabase
+export async function fetchInsightSessions(startIso: string): Promise<InsightSession[]> {
+  const { data, error } = await createClient()
     .from('sessions')
     .select('id, task_id, started_at, focus_rating, distraction_tags')
     .gte('started_at', startIso);
-  if (error || !data) return null;
-  return data.map(toInsightSession).filter((s): s is InsightSession => s !== null);
+  if (error) throw error;
+  return parseRows(data, toInsightSession);
 }
 
-export async function insertSession(input: Omit<Session, 'id'>): Promise<Session | null> {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from('sessions')
-    .insert({
-      task_id: input.taskId,
-      title: input.title,
-      mode: input.mode,
-      started_at: input.startedAt,
-      ended_at: input.endedAt,
-      completed_cycles: input.completedCycles,
-      total_cycles: input.totalCycles,
-      focus_seconds: input.focusSeconds,
-      paused_seconds: input.pausedSeconds,
-      focus_periods: input.focusPeriods,
-      note: input.note,
-      focus_rating: input.focusRating,
-      distraction_tags: input.distractionTags,
-    })
-    .select(SELECT_COLUMNS)
-    .single();
-  if (error || !data) return null;
-  return toSession(data);
+export async function insertSession(input: Omit<Session, 'id'>): Promise<void> {
+  const { error } = await createClient().from('sessions').insert({
+    task_id: input.taskId,
+    title: input.title,
+    mode: input.mode,
+    started_at: input.startedAt,
+    ended_at: input.endedAt,
+    completed_cycles: input.completedCycles,
+    total_cycles: input.totalCycles,
+    focus_seconds: input.focusSeconds,
+    paused_seconds: input.pausedSeconds,
+    focus_periods: input.focusPeriods,
+    note: input.note,
+    focus_rating: input.focusRating,
+    distraction_tags: input.distractionTags,
+  });
+  if (error) throw error;
 }
 
 export async function updateSession(
   id: string,
   patch: Partial<SessionEditableFields>,
-): Promise<{ error: boolean }> {
-  const supabase = createClient();
+): Promise<void> {
   const row: Record<string, unknown> = {};
   if (patch.title !== undefined) row.title = patch.title;
   if (patch.note !== undefined) row.note = patch.note;
@@ -241,12 +219,11 @@ export async function updateSession(
   if (patch.distractionTags !== undefined) row.distraction_tags = patch.distractionTags;
   if (patch.taskId !== undefined) row.task_id = patch.taskId;
 
-  const { error } = await supabase.from('sessions').update(row).eq('id', id);
-  return { error: error !== null };
+  const { error } = await createClient().from('sessions').update(row).eq('id', id);
+  if (error) throw error;
 }
 
-export async function deleteSession(id: string): Promise<{ error: boolean }> {
-  const supabase = createClient();
-  const { error } = await supabase.from('sessions').delete().eq('id', id);
-  return { error: error !== null };
+export async function deleteSession(id: string): Promise<void> {
+  const { error } = await createClient().from('sessions').delete().eq('id', id);
+  if (error) throw error;
 }

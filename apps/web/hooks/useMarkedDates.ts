@@ -12,11 +12,7 @@ export function useMarkedDates(visibleMonth: { year: number; month: number } | n
   const query = useQuery({
     queryKey: sessionKeys.markedDates(range?.startIso ?? ''),
     enabled: range !== null,
-    queryFn: async () => {
-      const result = await fetchSessionStartTimes(range!.startIso, range!.endIso);
-      if (!result) throw new Error('marked dates fetch failed');
-      return result;
-    },
+    queryFn: () => fetchSessionStartTimes(range!.startIso, range!.endIso),
   });
 
   return new Set((query.data ?? []).map(toLocalDateKey));

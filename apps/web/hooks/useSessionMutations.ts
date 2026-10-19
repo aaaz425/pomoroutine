@@ -43,10 +43,7 @@ export function useSessionMutations() {
   }
 
   const add = useMutation({
-    mutationFn: async (input: Omit<Session, 'id'>) => {
-      const inserted = await insertSession(input);
-      if (!inserted) throw new Error('session insert failed');
-    },
+    mutationFn: insertSession,
     onError: () => toast(TOAST_MESSAGES.sessionSaveFailed),
     onSuccess: () => {
       toast(TOAST_MESSAGES.sessionSaved);
@@ -55,10 +52,8 @@ export function useSessionMutations() {
   });
 
   const update = useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: Partial<SessionEditableFields> }) => {
-      const { error } = await updateSession(id, patch);
-      if (error) throw new Error('session update failed');
-    },
+    mutationFn: ({ id, patch }: { id: string; patch: Partial<SessionEditableFields> }) =>
+      updateSession(id, patch),
     onMutate: async ({ id, patch }) => {
       const snapshot = await prepare();
       queryClient.setQueriesData<SessionPages>({ queryKey: LIST_KEY }, (data) =>
@@ -78,10 +73,7 @@ export function useSessionMutations() {
   });
 
   const remove = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await deleteSession(id);
-      if (error) throw new Error('session delete failed');
-    },
+    mutationFn: deleteSession,
     onMutate: async (id) => {
       const snapshot = await prepare();
       queryClient.setQueriesData<SessionPages>({ queryKey: LIST_KEY }, (data) =>

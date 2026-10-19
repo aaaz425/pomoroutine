@@ -70,7 +70,6 @@ export {
   filterSessionsByTab,
   getTotalFocusSeconds,
   getHourlyFocusSeconds,
-  getSessionCount,
   getAvgSessionSeconds,
 } from './lib/dashboard';
 export type { DayActivity, TabType } from './lib/dashboard';

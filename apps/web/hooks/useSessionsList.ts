@@ -17,9 +17,9 @@ export function useSessionsList(filters: SessionListFilters) {
   const query = useInfiniteQuery({
     queryKey: sessionKeys.list(keyFilters),
     initialPageParam: null as string | null,
-    queryFn: async ({ pageParam }) => {
+    queryFn: ({ pageParam }) => {
       const { startIso, endIso } = getDateFilterRange(filters.dateFrom, filters.dateTo);
-      const result = await fetchSessionsPage({
+      return fetchSessionsPage({
         cursor: pageParam,
         limit: SESSION_LIMITS.JOURNAL_PAGE_SIZE,
         categoryIds: filters.categoryIds,
@@ -28,8 +28,6 @@ export function useSessionsList(filters: SessionListFilters) {
         endIso,
         withCount: pageParam === null,
       });
-      if (!result) throw new Error('sessions page fetch failed');
-      return result;
     },
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });

@@ -16,7 +16,6 @@ import {
   filterSessionsByTab,
   getTotalFocusSeconds,
   getHourlyFocusSeconds,
-  getSessionCount,
   getAvgSessionSeconds,
 } from '@pomoroutine/shared';
 
@@ -209,7 +208,7 @@ export function getTabStats(
   const filtered = filterSessionsByTab(periodSessions, tab, today);
   return {
     focusSeconds: getTotalFocusSeconds(filtered),
-    count: getSessionCount(filtered),
+    count: filtered.length,
     avgSeconds: getAvgSessionSeconds(filtered),
     focusTrend: getFocusTrendData(filtered, tasks, categories, tab, today),
     categoryFocus: getCategoryFocusData(filtered, tasks, categories),

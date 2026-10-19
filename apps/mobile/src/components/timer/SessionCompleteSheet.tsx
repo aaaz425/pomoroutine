@@ -26,17 +26,88 @@ import { SessionMemoField } from './SessionMemoField';
 import { SessionActionButtons } from './SessionActionButtons';
 
 function SessionCompleteSheetContent() {
-  const theme = useThemeTokens();
   const { session } = useAuth();
-
   const sessionEnded = useTimerStore((s) => s.sessionEnded);
+  const sessionEndedAt = useTimerStore((s) => s.sessionEndedAt);
+
+  if (!sessionEnded || sessionEndedAt === null) return null;
+  return session ? <RecordForm sessionEndedAt={sessionEndedAt} /> : <GuestPrompt />;
+}
+
+function GuestPrompt() {
+  const theme = useThemeTokens();
+  const dismissSessionRecord = useTimerStore((s) => s.dismissSessionRecord);
+  const cycleCount = useTimerStore((s) => s.cycleCount);
+  const mode = useTimerStore((s) => s.mode);
+  const accFocusSeconds = useTimerStore((s) => s.accFocusSeconds);
+
+  return (
+    <Modal visible animationType="fade" transparent onRequestClose={dismissSessionRecord}>
+      <View style={styles.root}>
+        <Pressable style={styles.backdrop} onPress={dismissSessionRecord} />
+        <View style={styles.sheetWrap} pointerEvents="box-none">
+          <View style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <SafeAreaView edges={['bottom']}>
+              <View style={styles.scrollOuter}>
+                <View style={styles.headerGroup}>
+                  <SessionCompleteHeader />
+                </View>
+
+                <Text
+                  style={[
+                    styles.summaryText,
+                    { color: theme.mutedForeground, fontFamily: FONTS.sansRegular },
+                  ]}
+                >
+                  {mode !== 'free' && `${cycleCount}사이클 동안 `}
+                  {formatDuration(accFocusSeconds)} 집중했어요
+                </Text>
+
+                <View style={styles.guestActions}>
+                  <Pressable
+                    onPress={() => {
+                      dismissSessionRecord();
+                      router.push('/login');
+                    }}
+                    style={[styles.cta, { backgroundColor: theme.primary }]}
+                  >
+                    <Text
+                      style={[
+                        styles.ctaText,
+                        { color: theme.primaryForeground, fontFamily: FONTS.sansSemiBold },
+                      ]}
+                    >
+                      로그인하고 기록 남기기
+                    </Text>
+                  </Pressable>
+                  <Pressable onPress={dismissSessionRecord} style={styles.closeButton}>
+                    <Text
+                      style={[
+                        styles.closeText,
+                        { color: theme.mutedForeground, fontFamily: FONTS.sansMedium },
+                      ]}
+                    >
+                      닫기
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+            </SafeAreaView>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+function RecordForm({ sessionEndedAt }: { sessionEndedAt: number }) {
+  const theme = useThemeTokens();
   const dismissSessionRecord = useTimerStore((s) => s.dismissSessionRecord);
   const cycleCount = useTimerStore((s) => s.cycleCount);
   const settings = useTimerStore((s) => s.settings);
   const mode = useTimerStore((s) => s.mode);
   const currentTaskId = useTimerStore((s) => s.currentTaskId);
   const sessionStartedAt = useTimerStore((s) => s.sessionStartedAt);
-  const sessionEndedAt = useTimerStore((s) => s.sessionEndedAt);
   const accFocusSeconds = useTimerStore((s) => s.accFocusSeconds);
   const rawFocusPeriods = useTimerStore((s) => s.rawFocusPeriods);
 
@@ -60,88 +131,10 @@ function SessionCompleteSheetContent() {
     snapBackOnDismiss: true,
   });
 
-  if (!sessionEnded || sessionEndedAt === null) return null;
-
-  function resetForm() {
-    setNote('');
-    setFocusRating(null);
-    setDistractionTags([]);
-    setSelectedTaskId(null);
-    setPendingAction(null);
-  }
-
-  function handleSkip() {
-    dismissSessionRecord();
-    resetForm();
-  }
-
-  if (!session) {
-    return (
-      <Modal visible={sessionEnded} animationType="fade" transparent onRequestClose={handleSkip}>
-        <View style={styles.root}>
-          <Pressable style={styles.backdrop} onPress={handleSkip} />
-          <View style={styles.sheetWrap} pointerEvents="box-none">
-            <View
-              style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.border }]}
-            >
-              <SafeAreaView edges={['bottom']}>
-                <View style={styles.scrollOuter}>
-                  <View style={styles.headerGroup}>
-                    <SessionCompleteHeader />
-                  </View>
-
-                  <Text
-                    style={[
-                      styles.summaryText,
-                      { color: theme.mutedForeground, fontFamily: FONTS.sansRegular },
-                    ]}
-                  >
-                    {mode !== 'free' && `${cycleCount}사이클 동안 `}
-                    {formatDuration(accFocusSeconds)} 집중했어요
-                  </Text>
-
-                  <View style={styles.guestActions}>
-                    <Pressable
-                      onPress={() => {
-                        resetForm();
-                        dismissSessionRecord();
-                        router.push('/login');
-                      }}
-                      style={[styles.cta, { backgroundColor: theme.primary }]}
-                    >
-                      <Text
-                        style={[
-                          styles.ctaText,
-                          { color: theme.primaryForeground, fontFamily: FONTS.sansSemiBold },
-                        ]}
-                      >
-                        로그인하고 기록 남기기
-                      </Text>
-                    </Pressable>
-                    <Pressable onPress={handleSkip} style={styles.closeButton}>
-                      <Text
-                        style={[
-                          styles.closeText,
-                          { color: theme.mutedForeground, fontFamily: FONTS.sansMedium },
-                        ]}
-                      >
-                        닫기
-                      </Text>
-                    </Pressable>
-                  </View>
-                </View>
-              </SafeAreaView>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    );
-  }
-
   const isTaskSession = currentTaskId !== null;
 
   async function handleSave() {
-    if (isSaving || sessionEndedAt === null) return;
+    if (isSaving) return;
     setIsSaving(true);
     const { error } = await insertSession(
       buildSessionRecord(
@@ -170,19 +163,10 @@ function SessionCompleteSheetContent() {
     }
     toast(TOAST_MESSAGES.sessionSaved);
     dismissSessionRecord();
-    setNote('');
-    setFocusRating(null);
-    setDistractionTags([]);
-    setSelectedTaskId(null);
   }
 
   return (
-    <Modal
-      visible={sessionEnded}
-      animationType="fade"
-      transparent
-      onRequestClose={() => setPendingAction('skip')}
-    >
+    <Modal visible animationType="fade" transparent onRequestClose={() => setPendingAction('skip')}>
       {/* RN <Modal>은 별도 네이티브 루트라 앱 루트의 GestureHandlerRootView가 닿지 않음 */}
       <GestureHandlerRootView style={styles.root}>
         <Pressable style={styles.backdrop} onPress={() => setPendingAction('skip')} />
@@ -264,7 +248,7 @@ function SessionCompleteSheetContent() {
           description="작성한 메모는 저장되지 않아요"
           confirmLabel="건너뛰기"
           destructive
-          onConfirm={handleSkip}
+          onConfirm={dismissSessionRecord}
           onCancel={() => setPendingAction(null)}
         />
 
