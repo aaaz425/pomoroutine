@@ -4,7 +4,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
-import { isValidRedirectTarget } from '@/lib/supabase/redirect';
+import { toSafeRedirectPath } from '@/lib/supabase/redirect';
 import {
   LoginCredentialsSchema,
   SignupCredentialsSchema,
@@ -56,8 +56,7 @@ export async function login(formData: FormData): Promise<AuthActionResult> {
     return { error: AUTH_ERROR_MESSAGES.loginFailed };
   }
 
-  const redirectTarget = formData.get('redirectTo');
-  redirect(isValidRedirectTarget(redirectTarget) ? redirectTarget : '/');
+  redirect(toSafeRedirectPath(formData.get('redirectTo'), '/'));
 }
 
 export async function signup(formData: FormData): Promise<AuthActionResult> {
@@ -143,8 +142,7 @@ export async function updatePassword(formData: FormData): Promise<AuthActionResu
 
 export async function loginWithKakao(formData: FormData): Promise<void> {
   const origin = (await headers()).get('origin') ?? '';
-  const redirectTarget = formData.get('redirectTo');
-  const next = isValidRedirectTarget(redirectTarget) ? redirectTarget : '/';
+  const next = toSafeRedirectPath(formData.get('redirectTo'), '/');
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
