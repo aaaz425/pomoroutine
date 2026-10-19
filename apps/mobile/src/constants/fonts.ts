@@ -4,8 +4,6 @@ export const FONTS = {
   sansMedium: 'Pretendard-Medium',
   sansSemiBold: 'Pretendard-SemiBold',
   sansBold: 'Pretendard-Bold',
-  monoRegular: 'GeistMono-Regular',
-  monoSemiBold: 'GeistMono-SemiBold',
   monoBold: 'GeistMono-Bold',
 } as const;
 

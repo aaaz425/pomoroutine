@@ -49,8 +49,6 @@ export default function RootLayout() {
     'Pretendard-Medium': require('@/assets/fonts/Pretendard-Medium.ttf'),
     'Pretendard-SemiBold': require('@/assets/fonts/Pretendard-SemiBold.ttf'),
     'Pretendard-Bold': require('@/assets/fonts/Pretendard-Bold.ttf'),
-    'GeistMono-Regular': require('@/assets/fonts/GeistMono-Regular.ttf'),
-    'GeistMono-SemiBold': require('@/assets/fonts/GeistMono-SemiBold.ttf'),
     'GeistMono-Bold': require('@/assets/fonts/GeistMono-Bold.ttf'),
   });
 
