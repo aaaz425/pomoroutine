@@ -1,9 +1,15 @@
 import { useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
-import { deriveTimerDisplay, getPhaseEndSchedule } from '@pomoroutine/shared';
+import {
+  deriveTimerDisplay,
+  getPhaseEndMessage,
+  getPhaseEndSchedule,
+  TOAST_MESSAGES,
+} from '@pomoroutine/shared';
 import { useTimerStore, useSettingsStore, useHydrated } from '@/store/StoreProvider';
 import { syncTimerNotifications } from '@/lib/notifications';
 import { playAlarm } from '@/lib/sound';
+import { toast } from '@/lib/toast';
 import { ALARM_MAX_OVERDUE_SECONDS } from '@/constants/ux';
 import { useKeepAwake } from '@/hooks/useKeepAwake';
 
@@ -71,6 +77,16 @@ export function TimerEngine() {
           result.overdueSeconds <= ALARM_MAX_OVERDUE_SECONDS;
         complete();
         if (isFresh) {
+          toast(
+            TOAST_MESSAGES.phaseEnded(
+              getPhaseEndMessage({
+                phase,
+                cycleCount,
+                totalCycles: settings.totalCycles,
+                shortBreakMinutes: settings.shortBreakMinutes,
+              }),
+            ),
+          );
           if (soundAlert) {
             void playAlarm({
               type: soundType,
@@ -106,6 +122,7 @@ export function TimerEngine() {
     accFocusSeconds,
     cycleCount,
     focusMinutes,
+    settings,
     soundAlert,
     soundType,
     soundVolume,

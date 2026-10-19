@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { deriveTimerDisplay, getPhaseEndMessage } from '@pomoroutine/shared';
+import { deriveTimerDisplay, getPhaseEndMessage, TOAST_MESSAGES } from '@pomoroutine/shared';
 import { useTimerStore, useSettingsStore, useHydrated } from '@/store/StoreProvider';
 import { playAlarm, sendNotification } from '@/lib/notifications';
+import { toast } from '@/lib/toast';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { ALARM_MAX_OVERDUE_SECONDS } from '@/lib/constants/ux';
 
@@ -63,6 +64,7 @@ export function TimerEngine() {
           if (soundAlert)
             playAlarm({ type: soundType, volume: soundVolume, repeatCount: soundRepeatCount });
           if (browserNotification) sendNotification(message.title, message.body);
+          if (document.visibilityState === 'visible') toast(TOAST_MESSAGES.phaseEnded(message));
         }
         complete();
       }
