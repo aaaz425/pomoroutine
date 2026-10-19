@@ -1,8 +1,8 @@
 'use client';
 
+import { formatSessionProgressLabel } from '@pomoroutine/shared';
 import { useTimerStore } from '@/store/StoreProvider';
 import { CycleIndicator } from '@/components/timer/CycleIndicator';
-import { formatSessionProgressLabel } from '@/lib/sessionUtils';
 
 // CycleIndicator는 free 모드에서 스스로 숨으므로 여기서 별도 분기하지 않는다
 export function SessionProgressBadge() {

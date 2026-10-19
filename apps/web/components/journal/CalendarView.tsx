@@ -1,12 +1,11 @@
 'use client';
 
+import { getMonthlyActivityData, getSessionsForDate } from '@pomoroutine/shared';
 import { useState } from 'react';
 import { CalendarMonthNav } from '@/components/journal/CalendarMonthNav';
 import { CalendarMonthGrid } from '@/components/journal/CalendarMonthGrid';
 import { CalendarDayModal } from '@/components/journal/CalendarDayModal';
 import { useMonthSessions } from '@/hooks/useMonthSessions';
-import { getMonthlyActivityData } from '@/lib/dashboard';
-import { getSessionsForDate } from '@/lib/sessionUtils';
 import { ErrorFallback } from '@/components/shared/ErrorFallback';
 import type { Category, Session, Task } from '@/types';
 

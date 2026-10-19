@@ -1,12 +1,12 @@
 'use client';
 
-import { CategoryBadge } from '@/components/shared/CategoryBadge';
-import { Badge } from '@/components/shared/Badge';
 import {
   formatDuration,
   formatSessionTimeSummary,
   getSessionOrdinalTitle,
-} from '@/lib/sessionUtils';
+} from '@pomoroutine/shared';
+import { CategoryBadge } from '@/components/shared/CategoryBadge';
+import { Badge } from '@/components/shared/Badge';
 import { FOCUS_RATING_LABELS } from '@/lib/constants';
 import type { Category, Session, Task } from '@/types';
 

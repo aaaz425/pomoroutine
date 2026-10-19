@@ -1,10 +1,9 @@
 import { useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Plus, X } from 'lucide-react-native';
-import { DISTRACTION_TAGS, INPUT_LIMITS } from '@pomoroutine/shared';
+import { DISTRACTION_TAGS, INPUT_LIMITS, withAlpha } from '@pomoroutine/shared';
 import { Text } from '@/components/shared/Text';
 import { TextInput } from '@/components/shared/TextInput';
-import { withAlpha } from '@/constants/timerColors';
 import { FONTS } from '@/constants/fonts';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
 

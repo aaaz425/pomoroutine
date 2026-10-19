@@ -49,13 +49,22 @@ describe('getSettingsActions', () => {
     expect(api.saveSettings).toHaveBeenCalledWith({ ...DEFAULT_APP_SETTINGS, soundAlert: false });
   });
 
-  it('저장 실패면 바꾼 항목만 이전 값으로 되돌리고 알림', async () => {
+  it('저장 실패면 바꾼 항목만 이전 값으로 되돌려 동시에 성공한 변경은 유지하고 알림', async () => {
     const actions = setup({ nickname: '이전' });
-    vi.mocked(api.saveSettings).mockResolvedValue({ error: true });
+    let failNicknameSave = () => {};
+    vi.mocked(api.saveSettings)
+      .mockImplementationOnce(
+        () => new Promise((resolve) => (failNicknameSave = () => resolve({ error: true }))),
+      )
+      .mockResolvedValueOnce({ error: false });
 
-    await actions.setNickname('새 이름');
+    const nicknameSave = actions.setNickname('새 이름');
+    await actions.setSoundAlert(false);
+    failNicknameSave();
+    await nicknameSave;
 
     expect(cached()?.nickname).toBe('이전');
+    expect(cached()?.soundAlert).toBe(false);
     expect(api.toast).toHaveBeenCalledWith(TOAST_MESSAGES.settingsSaveFailed);
   });
 

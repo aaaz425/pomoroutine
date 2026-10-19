@@ -13,11 +13,11 @@
 | Zustand 스토어 | `store/` | `store/` |
 | 훅 | `hooks/` | `hooks/` |
 | 상수 | `lib/constants/` | `constants/` |
-| Supabase 조회와 저장 | `lib/supabase/` | `lib/supabase/` |
+| Supabase 조회와 저장 | `lib/supabase/` — 기록과 통계 | `lib/supabase/` — 기록 |
 | 도메인 순수 함수 | `lib/` | `lib/` |
 | 타입과 스키마 | `types/` | `types/` |
 
-- 웹과 모바일이 함께 쓰는 순수 로직은 `packages/shared`로 옮김 — 타이머 스토어 팩토리, 작업과 설정 조회와 변경, 통계 집계, 뱃지, 입력 제한 상수, 공용 타입
+- 웹과 모바일이 함께 쓰는 순수 로직은 `packages/shared`로 옮김 — 타이머 스토어 팩토리, 작업, 카테고리, 설정의 Supabase 조회와 변경, 기록 생성 계산, 공용 Zod 스키마, 통계 집계, 뱃지, 입력 제한 상수, 공용 타입
 - 한쪽 앱에만 쓰이는 로직은 그 앱의 `lib/`에 둠
 - 토스트, 안내 화면, 인증 에러 문구는 화면에 직접 쓰지 않고 shared `TOAST_MESSAGES`, `NOTICE_MESSAGES`, `AUTH_ERROR_MESSAGES`에 둠 — 토스트는 성공, 정보, 실패 중 종류를 함께 지정
 

@@ -13,22 +13,11 @@ import type {
   YearlyCategoryMinutes,
 } from '@/types';
 import {
-  getMonthlyActivityData,
   filterSessionsByTab,
   getTotalFocusSeconds,
   getHourlyFocusSeconds,
-  getSessionCount,
   getAvgSessionSeconds,
 } from '@pomoroutine/shared';
-
-export {
-  getMonthlyActivityData,
-  filterSessionsByTab,
-  getTotalFocusSeconds,
-  getHourlyFocusSeconds,
-  getSessionCount,
-  getAvgSessionSeconds,
-};
 
 interface CategoryMinutesRow {
   label: string;
@@ -219,7 +208,7 @@ export function getTabStats(
   const filtered = filterSessionsByTab(periodSessions, tab, today);
   return {
     focusSeconds: getTotalFocusSeconds(filtered),
-    count: getSessionCount(filtered),
+    count: filtered.length,
     avgSeconds: getAvgSessionSeconds(filtered),
     focusTrend: getFocusTrendData(filtered, tasks, categories, tab, today),
     categoryFocus: getCategoryFocusData(filtered, tasks, categories),

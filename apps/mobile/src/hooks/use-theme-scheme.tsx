@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Appearance, useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { DEFAULT_COLOR_THEME, type ColorThemeKey } from '@pomoroutine/shared';
+import { COLOR_THEME_KEYS, DEFAULT_COLOR_THEME, type ColorThemeKey } from '@pomoroutine/shared';
 import { getThemeTokens, setActiveColorTheme, type ThemeTokens } from '@/constants/timerColors';
 
 type Scheme = 'light' | 'dark';
@@ -31,9 +31,10 @@ export function ThemeModeProvider({ children }: { children: ReactNode }) {
       }
     });
     AsyncStorage.getItem(COLOR_THEME_STORAGE_KEY).then((stored) => {
-      if (stored === 'midnight' || stored === 'sunset' || stored === 'ocean' || stored === 'mono') {
-        setActiveColorTheme(stored);
-        setColorThemeState(stored);
+      const key = COLOR_THEME_KEYS.find((k) => k === stored);
+      if (key) {
+        setActiveColorTheme(key);
+        setColorThemeState(key);
       }
     });
   }, []);

@@ -5,13 +5,13 @@ import { Text } from '@/components/shared/Text';
 import { useTimerStore } from '@/store/StoreProvider';
 import { useRotatingMessage } from '@/hooks/useRotatingMessage';
 import { useCurrentTask } from '@/hooks/useCurrentTask';
+import { useSettings } from '@/hooks/useSettings';
 import { useSessionEndFlow } from '@/hooks/useSessionEndFlow';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
 import { CategoryBadge } from '@/components/shared/CategoryBadge';
 import { ConfirmModal } from '@/components/shared/ConfirmModal';
-import { withAlpha } from '@/constants/timerColors';
+import { withAlpha, MESSAGE_ROTATE_INTERVAL_MS } from '@pomoroutine/shared';
 import { FONTS } from '@/constants/fonts';
-import { MESSAGE_ROTATE_INTERVAL_MS, MOTIVATIONAL_MESSAGES } from '@/constants/messages';
 import { TimerRing } from './TimerRing';
 import { CycleIndicator } from './CycleIndicator';
 
@@ -26,11 +26,8 @@ export function FocusMode() {
   const { showEndConfirm, requestEnd, confirmEnd, cancelEnd } = useSessionEndFlow();
   const insets = useSafeAreaInsets();
 
-  const message = useRotatingMessage(
-    MOTIVATIONAL_MESSAGES,
-    MESSAGE_ROTATE_INTERVAL_MS,
-    isFocusMode,
-  );
+  const messages = useSettings((s) => s.motivationalMessages);
+  const message = useRotatingMessage(messages, MESSAGE_ROTATE_INTERVAL_MS, isFocusMode);
 
   return (
     <Modal visible={isFocusMode} animationType="fade" onRequestClose={exitFocusMode}>

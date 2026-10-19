@@ -1,5 +1,11 @@
 'use client';
 
+import {
+  getEarnedBadgeIds,
+  buildShareCardData,
+  formatCount,
+  formatDuration,
+} from '@pomoroutine/shared';
 import { ChartColumn, CircleCheck, Flame, Share2, Timer } from 'lucide-react';
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
@@ -15,11 +21,9 @@ import { HourlyChart } from '@/components/dashboard/HourlyChart';
 import { MonthlyActivityCard } from '@/components/dashboard/MonthlyActivityCard';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { Button } from '@/components/ui/button';
-import { getEarnedBadgeIds, toBadgeProgress } from '@/lib/badges';
+import { toBadgeProgress } from '@/lib/badges';
 import { getTabStats } from '@/lib/dashboard';
-import { buildShareCardData } from '@/lib/shareCard';
 import type { TabType } from '@/types';
-import { formatCount, formatDuration } from '@/lib/sessionUtils';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useDelayedFlag } from '@/hooks/useDelayedFlag';
 import { useDelayedHydration } from '@/hooks/useDelayedHydration';

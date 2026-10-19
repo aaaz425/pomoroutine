@@ -1,5 +1,6 @@
 'use client';
 
+import { getSessionOrdinalTitle } from '@pomoroutine/shared';
 import { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useTasks, useCategories } from '@/hooks/useTasks';
@@ -11,7 +12,6 @@ import { SessionDetailHeader } from '@/components/journal/SessionDetailHeader';
 import { SessionStatsRow } from '@/components/journal/SessionStatsRow';
 import { SessionTaskReassignModal } from '@/components/journal/SessionTaskReassignModal';
 import { useSessionMutations } from '@/hooks/useSessionMutations';
-import { getSessionOrdinalTitle } from '@/lib/sessionUtils';
 import type { Category, FocusRating, Session, Task } from '@/types';
 
 interface Props {
@@ -48,9 +48,9 @@ export function JournalDetailPanel({
   const categories = useCategories();
 
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState<EditDraft | null>(null);
   const [initialDraft, setInitialDraft] = useState<EditDraft | null>(null);
+  const isEditing = draft !== null;
   const isDirty = isEditing && JSON.stringify(draft) !== JSON.stringify(initialDraft);
 
   useEffect(() => {
@@ -80,11 +80,9 @@ export function JournalDetailPanel({
     };
     setDraft(initial);
     setInitialDraft(initial);
-    setIsEditing(true);
   }
 
   function handleCancelEdit() {
-    setIsEditing(false);
     setDraft(null);
   }
 
@@ -106,7 +104,6 @@ export function JournalDetailPanel({
     };
     updateSession({ id: session.id, patch }, { onError: () => onUpdated(previous) });
     onUpdated(patch);
-    setIsEditing(false);
     setDraft(null);
   }
 

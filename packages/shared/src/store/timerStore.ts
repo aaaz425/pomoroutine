@@ -27,7 +27,6 @@ export interface TimerStorePorts {
   persistSnapshot?: (snapshot: TimerSnapshot) => void;
   /** hydrate()에서 1회 호출 — 저장된 스냅샷을 fallback 위에 병합해 반환. 미주입 시 hydrate()는 사실상 no-op */
   loadSnapshot?: (fallback: TimerSnapshot) => TimerSnapshot;
-  /** endSession()에서 총 집중 시간이 5초 미만이라 세션을 폐기하기 직전 호출됨(웹: toast) */
   onSessionTooShort?: () => void;
 }
 
@@ -42,8 +41,6 @@ export interface TimerStore extends TimerSnapshot {
   start: () => void;
   pause: () => void;
   complete: () => void; // 타이머 0 도달 시 훅이 호출
-  reset: () => void;
-  setPhase: (phase: TimerPhase) => void;
   setCurrentTask: (taskId: string | null) => void;
   completeCycle: () => void;
   updateSettings: (patch: Partial<TimerSettings>) => void;
@@ -191,16 +188,6 @@ export function createTimerStore(ports: TimerStorePorts = {}) {
             lastActiveAt: now,
           });
         }
-      },
-
-      reset: () => {
-        const seconds = phaseSeconds(get().settings);
-        set({ remainingSeconds: seconds[get().phase], startedAt: null });
-      },
-
-      setPhase: (phase) => {
-        const seconds = phaseSeconds(get().settings);
-        set({ phase, remainingSeconds: seconds[phase], startedAt: null });
       },
 
       setCurrentTask: (taskId) => set({ currentTaskId: taskId }),

@@ -6,7 +6,7 @@ import { Text } from '@/components/shared/Text';
 import { useAuth } from '@/store/AuthProvider';
 import { AuthShell } from '@/components/auth/AuthShell';
 import { TextInput } from '@/components/shared/TextInput';
-import { withAlpha } from '@/constants/timerColors';
+import { withAlpha } from '@pomoroutine/shared';
 import { FONTS } from '@/constants/fonts';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
 

@@ -1,4 +1,4 @@
-import { formatDuration } from '@/lib/sessionUtils';
+import { formatDuration } from '@pomoroutine/shared';
 import type { Session } from '@/types';
 
 interface Props {

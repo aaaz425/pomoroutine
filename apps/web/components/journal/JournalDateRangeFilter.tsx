@@ -1,9 +1,9 @@
 'use client';
 
+import { toLocalDateKey } from '@pomoroutine/shared';
 import { useState } from 'react';
 import { DatePickerInput } from '@/components/shared/DatePickerInput';
 import { useMarkedDates } from '@/hooks/useMarkedDates';
-import { toLocalDateKey } from '@/lib/sessionUtils';
 
 interface Props {
   dateFrom: string;

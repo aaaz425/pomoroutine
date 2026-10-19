@@ -6,26 +6,21 @@ import type {
   FocusRating,
   Task,
   Category,
+  Session,
+  SessionGroup as SharedSessionGroup,
+  DayActivity,
 } from '@pomoroutine/shared';
 
-export type { TimerPhase, TimerMode, TimerSettings, FocusPeriod, FocusRating, Task, Category };
-
-export interface Session {
-  id: string;
-  taskId: string | null;
-  title: string | null; // taskId와 독립된 세션별 라벨, 저널 상세 편집에서만 설정
-  mode: TimerMode; // 'free'는 completedCycles/totalCycles가 0 — 저널/모달에서 "N/M 사이클" 대신 별도 표시 필요
-  startedAt: string; // ISO 8601, 시간대 분석용
-  endedAt: string; // ISO 8601, 경과 시간 ≠ 집중 시간
-  completedCycles: number;
-  totalCycles: number;
-  focusSeconds: number; // endedAt - startedAt 금지
-  pausedSeconds: number;
-  focusPeriods: FocusPeriod[]; // 타임라인용 실제 구간
-  note: string | null;
-  focusRating: FocusRating | null; // 3단계 자가 평점, 옵션
-  distractionTags: string[]; // DISTRACTION_TAGS의 id 배열, 옵션
-}
+export type {
+  TimerPhase,
+  TimerMode,
+  TimerSettings,
+  FocusPeriod,
+  FocusRating,
+  Task,
+  Category,
+  Session,
+};
 
 export type DashboardSession = Pick<
   Session,
@@ -34,14 +29,10 @@ export type DashboardSession = Pick<
 
 export type { SoundType } from '@pomoroutine/shared';
 
-export type TabType = 'today' | 'week' | 'month' | 'all';
+export type { TabType } from '@pomoroutine/shared';
+export type { DayActivity };
 
 export type JournalTab = 'list' | 'calendar';
-
-export interface DayActivity {
-  date: string; // YYYY-MM-DD
-  focusMinutes: number;
-}
 
 export interface PeriodStat {
   focusSeconds: number;
@@ -110,12 +101,7 @@ export interface CategoryFocusItem {
   color: string;
 }
 
-export interface SessionGroup {
-  dateKey: string;
-  displayLabel: string;
-  totalFocusSeconds: number;
-  sessions: Session[];
-}
+export type SessionGroup = SharedSessionGroup<Session>;
 
 export interface DistractionFrequency {
   tagId: string;

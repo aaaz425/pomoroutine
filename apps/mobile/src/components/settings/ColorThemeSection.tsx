@@ -1,7 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
-import { COLOR_THEME_KEYS, COLOR_THEMES } from '@pomoroutine/shared';
+import { COLOR_THEME_KEYS, COLOR_THEMES, withAlpha } from '@pomoroutine/shared';
 import { Text } from '@/components/shared/Text';
-import { withAlpha } from '@/constants/timerColors';
 import { FONTS } from '@/constants/fonts';
 import { useColorTheme, useThemeScheme, useThemeTokens } from '@/hooks/use-theme-scheme';
 

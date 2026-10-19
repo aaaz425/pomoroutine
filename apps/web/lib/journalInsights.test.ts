@@ -69,13 +69,13 @@ describe('getFocusRatingTrend', () => {
   it('최근 7일과 이전 7일의 평균 집중도를 정상적으로 비교', () => {
     const sessions = [
       makeSession({ startedAt: '2024-03-15T09:00:00', focusRating: 3 }),
-      makeSession({ startedAt: '2024-03-10T09:00:00', focusRating: 1 }),
+      makeSession({ startedAt: '2024-03-10T09:00:00', focusRating: 3 }),
       makeSession({ startedAt: '2024-03-08T23:00:00', focusRating: 2 }),
-      makeSession({ startedAt: '2024-03-03T09:00:00', focusRating: 2 }),
+      makeSession({ startedAt: '2024-03-03T09:00:00', focusRating: 1 }),
     ];
     const result = getFocusRatingTrend(sessions, 7, TODAY);
-    expect(result.recentAvg).toBe(2);
-    expect(result.previousAvg).toBe(2);
+    expect(result.recentAvg).toBe(3);
+    expect(result.previousAvg).toBe(1.5);
     expect(result.sampleSize).toBe(2);
   });
 

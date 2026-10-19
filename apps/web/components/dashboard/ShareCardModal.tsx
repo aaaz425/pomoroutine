@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { COLOR_THEMES, type ShareCardAction } from '@pomoroutine/shared';
 import { Modal } from '@/components/shared/Modal';
 import { Button } from '@/components/ui/button';
@@ -35,12 +35,6 @@ export function ShareCardModal({ data, onClose }: Props) {
     const ctx = node?.getContext('2d');
     if (ctx) void drawShareCard(ctx, data, palette);
   };
-
-  // 콜백 ref는 최초 마운트 시점만 커버하므로, 마운트 후 컬러 테마가 바뀌는 경우는 이 effect가 처리
-  useEffect(() => {
-    const ctx = canvasRef.current?.getContext('2d');
-    if (ctx) void drawShareCard(ctx, data, palette);
-  }, [data, palette]);
 
   const sendToNativeApp = (action: ShareCardAction) => {
     if (!canvasRef.current) return;

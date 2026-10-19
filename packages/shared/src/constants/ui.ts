@@ -1,4 +1,7 @@
-// 웹 CATEGORY_PRESET_COLORS와 값이 동일한 프리셋 단축 버튼 목록 — 실제 색상은 컬러피커로 고른 임의의 hex도 저장될 수 있음
+import type { SoundType } from '../types/settings';
+
+export const MESSAGE_ROTATE_INTERVAL_MS = 5000;
+
 export const CATEGORY_PRESET_COLORS: { hex: string; label: string }[] = [
   { hex: '#3b82f6', label: '파란색' },
   { hex: '#22c55e', label: '초록색' },
@@ -8,3 +11,10 @@ export const CATEGORY_PRESET_COLORS: { hex: string; label: string }[] = [
   { hex: '#ec4899', label: '분홍색' },
   { hex: '#eab308', label: '노란색' },
 ];
+
+export const SOUND_TYPE_LABELS: Record<SoundType, string> = {
+  sine: '기본',
+  chime: '차임',
+  bell: '벨',
+  digital: '디지털',
+};

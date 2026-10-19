@@ -1,19 +1,5 @@
 import { z } from 'zod';
-import { TIMER_LIMITS, INPUT_LIMITS, SOUND_LIMITS, AUTH_LIMITS } from '@/lib/constants/limits';
-
-export const CategorySchema = z.object({
-  id: z.string(),
-  // 카테고리 이름도 짧은 라벨이라 닉네임과 동일 기준(NICKNAME_MAX_LENGTH) 재사용
-  name: z.string().max(INPUT_LIMITS.NICKNAME_MAX_LENGTH),
-  color: z.string().refine((v) => /^#[0-9a-f]{6}$/i.test(v), { message: 'hex color required' }),
-});
-
-export const TaskSchema = z.object({
-  id: z.string(),
-  title: z.string().max(INPUT_LIMITS.TITLE_MAX_LENGTH),
-  categoryId: z.string(),
-  createdAt: z.string(),
-});
+import { INPUT_LIMITS } from '@/lib/constants/limits';
 
 export const FocusPeriodSchema = z.object({
   start: z.string(),
@@ -106,94 +92,18 @@ export const DashboardSummarySchema = z.object({
   badgeStats: BadgeStatsSchema,
 });
 
-export const TimerSettingsSchema = z.object({
-  focusMinutes: z.number().min(TIMER_LIMITS.FOCUS_MINUTES_MIN).max(TIMER_LIMITS.FOCUS_MINUTES_MAX),
-  shortBreakMinutes: z
-    .number()
-    .min(TIMER_LIMITS.BREAK_MINUTES_MIN)
-    .max(TIMER_LIMITS.BREAK_MINUTES_MAX),
-  totalCycles: z.number().min(TIMER_LIMITS.CYCLES_MIN).max(TIMER_LIMITS.CYCLES_MAX),
-});
-
-// 새로고침 복구용 — 진행 중이거나 아직 기록 안 한(sessionEnded) 활성 타이머 1개의 스냅샷
-export const RawFocusPeriodSchema = z.object({
-  start: z.number(),
-  end: z.number(),
-});
-
-export const ActiveTimerStateSchema = z.object({
-  phase: z.enum(['focus', 'short-break']),
-  // 기존 localStorage 데이터에는 없는 필드이므로 .default() 필수
-  mode: z.enum(['pomodoro', 'free']).default('pomodoro'),
-  remainingSeconds: z.number(),
-  startedAt: z.number().nullable(),
-  cycleCount: z.number(),
-  currentTaskId: z.string().nullable(),
-  settings: TimerSettingsSchema,
-  sessionEnded: z.boolean(),
-  sessionStarted: z.boolean(),
-  sessionStartedAt: z.number().nullable(),
-  sessionEndedAt: z.number().nullable(),
-  accFocusSeconds: z.number(),
-  rawFocusPeriods: z.array(RawFocusPeriodSchema),
-  // 기존 localStorage 데이터에는 없는 필드이므로 .default() 필수 — 없으면 parse 실패 시 진행 중이던 세션이 전부 초기화됨
-  lastActiveAt: z.number().nullable().default(null),
-});
-
-export const AppSettingsSchema = z.object({
-  nickname: z.string().max(INPUT_LIMITS.NICKNAME_MAX_LENGTH),
-  browserNotification: z.boolean(),
-  soundAlert: z.boolean(),
-  // 기존 localStorage 데이터에는 없는 필드이므로 .default() 필수 — 없으면 parse 실패 시 전체 설정이 초기화됨
-  soundType: z.enum(['sine', 'chime', 'bell', 'digital']).default('sine'),
-  soundVolume: z.number().min(SOUND_LIMITS.VOLUME_MIN).max(SOUND_LIMITS.VOLUME_MAX).default(70),
-  soundRepeatCount: z.number().min(SOUND_LIMITS.REPEAT_MIN).max(SOUND_LIMITS.REPEAT_MAX).default(2),
-  motivationalMessages: z
-    .array(z.string().min(INPUT_LIMITS.MESSAGE_LENGTH_MIN).max(INPUT_LIMITS.MESSAGE_LENGTH_MAX))
-    .min(INPUT_LIMITS.MESSAGE_COUNT_MIN)
-    .max(INPUT_LIMITS.MESSAGE_COUNT_MAX),
-  defaultTimerSettings: TimerSettingsSchema,
-  keepScreenAwake: z.boolean().default(false),
-});
-
-export const LoginCredentialsSchema = z.object({
-  email: z.string().email({ message: '올바른 이메일 형식이 아니에요' }),
-  password: z.string().min(1, { message: '비밀번호를 입력해주세요' }),
-});
-
-export const SignupCredentialsSchema = z
-  .object({
-    email: z.string().email({ message: '올바른 이메일 형식이 아니에요' }),
-    password: z
-      .string()
-      .min(AUTH_LIMITS.PASSWORD_MIN_LENGTH, { message: '비밀번호는 8자 이상이어야 해요' }),
-    passwordConfirm: z.string(),
-  })
-  .refine((data) => data.password === data.passwordConfirm, {
-    message: '비밀번호가 일치하지 않아요',
-    path: ['passwordConfirm'],
-  });
-
-export const ForgotPasswordSchema = z.object({
-  email: z.string().email({ message: '올바른 이메일 형식이 아니에요' }),
-});
-
-export const NewPasswordSchema = z
-  .object({
-    password: z
-      .string()
-      .min(AUTH_LIMITS.PASSWORD_MIN_LENGTH, { message: '비밀번호는 8자 이상이어야 해요' }),
-    passwordConfirm: z.string(),
-  })
-  .refine((data) => data.password === data.passwordConfirm, {
-    message: '비밀번호가 일치하지 않아요',
-    path: ['passwordConfirm'],
-  });
-
 export const STORAGE_KEYS = {
   activeTimer: 'pomoroutine:active-timer',
   theme: 'theme',
   colorTheme: 'pomoroutine:color-theme',
 } as const;
 
-export { DEFAULT_TIMER_SETTINGS, DEFAULT_CATEGORIES } from '@pomoroutine/shared';
+export {
+  TaskSchema,
+  ActiveTimerStateSchema,
+  LoginCredentialsSchema,
+  SignupCredentialsSchema,
+  ForgotPasswordSchema,
+  NewPasswordSchema,
+  DEFAULT_CATEGORIES,
+} from '@pomoroutine/shared';

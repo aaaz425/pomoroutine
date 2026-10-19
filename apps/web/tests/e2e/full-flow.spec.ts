@@ -45,8 +45,8 @@ test('작업 생성 → 타이머 완료 → 메모 작성 → journal/dashboard
   await expect(page.getByText(TASK_TITLE).first()).toBeVisible();
 
   await page.goto('/dashboard');
-  await expect(page.getByText('이번 주 기록').first()).toBeVisible();
-  await expect(page.getByText('1건', { exact: true }).first()).toBeVisible();
-  await expect(page.getByText('연속 집중일').first()).toBeVisible();
-  await expect(page.getByText('1일', { exact: true }).first()).toBeVisible();
+  const statCard = (label: string) =>
+    page.getByText(label, { exact: true }).first().locator('xpath=../..');
+  await expect(statCard('이번 주 기록').getByText('1건', { exact: true })).toBeVisible();
+  await expect(statCard('연속 집중일').getByText('1일', { exact: true })).toBeVisible();
 });

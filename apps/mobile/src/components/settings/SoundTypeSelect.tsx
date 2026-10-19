@@ -4,7 +4,7 @@ import { Check, ChevronDown } from 'lucide-react-native';
 import type { SoundType } from '@pomoroutine/shared';
 import { Text } from '@/components/shared/Text';
 import { Portal } from '@/components/shared/Portal';
-import { SOUND_TYPE_LABELS } from '@/constants/soundTypes';
+import { SOUND_TYPE_LABELS } from '@pomoroutine/shared';
 import { FONTS } from '@/constants/fonts';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
 

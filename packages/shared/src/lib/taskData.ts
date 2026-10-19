@@ -37,7 +37,7 @@ async function check(request: WriteResult, toastMessage: ToastMessage): Promise<
   if (error) throw new RequestError(toastMessage);
 }
 
-function moveItem<T>(list: T[], from: number, to: number): T[] | null {
+export function moveItem<T>(list: T[], from: number, to: number): T[] | null {
   if (from < 0 || to < 0 || from >= list.length || to >= list.length) return null;
   const next = list.slice();
   const [moved] = next.splice(from, 1);

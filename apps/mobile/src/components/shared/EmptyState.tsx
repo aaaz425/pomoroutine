@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { Text } from '@/components/shared/Text';
-import { withAlpha } from '@/constants/timerColors';
+import { withAlpha } from '@pomoroutine/shared';
 import { FONTS } from '@/constants/fonts';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
 

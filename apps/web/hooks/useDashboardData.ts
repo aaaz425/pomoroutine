@@ -12,20 +12,12 @@ export function useDashboardData() {
 
   const summary = useQuery({
     queryKey: sessionKeys.summary(timezone),
-    queryFn: async () => {
-      const result = await fetchDashboardSummary(timezone);
-      if (!result) throw new Error('dashboard summary fetch failed');
-      return result;
-    },
+    queryFn: () => fetchDashboardSummary(timezone),
   });
 
   const periodSessions = useQuery({
     queryKey: sessionKeys.range(startIso, endIso),
-    queryFn: async () => {
-      const result = await fetchDashboardSessions(startIso, endIso);
-      if (!result) throw new Error('dashboard sessions fetch failed');
-      return result;
-    },
+    queryFn: () => fetchDashboardSessions(startIso, endIso),
   });
 
   return {

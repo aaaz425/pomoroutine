@@ -3,7 +3,7 @@ import { Check, Pencil, Trash2 } from 'lucide-react-native';
 import { useCategories } from '@/hooks/useTasks';
 import { Text } from '@/components/shared/Text';
 import { CategoryBadge } from '@/components/shared/CategoryBadge';
-import { withAlpha } from '@/constants/timerColors';
+import { withAlpha } from '@pomoroutine/shared';
 import { FONTS } from '@/constants/fonts';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
 import type { Task } from '@/types/tasks';

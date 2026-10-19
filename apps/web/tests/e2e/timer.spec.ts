@@ -35,6 +35,7 @@ test.describe('타이머', () => {
     await expect(dialog).toBeVisible();
     await dialog.getByRole('button', { name: '확인' }).click();
 
+    await expect(page.getByText('30초 미만은 기록되지 않아요')).toBeVisible();
     await expect(page.getByRole('button', { name: '시작' })).toBeVisible();
   });
 });

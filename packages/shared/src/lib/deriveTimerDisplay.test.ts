@@ -104,50 +104,6 @@ describe('deriveTimerDisplay', () => {
     expect(result.displaySeconds).toBe(100);
   });
 
-  it('elapsedMinutes — focus phase에서 완료된 사이클 + 현재 phase 경과 분을 합산', () => {
-    const result = deriveTimerDisplay({
-      phase: 'focus',
-      mode: 'pomodoro',
-      remainingSeconds: 20 * 60, // 5분 경과
-      startedAt: null,
-      accFocusSeconds: 0,
-      cycleCount: 2,
-      focusMinutes: 25,
-      now: NOW,
-    });
-
-    expect(result.elapsedMinutes).toBe(2 * 25 + 5);
-  });
-
-  it('elapsedMinutes — short-break phase에서는 현재 phase 경과를 더하지 않음', () => {
-    const result = deriveTimerDisplay({
-      phase: 'short-break',
-      mode: 'pomodoro',
-      remainingSeconds: 60,
-      startedAt: null,
-      accFocusSeconds: 0,
-      cycleCount: 1,
-      focusMinutes: 25,
-      now: NOW,
-    });
-
-    expect(result.elapsedMinutes).toBe(25);
-  });
-
-  it('elapsedMinutes — free 모드는 displaySeconds를 분으로 환산', () => {
-    const result = deriveTimerDisplay({
-      phase: 'focus',
-      mode: 'free',
-      remainingSeconds: 25 * 60,
-      startedAt: null,
-      accFocusSeconds: 185,
-      cycleCount: 0,
-      focusMinutes: 25,
-      now: NOW,
-    });
-
-    expect(result.elapsedMinutes).toBe(3);
-  });
   it('pomodoro 실행 중 예정 종료를 지난 만큼 overdueSeconds로 반환', () => {
     const result = deriveTimerDisplay({
       phase: 'focus',

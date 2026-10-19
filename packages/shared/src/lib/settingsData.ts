@@ -5,6 +5,7 @@ import { TOAST_MESSAGES, type ToastMessage } from '../constants/toastMessages';
 import { INPUT_LIMITS, SOUND_LIMITS } from '../constants/limits';
 import { QUERY_KEYS } from '../constants/queryKeys';
 import { DEFAULT_APP_SETTINGS } from '../constants/defaults';
+import { moveItem } from './taskData';
 
 export interface SettingsDataApi {
   fetchSettings: () => Promise<AppSettings | null>;
@@ -95,12 +96,8 @@ function createSettingsActions(queryClient: QueryClient, api: SettingsDataApi) {
     },
 
     reorderMessages: async (from: number, to: number) => {
-      const messages = current().motivationalMessages;
-      if (from < 0 || to < 0 || from >= messages.length || to >= messages.length) return;
-      const next = messages.slice();
-      const [moved] = next.splice(from, 1);
-      next.splice(to, 0, moved);
-      await save({ motivationalMessages: next });
+      const next = moveItem(current().motivationalMessages, from, to);
+      if (next) await save({ motivationalMessages: next });
     },
   };
 }

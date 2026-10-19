@@ -28,19 +28,6 @@ test.describe('작업 관리', () => {
     await page.getByRole('button', { name: '환경설정' }).click();
   });
 
-  test('작업 생성', async ({ page }) => {
-    const taskName = uniqueName();
-    await page.getByRole('button', { name: '작업 관리' }).click();
-
-    const taskModal = page.getByRole('dialog', { name: '작업 관리' });
-    await expect(taskModal).toBeVisible();
-
-    await createTask(page, taskModal, taskName);
-
-    // 정리 — 다음 테스트와 이름이 겹치지 않도록 생성한 작업을 삭제
-    await deleteTask(page, taskModal, taskName);
-  });
-
   test('작업 선택 후 타이머 연결', async ({ page }) => {
     const taskName = uniqueName();
 

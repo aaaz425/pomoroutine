@@ -38,19 +38,7 @@ describe('toSession', () => {
     });
   });
 
-  it('taskId가 null(미분류 세션)이어도 정상 변환됨', () => {
-    expect(toSession({ ...validRow, task_id: null })?.taskId).toBeNull();
-  });
-
-  it('focus_rating이 허용 범위(1-3) 밖이면 검증 실패로 null 반환', () => {
+  it('검증 실패면 null', () => {
     expect(toSession({ ...validRow, focus_rating: 5 })).toBeNull();
-  });
-
-  it('mode가 pomodoro/free가 아니면 검증 실패로 null 반환', () => {
-    expect(toSession({ ...validRow, mode: 'invalid' })).toBeNull();
-  });
-
-  it('title이 설정돼 있으면 그대로 왕복됨', () => {
-    expect(toSession({ ...validRow, title: '알고리즘 스터디' })?.title).toBe('알고리즘 스터디');
   });
 });

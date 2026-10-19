@@ -1,6 +1,6 @@
 import { Pressable } from 'react-native';
 import { GripVertical } from 'lucide-react-native';
-import { withAlpha } from '@/constants/timerColors';
+import { withAlpha } from '@pomoroutine/shared';
 import { DRAG_START_DELAY_MS } from '@/constants/ux';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
 

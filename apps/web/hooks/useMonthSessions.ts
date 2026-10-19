@@ -10,11 +10,7 @@ export function useMonthSessions(viewedMonth: Date) {
 
   const query = useQuery({
     queryKey: sessionKeys.month(startIso),
-    queryFn: async () => {
-      const result = await fetchSessionsInRange(startIso, endIso);
-      if (!result) throw new Error('month sessions fetch failed');
-      return result.sessions;
-    },
+    queryFn: () => fetchSessionsInRange(startIso, endIso),
   });
 
   return {

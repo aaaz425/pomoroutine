@@ -1,4 +1,5 @@
 import {
+  withAlpha,
   COLOR_THEMES,
   DEFAULT_COLOR_THEME,
   type ColorThemeKey,
@@ -15,14 +16,6 @@ export const PHASE_LABELS: Record<TimerPhase, string> = {
   focus: '집중 중',
   'short-break': '휴식 중',
 };
-
-// 웹의 Tailwind 알파 표기(예: bg-muted/60)에 대응 — hex를 rgba 문자열로 변환
-export function withAlpha(hex: string, alpha: number): string {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
-}
 
 const SHORT_BREAK_HEX = '#60A5FA';
 

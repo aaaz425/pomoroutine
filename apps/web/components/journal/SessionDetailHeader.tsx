@@ -1,12 +1,12 @@
-import { Pencil, Trash2 } from 'lucide-react';
-import { CategoryBadge } from '@/components/shared/CategoryBadge';
-import { SessionTitleInput } from '@/components/journal/SessionTitleInput';
 import {
   formatTimeRange,
   formatFocusPeriodRanges,
   formatFullDate,
   hasAbnormalFocusGap,
-} from '@/lib/sessionUtils';
+} from '@pomoroutine/shared';
+import { Pencil, Trash2 } from 'lucide-react';
+import { CategoryBadge } from '@/components/shared/CategoryBadge';
+import { SessionTitleInput } from '@/components/journal/SessionTitleInput';
 import type { Category, Session } from '@/types';
 
 interface Props {

@@ -1,5 +1,6 @@
 'use client';
 
+import { formatCount, groupSessionsByDate } from '@pomoroutine/shared';
 import { useEffect, useRef, useState } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 import { JournalSessionList } from '@/components/journal/JournalSessionList';
@@ -8,7 +9,6 @@ import { PageSpinner } from '@/components/shared/PageSpinner';
 import { ErrorFallback } from '@/components/shared/ErrorFallback';
 import { useJournalFilters } from '@/hooks/useJournalFilters';
 import { useSessionsList } from '@/hooks/useSessionsList';
-import { formatCount, groupSessionsByDate } from '@/lib/sessionUtils';
 import type { Category, Session, Task } from '@/types';
 
 interface Props {
