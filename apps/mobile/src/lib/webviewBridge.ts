@@ -29,7 +29,7 @@ async function handleShareCard(action: ShareCardAction, dataUrl: string) {
     return;
   }
 
-  const permission = await MediaLibrary.requestPermissionsAsync();
+  const permission = await MediaLibrary.requestPermissionsAsync(true);
   if (!permission.granted) {
     Alert.alert('저장 권한이 필요해요', '설정에서 사진 접근 권한을 허용해주세요.');
     return;

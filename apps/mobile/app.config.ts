@@ -32,13 +32,10 @@ const config: ExpoConfig = {
       monochromeImage: './assets/images/android-icon-monochrome.png',
     },
     predictiveBackGestureEnabled: false,
-    permissions: [
+    blockedPermissions: [
       'android.permission.READ_EXTERNAL_STORAGE',
-      'android.permission.WRITE_EXTERNAL_STORAGE',
       'android.permission.READ_MEDIA_VISUAL_USER_SELECTED',
-      'android.permission.READ_MEDIA_IMAGES',
-      'android.permission.READ_MEDIA_VIDEO',
-      'android.permission.READ_MEDIA_AUDIO',
+      'android.permission.SYSTEM_ALERT_WINDOW',
     ],
   },
   plugins: [
@@ -59,13 +56,21 @@ const config: ExpoConfig = {
       },
     ],
     'expo-sharing',
-    'expo-secure-store',
-    'expo-audio',
+    ['expo-secure-store', { faceIDPermission: false }],
+    [
+      'expo-audio',
+      {
+        microphonePermission: false,
+        recordAudioAndroid: false,
+        enableBackgroundPlayback: false,
+      },
+    ],
     [
       'expo-media-library',
       {
-        photosPermission: '집중 기록 공유 카드를 사진 앱에 저장하기 위해 접근 권한이 필요해요.',
+        photosPermission: false,
         savePhotosPermission: '집중 기록 공유 카드를 사진 앱에 저장하기 위해 접근 권한이 필요해요.',
+        granularPermissions: [],
       },
     ],
     [
