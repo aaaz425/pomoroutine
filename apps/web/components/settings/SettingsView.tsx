@@ -41,6 +41,7 @@ import { useDelayedHydration } from '@/hooks/useDelayedHydration';
 import { useTheme, type ThemeMode } from '@/hooks/useTheme';
 import { useAccentTheme } from '@/hooks/useAccentTheme';
 import { withReducedMotion } from '@/lib/motion';
+import { STORAGE_KEYS } from '@/types';
 import type { SettingsUser } from '@/types';
 
 type CategoryKey = 'account' | 'presets' | 'notifications' | 'about';
@@ -98,6 +99,7 @@ export function SettingsView({ userPromise }: Props) {
   useEffect(() => {
     if (searchParams.get('confirmDelete') !== '1' || deletingRef.current) return;
     deletingRef.current = true;
+    localStorage.removeItem(STORAGE_KEYS.activeTimer);
     // 성공 시 redirect()로 응답이 끝나 .then이 실행되지 않음 — 실패 시에만 결과를 확인해 토스트로 알림
     deleteAccountConfirmed().then((result) => {
       if (result.error) toast(TOAST_MESSAGES.errorMessage(result.error));
