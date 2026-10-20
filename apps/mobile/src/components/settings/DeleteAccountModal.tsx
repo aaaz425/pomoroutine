@@ -3,6 +3,7 @@ import { Modal as RNModal, Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { Text } from '@/components/shared/Text';
 import { useAuth } from '@/store/AuthProvider';
+import { useTimerStore } from '@/store/StoreProvider';
 import { ConfirmModal } from '@/components/shared/ConfirmModal';
 import { PasswordField } from '@/components/auth/PasswordField';
 import { FONTS } from '@/constants/fonts';
@@ -17,6 +18,7 @@ interface Props {
 export function DeleteAccountModal({ visible, onClose }: Props) {
   const theme = useThemeTokens();
   const { user, deleteAccount, loginWithKakao } = useAuth();
+  const sessionStarted = useTimerStore((s) => s.sessionStarted);
 
   const [step, setStep] = useState<'confirm' | 'verify'>('confirm');
   const [password, setPassword] = useState('');
@@ -69,7 +71,7 @@ export function DeleteAccountModal({ visible, onClose }: Props) {
       <ConfirmModal
         visible={visible}
         title="정말 탈퇴하시겠어요?"
-        description="모든 작업, 기록, 설정이 영구 삭제되며 복구할 수 없어요."
+        description={`모든 작업, 기록, 설정이 영구 삭제되며 복구할 수 없어요.${sessionStarted ? ' 진행 중인 타이머도 기록되지 않고 사라져요.' : ''}`}
         confirmLabel="다음"
         destructive
         onConfirm={() => setStep('verify')}

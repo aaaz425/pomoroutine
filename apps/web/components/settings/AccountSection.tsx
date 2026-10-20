@@ -10,6 +10,7 @@ import { SettingsMenuRow } from '@/components/shared/SettingsMenuRow';
 import { PasswordField } from '@/components/auth/PasswordField';
 import { PasswordChangeDialog } from '@/components/settings/PasswordChangeDialog';
 import { cn } from '@/lib/utils';
+import { useTimerStore } from '@/store/StoreProvider';
 import { STORAGE_KEYS } from '@/types';
 import type { AuthActionResult } from '@/types';
 
@@ -19,10 +20,14 @@ interface Props {
 
 export function AccountSection({ user }: Props) {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const sessionStarted = useTimerStore((s) => s.sessionStarted);
   const [verifying, setVerifying] = useState(false);
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [state, formAction, pending] = useActionState<AuthActionResult, FormData>(
-    (_prev, formData) => deleteAccountWithPassword(formData),
+    (_prev, formData) => {
+      localStorage.removeItem(STORAGE_KEYS.activeTimer);
+      return deleteAccountWithPassword(formData);
+    },
     {},
   );
 
@@ -126,7 +131,7 @@ export function AccountSection({ user }: Props) {
       <ConfirmDialog
         open={confirmOpen}
         title="정말 탈퇴하시겠어요?"
-        description="모든 작업, 기록, 설정이 영구 삭제되며 복구할 수 없어요."
+        description={`모든 작업, 기록, 설정이 영구 삭제되며 복구할 수 없어요.${sessionStarted ? ' 진행 중인 타이머도 기록되지 않고 사라져요.' : ''}`}
         confirmLabel="탈퇴 계속하기"
         confirmVariant="destructive"
         onConfirm={() => {

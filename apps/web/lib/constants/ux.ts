@@ -5,6 +5,8 @@ export const ALARM_MAX_OVERDUE_SECONDS = 90;
 
 export const DRAG_ACTIVATION_DISTANCE_PX = 5;
 
+export const QUERY_STALE_MS = 60 * 1000;
+
 export {
   MESSAGE_ROTATE_INTERVAL_MS,
   SOUND_TYPE_LABELS,
