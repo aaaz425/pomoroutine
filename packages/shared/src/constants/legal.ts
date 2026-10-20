@@ -15,11 +15,12 @@ export interface LegalDocument {
 }
 
 const SERVICE_NAME = 'PomoRoutine';
+const CONTACT_EMAIL = 'privacy@pomoroutine.com';
 
 export const LEGAL_DOCUMENTS: Record<LegalDocType, LegalDocument> = {
   terms: {
     title: '이용약관',
-    effectiveDate: '2026-08-10',
+    effectiveDate: '2026-10-21',
     intro: `이 약관은 ${SERVICE_NAME}(이하 '서비스') 이용과 관련하여 서비스와 이용자의 권리, 의무 및 책임사항을 정합니다.`,
     sections: [
       {
@@ -82,14 +83,14 @@ export const LEGAL_DOCUMENTS: Record<LegalDocType, LegalDocument> = {
       },
       {
         title: '7. 문의처',
-        blocks: [{ type: 'paragraph', text: '이용약관 관련 문의: ytokogg@gmail.com' }],
+        blocks: [{ type: 'paragraph', text: `이용약관 관련 문의: ${CONTACT_EMAIL}` }],
       },
     ],
   },
   privacy: {
     title: '개인정보처리방침',
-    effectiveDate: '2026-08-07',
-    intro: `${SERVICE_NAME}(이하 '서비스')는 이용자의 개인정보를 소중히 다루며, 관련 법령에 따라 아래와 같이 개인정보를 수집·이용합니다.`,
+    effectiveDate: '2026-10-21',
+    intro: `${SERVICE_NAME}(이하 '서비스')는 이용자의 개인정보를 소중히 다루며, 개인정보 보호법 등 관련 법령에 따라 아래와 같이 개인정보를 수집·이용합니다.`,
     sections: [
       {
         title: '1. 수집하는 개인정보 항목',
@@ -99,7 +100,9 @@ export const LEGAL_DOCUMENTS: Record<LegalDocType, LegalDocument> = {
             items: [
               '이메일/비밀번호 회원가입 시: 이메일 주소, 비밀번호(암호화 저장)',
               '카카오 로그인 시: 카카오 계정 이메일 주소',
-              '서비스 이용 기록: 작업(Task), 카테고리, 집중 기록(Session), 타이머·알림 등 설정값',
+              '프로필: 닉네임(선택)',
+              '서비스 이용 기록: 작업, 카테고리, 집중 기록(시작·종료 시각, 집중 시간, 메모, 집중도, 방해 요소), 동기부여 메시지, 타이머·알림 설정값',
+              '자동 수집: 접속 IP 주소, 접속 일시, 기기·브라우저 종류, 서비스 이용 통계',
             ],
           },
         ],
@@ -111,18 +114,23 @@ export const LEGAL_DOCUMENTS: Record<LegalDocType, LegalDocument> = {
             type: 'list',
             items: [
               '회원 식별 및 로그인 유지',
-              '포모도로 타이머, 작업 기록, 대시보드 등 서비스 제공',
+              '포모도로 타이머, 작업 기록, 통계 등 서비스 제공',
               '카카오 간편 로그인을 통한 회원가입·인증',
+              '부정 이용 방지 및 서비스 품질 개선',
             ],
           },
         ],
       },
       {
-        title: '3. 개인정보의 보유 및 이용 기간',
+        title: '3. 개인정보의 보유 기간 및 파기',
         blocks: [
           {
-            type: 'paragraph',
-            text: '회원 탈퇴 시 지체 없이 파기합니다. 관계 법령에 따라 보존이 필요한 경우 해당 법령에서 정한 기간 동안 보관합니다.',
+            type: 'list',
+            items: [
+              '회원 탈퇴 시 계정과 모든 이용 기록을 지체 없이 데이터베이스에서 삭제합니다',
+              '부정 이용 방지를 위해 기록한 IP 주소는 짧은 기간 후 자동 삭제합니다',
+              '관계 법령에 따라 보존이 필요한 경우 해당 법령에서 정한 기간 동안 보관합니다',
+            ],
           },
         ],
       },
@@ -144,17 +152,74 @@ export const LEGAL_DOCUMENTS: Record<LegalDocType, LegalDocument> = {
         ],
       },
       {
-        title: '5. 이용자의 권리',
+        title: '5. 개인정보의 국외 이전',
         blocks: [
           {
             type: 'paragraph',
-            text: '이용자는 언제든지 설정 메뉴에서 회원 탈퇴를 통해 개인정보 삭제를 요청할 수 있으며, 그 외 개인정보 열람·정정 요청은 아래 문의처로 연락해주세요.',
+            text: '회원 정보와 이용 기록은 Supabase의 서울 리전 서버에 저장됩니다. 웹 서비스 제공 과정에서 아래와 같이 개인정보가 국외로 이전됩니다.',
+          },
+          {
+            type: 'list',
+            items: [
+              '이전받는 자: Vercel Inc.(privacy@vercel.com)',
+              '이전 국가: 미국 등 Vercel이 운영하는 리전',
+              '이전 항목: 접속 IP 주소, 접속 일시, 기기·브라우저 종류, 서비스 이용 통계',
+              '이전 시기 및 방법: 웹 서비스 이용 시 네트워크를 통해 전송',
+              '이용 목적: 웹 호스팅 및 이용 통계 분석',
+              '보유 기간: 위탁 계약 종료 시 또는 Vercel의 보관 정책에 따른 기간까지',
+              '거부 방법 및 효과: 국외 이전을 원하지 않으면 회원 탈퇴로 서비스 이용을 중단할 수 있으며, 이 경우 서비스를 이용할 수 없습니다',
+            ],
           },
         ],
       },
       {
-        title: '6. 문의처',
-        blocks: [{ type: 'paragraph', text: '개인정보 관련 문의: ytokogg@gmail.com' }],
+        title: '6. 자동 수집 장치의 설치·운영 및 거부',
+        blocks: [
+          {
+            type: 'paragraph',
+            text: '서비스는 로그인 상태 유지를 위해 쿠키와 브라우저 저장소를 사용합니다. 브라우저 설정에서 쿠키 저장을 거부할 수 있으나, 이 경우 로그인이 필요한 기능을 이용할 수 없습니다.',
+          },
+        ],
+      },
+      {
+        title: '7. 개인정보의 안전성 확보 조치',
+        blocks: [
+          {
+            type: 'list',
+            items: [
+              '비밀번호 암호화 저장',
+              '모든 통신 구간 암호화(HTTPS)',
+              '계정별 데이터 접근 제어 — 본인 기록만 조회·수정 가능',
+            ],
+          },
+        ],
+      },
+      {
+        title: '8. 이용자의 권리',
+        blocks: [
+          {
+            type: 'paragraph',
+            text: '이용자는 언제든지 설정 메뉴에서 회원 탈퇴를 통해 개인정보 삭제를 요청할 수 있으며, 그 외 개인정보 열람·정정·처리정지 요청은 아래 개인정보 보호책임자에게 연락해주세요.',
+          },
+        ],
+      },
+      {
+        title: '9. 개인정보 보호책임자',
+        blocks: [
+          {
+            type: 'list',
+            items: ['성명: 박유진', `이메일: ${CONTACT_EMAIL}`],
+          },
+        ],
+      },
+      {
+        title: '10. 개인정보처리방침의 변경',
+        blocks: [
+          {
+            type: 'paragraph',
+            text: '이 방침이 변경되는 경우 시행일과 함께 이 페이지를 통해 안내합니다.',
+          },
+        ],
       },
     ],
   },
