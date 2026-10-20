@@ -4,10 +4,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { router } from 'expo-router';
-import { buildSessionRecord, formatDuration, TOAST_MESSAGES } from '@pomoroutine/shared';
+import { useMutation } from '@tanstack/react-query';
+import {
+  buildSessionRecord,
+  formatDuration,
+  insertSession,
+  TOAST_MESSAGES,
+} from '@pomoroutine/shared';
 import type { FocusRating } from '@pomoroutine/shared';
 import { Text } from '@/components/shared/Text';
-import { useTimerStore } from '@/store/StoreProvider';
+import { useTimerStore, useTimerStoreApi } from '@/store/StoreProvider';
 import { useAuth } from '@/store/AuthProvider';
 import { useCurrentTask } from '@/hooks/useCurrentTask';
 import { ConfirmModal } from '@/components/shared/ConfirmModal';
@@ -18,7 +24,7 @@ import { DistractionTagPicker } from '@/components/shared/DistractionTagPicker';
 import { FONTS } from '@/constants/fonts';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
 import { toast } from '@/lib/toast';
-import { insertSession } from '@/lib/supabase/sessions';
+import { supabase } from '@/lib/supabase/client';
 import { createSheetDismissGesture } from '@/lib/sheetDismissGesture';
 import { SessionCompleteHeader } from './SessionCompleteHeader';
 import { SessionTaskSummary } from './SessionTaskSummary';
@@ -102,14 +108,9 @@ function GuestPrompt() {
 
 function RecordForm({ sessionEndedAt }: { sessionEndedAt: number }) {
   const theme = useThemeTokens();
+  const timerStore = useTimerStoreApi();
   const dismissSessionRecord = useTimerStore((s) => s.dismissSessionRecord);
-  const cycleCount = useTimerStore((s) => s.cycleCount);
-  const settings = useTimerStore((s) => s.settings);
-  const mode = useTimerStore((s) => s.mode);
   const currentTaskId = useTimerStore((s) => s.currentTaskId);
-  const sessionStartedAt = useTimerStore((s) => s.sessionStartedAt);
-  const accFocusSeconds = useTimerStore((s) => s.accFocusSeconds);
-  const rawFocusPeriods = useTimerStore((s) => s.rawFocusPeriods);
 
   const { task, category } = useCurrentTask();
 
@@ -118,7 +119,6 @@ function RecordForm({ sessionEndedAt }: { sessionEndedAt: number }) {
   const [distractionTags, setDistractionTags] = useState<string[]>([]);
   const [pendingAction, setPendingAction] = useState<'skip' | 'save' | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
   const translateY = useSharedValue(0);
   const sheetHeight = useSharedValue(0);
   const sheetAnimatedStyle = useAnimatedStyle(() => ({
@@ -133,36 +133,30 @@ function RecordForm({ sessionEndedAt }: { sessionEndedAt: number }) {
 
   const isTaskSession = currentTaskId !== null;
 
-  async function handleSave() {
-    if (isSaving) return;
-    setIsSaving(true);
-    const { error } = await insertSession(
-      buildSessionRecord(
-        {
-          mode,
-          cycleCount,
-          settings,
-          sessionStartedAt,
-          sessionEndedAt,
-          accFocusSeconds,
-          rawFocusPeriods,
-        },
-        {
-          taskId: isTaskSession ? currentTaskId : selectedTaskId,
-          note,
-          focusRating,
-          distractionTags,
-        },
+  const save = useMutation({
+    mutationFn: () =>
+      insertSession(
+        supabase,
+        buildSessionRecord(
+          { ...timerStore.getState(), sessionEndedAt },
+          {
+            taskId: isTaskSession ? currentTaskId : selectedTaskId,
+            note,
+            focusRating,
+            distractionTags,
+          },
+        ),
       ),
-    );
-    setPendingAction(null);
-    setIsSaving(false);
-    if (error) {
-      toast(TOAST_MESSAGES.sessionSaveFailed);
-      return;
-    }
-    toast(TOAST_MESSAGES.sessionSaved);
-    dismissSessionRecord();
+    onError: () => toast(TOAST_MESSAGES.sessionSaveFailed),
+    onSuccess: () => {
+      toast(TOAST_MESSAGES.sessionSaved);
+      dismissSessionRecord();
+    },
+    onSettled: () => setPendingAction(null),
+  });
+
+  function handleSave() {
+    if (!save.isPending) save.mutate();
   }
 
   return (
@@ -258,7 +252,7 @@ function RecordForm({ sessionEndedAt }: { sessionEndedAt: number }) {
           confirmLabel="저장"
           onConfirm={handleSave}
           onCancel={() => setPendingAction(null)}
-          loading={isSaving}
+          loading={save.isPending}
         />
       </GestureHandlerRootView>
     </Modal>

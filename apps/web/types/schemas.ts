@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ACTIVE_TIMER_STORAGE_KEY } from '@pomoroutine/shared';
 import { INPUT_LIMITS } from '@/lib/constants/limits';
 
 export const FocusPeriodSchema = z.object({
@@ -93,13 +94,12 @@ export const DashboardSummarySchema = z.object({
 });
 
 export const STORAGE_KEYS = {
-  activeTimer: 'pomoroutine:active-timer',
+  activeTimer: ACTIVE_TIMER_STORAGE_KEY,
   theme: 'theme',
   colorTheme: 'pomoroutine:color-theme',
 } as const;
 
 export {
-  TaskSchema,
   ActiveTimerStateSchema,
   LoginCredentialsSchema,
   SignupCredentialsSchema,

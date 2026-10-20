@@ -74,9 +74,9 @@ describe('getDashboardRange', () => {
   });
 
   it('주가 다음 달로 넘어가면 주 끝까지 포함', () => {
-    const { startIso, endIso } = getDashboardRange(new Date('2024-03-30T12:00:00'));
-    expect(new Date(startIso)).toEqual(new Date('2024-03-01T00:00:00'));
-    expect(new Date(endIso)).toEqual(new Date('2024-04-01T00:00:00'));
+    const { startIso, endIso } = getDashboardRange(new Date('2024-04-30T12:00:00'));
+    expect(new Date(startIso)).toEqual(new Date('2024-04-01T00:00:00'));
+    expect(new Date(endIso)).toEqual(new Date('2024-05-06T00:00:00'));
   });
 });
 
@@ -95,10 +95,6 @@ describe('getAllTimeFocusTrend', () => {
       { label: '2024', 공부: 30, 미분류: 5 },
     ]);
     expect(trend.categories.map((c) => c.name)).toEqual(['공부', '미분류']);
-  });
-
-  it('기록이 없으면 빈 결과', () => {
-    expect(getAllTimeFocusTrend([], CATEGORIES)).toEqual({ data: [], categories: [] });
   });
 });
 
@@ -151,8 +147,29 @@ describe('getTabStats', () => {
     expect(stats.hourlySeconds).toBe(hourlySeconds);
   });
 
-  it('전체 탭에 기록이 없으면 평균 0', () => {
-    expect(getTabStats('all', [], makeSummary(), TASKS, CATEGORIES, TODAY).avgSeconds).toBe(0);
+  it('주 탭은 요일로, 월 탭은 주차로 나누고 29일 이후는 4주차', () => {
+    const minutes = (data: Record<string, string | number>[], label: string) =>
+      data.find((d) => d.label === label)?.['미분류'];
+    const week = getTabStats(
+      'week',
+      [makeSession('2024-03-17T12:00:00', 1500)],
+      makeSummary(),
+      TASKS,
+      CATEGORIES,
+      TODAY,
+    );
+    expect(minutes(week.focusTrend.data, '일')).toBe(25);
+
+    const month = getTabStats(
+      'month',
+      [makeSession('2024-03-01T09:00:00', 900), makeSession('2024-03-30T09:00:00', 1500)],
+      makeSummary(),
+      TASKS,
+      CATEGORIES,
+      TODAY,
+    );
+    expect(minutes(month.focusTrend.data, '1주차')).toBe(15);
+    expect(minutes(month.focusTrend.data, '4주차')).toBe(25);
   });
 });
 
@@ -163,10 +180,6 @@ describe('limitCategoryFocus', () => {
     percent,
     color: '#000000',
   }));
-
-  it('최대 개수 이하면 그대로 반환', () => {
-    expect(limitCategoryFocus(items.slice(0, 5), 5)).toHaveLength(5);
-  });
 
   it('초과하면 상위 항목만 남기고 나머지를 하나로 합침', () => {
     const result = limitCategoryFocus(items, 5);

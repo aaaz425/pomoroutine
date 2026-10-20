@@ -1,3 +1,4 @@
+import type { z } from 'zod';
 import { createClient } from '@/lib/supabase/client';
 import {
   DashboardSessionSchema,
@@ -29,28 +30,30 @@ interface SessionRow {
 const SELECT_COLUMNS =
   'id, task_id, title, mode, started_at, ended_at, completed_cycles, total_cycles, focus_seconds, paused_seconds, focus_periods, note, focus_rating, distraction_tags';
 
-export function toSession(row: SessionRow): Session | null {
-  const parsed = SessionSchema.safeParse({
-    id: row.id,
-    taskId: row.task_id,
-    title: row.title,
-    mode: row.mode,
-    startedAt: row.started_at,
-    endedAt: row.ended_at,
-    completedCycles: row.completed_cycles,
-    totalCycles: row.total_cycles,
-    focusSeconds: row.focus_seconds,
-    pausedSeconds: row.paused_seconds,
-    focusPeriods: row.focus_periods,
-    note: row.note,
-    focusRating: row.focus_rating,
-    distractionTags: row.distraction_tags,
+function parseRows<T>(schema: z.ZodType<T>, rows: Partial<SessionRow>[]): T[] {
+  return rows.flatMap((row) => {
+    const parsed = schema.safeParse({
+      id: row.id,
+      taskId: row.task_id,
+      title: row.title,
+      mode: row.mode,
+      startedAt: row.started_at,
+      endedAt: row.ended_at,
+      completedCycles: row.completed_cycles,
+      totalCycles: row.total_cycles,
+      focusSeconds: row.focus_seconds,
+      pausedSeconds: row.paused_seconds,
+      focusPeriods: row.focus_periods,
+      note: row.note,
+      focusRating: row.focus_rating,
+      distractionTags: row.distraction_tags,
+    });
+    return parsed.success ? [parsed.data] : [];
   });
-  return parsed.success ? parsed.data : null;
 }
 
-function parseRows<R, T>(rows: R[], parse: (row: R) => T | null): T[] {
-  return rows.map(parse).filter((item): item is T => item !== null);
+export function toSession(row: SessionRow): Session | null {
+  return parseRows(SessionSchema, [row])[0] ?? null;
 }
 
 export async function fetchSessionsInRange(startIso: string, endIso: string): Promise<Session[]> {
@@ -61,26 +64,7 @@ export async function fetchSessionsInRange(startIso: string, endIso: string): Pr
     .lt('started_at', endIso)
     .order('started_at', { ascending: true });
   if (error) throw error;
-  return parseRows(data, toSession);
-}
-
-interface DashboardSessionRow {
-  id: string;
-  task_id: string | null;
-  started_at: string;
-  focus_seconds: number;
-  focus_periods: { start: string; end: string }[];
-}
-
-function toDashboardSession(row: DashboardSessionRow): DashboardSession | null {
-  const parsed = DashboardSessionSchema.safeParse({
-    id: row.id,
-    taskId: row.task_id,
-    startedAt: row.started_at,
-    focusSeconds: row.focus_seconds,
-    focusPeriods: row.focus_periods,
-  });
-  return parsed.success ? parsed.data : null;
+  return parseRows(SessionSchema, data);
 }
 
 export async function fetchDashboardSessions(
@@ -94,7 +78,7 @@ export async function fetchDashboardSessions(
     .lt('started_at', endIso)
     .order('started_at', { ascending: true });
   if (error) throw error;
-  return parseRows(data, toDashboardSession);
+  return parseRows(DashboardSessionSchema, data);
 }
 
 interface SessionsPageParams {
@@ -145,7 +129,7 @@ export async function fetchSessionsPage({
 
   const rows = data as unknown as SessionRow[];
   return {
-    sessions: parseRows(rows, toSession),
+    sessions: parseRows(SessionSchema, rows),
     nextCursor: rows.length === limit ? rows[rows.length - 1].started_at : null,
     totalCount: count ?? null,
   };
@@ -161,51 +145,13 @@ export async function fetchSessionStartTimes(startIso: string, endIso: string): 
   return data.map((row) => row.started_at as string);
 }
 
-interface InsightSessionRow {
-  id: string;
-  task_id: string | null;
-  started_at: string;
-  focus_rating: number | null;
-  distraction_tags: string[];
-}
-
-function toInsightSession(row: InsightSessionRow): InsightSession | null {
-  const parsed = InsightSessionSchema.safeParse({
-    id: row.id,
-    taskId: row.task_id,
-    startedAt: row.started_at,
-    focusRating: row.focus_rating,
-    distractionTags: row.distraction_tags,
-  });
-  return parsed.success ? parsed.data : null;
-}
-
 export async function fetchInsightSessions(startIso: string): Promise<InsightSession[]> {
   const { data, error } = await createClient()
     .from('sessions')
     .select('id, task_id, started_at, focus_rating, distraction_tags')
     .gte('started_at', startIso);
   if (error) throw error;
-  return parseRows(data, toInsightSession);
-}
-
-export async function insertSession(input: Omit<Session, 'id'>): Promise<void> {
-  const { error } = await createClient().from('sessions').insert({
-    task_id: input.taskId,
-    title: input.title,
-    mode: input.mode,
-    started_at: input.startedAt,
-    ended_at: input.endedAt,
-    completed_cycles: input.completedCycles,
-    total_cycles: input.totalCycles,
-    focus_seconds: input.focusSeconds,
-    paused_seconds: input.pausedSeconds,
-    focus_periods: input.focusPeriods,
-    note: input.note,
-    focus_rating: input.focusRating,
-    distraction_tags: input.distractionTags,
-  });
-  if (error) throw error;
+  return parseRows(InsightSessionSchema, data);
 }
 
 export async function updateSession(

@@ -15,6 +15,7 @@ import {
 import type { FocusPeriod } from '../types/timer';
 import { TIMER_LIMITS } from '../constants/limits';
 import { clampPeriodDuration } from './focusPeriods';
+import { toDateKey } from './sessionFormat';
 
 export type TabType = 'today' | 'week' | 'month' | 'all';
 
@@ -29,10 +30,6 @@ type SessionLike = {
   focusPeriods: FocusPeriod[];
 };
 
-function toLocalDateKey(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
-
 export function getMonthlyActivityData<T extends { startedAt: string; focusSeconds: number }>(
   sessions: T[],
   today: Date = new Date(),
@@ -42,12 +39,12 @@ export function getMonthlyActivityData<T extends { startedAt: string; focusSecon
   // 날짜별로 한 번만 순회해 집계 — 매 날짜마다 전체 세션을 다시 필터링하면 O(days*n)이 됨
   const secondsByDate = new Map<string, number>();
   for (const s of sessions) {
-    const dateKey = toLocalDateKey(parseISO(s.startedAt));
+    const dateKey = toDateKey(parseISO(s.startedAt));
     secondsByDate.set(dateKey, (secondsByDate.get(dateKey) ?? 0) + s.focusSeconds);
   }
 
   return days.map((day) => {
-    const dateKey = toLocalDateKey(day);
+    const dateKey = toDateKey(day);
     const focusSeconds = secondsByDate.get(dateKey) ?? 0;
     // 1분 미만 집중도 캘린더에서 사라지지 않도록 반올림 대신 최소 1분 보장
     const focusMinutes = focusSeconds > 0 ? Math.max(1, Math.round(focusSeconds / 60)) : 0;

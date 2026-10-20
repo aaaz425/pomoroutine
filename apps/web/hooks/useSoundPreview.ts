@@ -8,11 +8,7 @@ export function useSoundPreview(type: SoundType, volume: number, repeatCount: nu
   const [isPlaying, setIsPlaying] = useState(false);
 
   function toggle() {
-    if (isPlaying) {
-      stopAlarm();
-      setIsPlaying(false);
-      return;
-    }
+    if (isPlaying) return stop();
     setIsPlaying(true);
     playAlarm({ type, volume, repeatCount, onEnded: () => setIsPlaying(false) });
   }

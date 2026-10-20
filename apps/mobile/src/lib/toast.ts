@@ -5,17 +5,14 @@ type Listener = (toast: ToastMessage | null) => void;
 
 const TOAST_DURATION_MS = 3000;
 
-let currentId = 0;
 let timeoutId: ReturnType<typeof setTimeout> | null = null;
 const listeners = new Set<Listener>();
 
 export function toast(message: ToastMessage) {
-  const id = ++currentId;
   listeners.forEach((listener) => listener(message));
 
   if (timeoutId) clearTimeout(timeoutId);
   timeoutId = setTimeout(() => {
-    if (id !== currentId) return;
     listeners.forEach((listener) => listener(null));
   }, TOAST_DURATION_MS);
 }

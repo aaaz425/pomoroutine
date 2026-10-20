@@ -1,5 +1,5 @@
 import type { SoundType } from '@/types';
-import { SOUND_SEQUENCE_INTERVAL } from '@/lib/constants/ux';
+import { SOUND_SEQUENCE_INTERVAL_MS } from '@/lib/constants/ux';
 
 export function sendNotification(title: string, body: string): void {
   if (typeof window === 'undefined' || !('Notification' in window)) return;
@@ -148,7 +148,7 @@ export function playAlarm({
     const play = SOUND_PLAYERS[type];
     let lastOsc: OscillatorNode | null = null;
     for (let i = 0; i < repeatCount; i++) {
-      lastOsc = play(ctx, peakGain, ctx.currentTime + i * SOUND_SEQUENCE_INTERVAL);
+      lastOsc = play(ctx, peakGain, ctx.currentTime + (i * SOUND_SEQUENCE_INTERVAL_MS) / 1000);
     }
     if (lastOsc) {
       lastOsc.onended = () => {

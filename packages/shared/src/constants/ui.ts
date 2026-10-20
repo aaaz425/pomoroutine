@@ -2,6 +2,12 @@ import type { SoundType } from '../types/settings';
 
 export const MESSAGE_ROTATE_INTERVAL_MS = 5000;
 
+export const ABANDONED_CHECK_INTERVAL_MS = 30 * 1000;
+
+export const SOUND_SEQUENCE_INTERVAL_MS = 1900;
+
+export const ACTIVE_TIMER_STORAGE_KEY = 'pomoroutine:active-timer';
+
 export const CATEGORY_PRESET_COLORS: { hex: string; label: string }[] = [
   { hex: '#3b82f6', label: '파란색' },
   { hex: '#22c55e', label: '초록색' },

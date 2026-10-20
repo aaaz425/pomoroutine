@@ -89,10 +89,6 @@ export default function SettingsScreen() {
     return () => setActiveCategory(null);
   });
 
-  function goTo(next: CategoryKey | null) {
-    setActiveCategory(next);
-  }
-
   if (!user)
     return (
       <NoticeScreen
@@ -141,7 +137,7 @@ export default function SettingsScreen() {
                             : '꺼짐'
                           : ''
                     }
-                    onPress={() => goTo(key)}
+                    onPress={() => setActiveCategory(key)}
                   />
                 ))}
               </SettingsRowGroup>
@@ -149,7 +145,11 @@ export default function SettingsScreen() {
           ) : (
             <Animated.View key="detail" entering={detailEnter} exiting={detailExit}>
               <View style={styles.detail}>
-                <Pressable onPress={() => goTo(null)} style={styles.backRow} hitSlop={8}>
+                <Pressable
+                  onPress={() => setActiveCategory(null)}
+                  style={styles.backRow}
+                  hitSlop={8}
+                >
                   <ChevronLeft size={16} color={theme.mutedForeground} />
                   <Text
                     style={[

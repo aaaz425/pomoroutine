@@ -2,7 +2,6 @@ import type {
   TimerPhase,
   TimerMode,
   TimerSettings,
-  FocusPeriod,
   FocusRating,
   Task,
   Category,
@@ -11,16 +10,7 @@ import type {
   DayActivity,
 } from '@pomoroutine/shared';
 
-export type {
-  TimerPhase,
-  TimerMode,
-  TimerSettings,
-  FocusPeriod,
-  FocusRating,
-  Task,
-  Category,
-  Session,
-};
+export type { TimerPhase, TimerMode, TimerSettings, FocusRating, Task, Category, Session };
 
 export type DashboardSession = Pick<
   Session,
@@ -150,8 +140,6 @@ export interface CategoryRatingItem {
 }
 
 export type { ShareCardData } from '@pomoroutine/shared';
-
-export type { AppSettings } from '@pomoroutine/shared';
 
 export interface AuthActionResult {
   error?: string;

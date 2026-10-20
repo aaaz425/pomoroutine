@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, BackHandler, PixelRatio, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView, { type WebViewNavigation } from 'react-native-webview';
@@ -39,21 +39,19 @@ export function EmbeddedWebScreen({ path }: Props) {
     return () => sub.remove();
   }, [canGoBack]);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (focusedOnceRef.current) {
-        webViewRef.current?.injectJavaScript(
-          `window.dispatchEvent(new Event('${WEBVIEW_TAB_FOCUS_EVENT}')); true;`,
-        );
-      }
-      focusedOnceRef.current = true;
-      return () => {
-        webViewRef.current?.injectJavaScript(
-          `window.dispatchEvent(new Event('${WEBVIEW_TAB_BLUR_EVENT}')); true;`,
-        );
-      };
-    }, []),
-  );
+  useFocusEffect(() => {
+    if (focusedOnceRef.current) {
+      webViewRef.current?.injectJavaScript(
+        `window.dispatchEvent(new Event('${WEBVIEW_TAB_FOCUS_EVENT}')); true;`,
+      );
+    }
+    focusedOnceRef.current = true;
+    return () => {
+      webViewRef.current?.injectJavaScript(
+        `window.dispatchEvent(new Event('${WEBVIEW_TAB_BLUR_EVENT}')); true;`,
+      );
+    };
+  });
 
   async function handleRelogin() {
     await logout();

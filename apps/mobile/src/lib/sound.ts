@@ -1,10 +1,7 @@
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
-import type { SoundType } from '@/types/settings';
+import { SOUND_SEQUENCE_INTERVAL_MS, TOAST_MESSAGES, type SoundType } from '@pomoroutine/shared';
 import { toast } from '@/lib/toast';
-import { TOAST_MESSAGES } from '@pomoroutine/shared';
 
-// 웹 apps/web/lib/notifications.ts의 SOUND_SEQUENCE_INTERVAL과 동일
-const SOUND_SEQUENCE_INTERVAL_MS = 1900;
 // 각 사운드 asset 자체 길이(초) — assets/sounds/gen-sounds.js 참고
 const TONE_DURATION_MS = 1500;
 

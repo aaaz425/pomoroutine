@@ -6,21 +6,18 @@ import { INPUT_LIMITS, SOUND_LIMITS } from '../constants/limits';
 import { QUERY_KEYS } from '../constants/queryKeys';
 import { DEFAULT_APP_SETTINGS } from '../constants/defaults';
 import { moveItem } from './taskData';
+import type { TimerStoreApi } from '../store/timerStore';
 
 export interface SettingsDataApi {
-  fetchSettings: () => Promise<AppSettings | null>;
-  saveSettings: (settings: AppSettings) => Promise<{ error: boolean }>;
+  fetchSettings: () => Promise<AppSettings>;
+  saveSettings: (settings: AppSettings) => Promise<void>;
   toast: (message: ToastMessage) => void;
 }
 
 export function createSettingsQuery(api: SettingsDataApi) {
   return {
     queryKey: QUERY_KEYS.settings,
-    queryFn: async (): Promise<AppSettings> => {
-      const settings = await api.fetchSettings();
-      if (!settings) throw new Error('settings fetch failed');
-      return settings;
-    },
+    queryFn: api.fetchSettings,
     staleTime: Infinity,
     refetchOnWindowFocus: 'always',
   } as const;
@@ -53,11 +50,10 @@ function createSettingsActions(queryClient: QueryClient, api: SettingsDataApi) {
     ) as Partial<AppSettings>;
     queryClient.setQueryData<AppSettings>(QUERY_KEYS.settings, { ...before, ...patch });
     try {
-      const { error } = await api.saveSettings(current());
-      if (error) {
-        queryClient.setQueryData<AppSettings>(QUERY_KEYS.settings, { ...current(), ...previous });
-        api.toast(TOAST_MESSAGES.settingsSaveFailed);
-      }
+      await api.saveSettings(current());
+    } catch {
+      queryClient.setQueryData<AppSettings>(QUERY_KEYS.settings, { ...current(), ...previous });
+      api.toast(TOAST_MESSAGES.settingsSaveFailed);
     } finally {
       pendingCount--;
       if (pendingCount === 0) void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.settings });
@@ -116,4 +112,15 @@ export function getSettingsActions(
     actionsByClient.set(queryClient, actions);
   }
   return actions;
+}
+
+export function subscribeTimerDefaults(queryClient: QueryClient, timerStore: TimerStoreApi) {
+  let synced: TimerSettings | null = null;
+  return queryClient.getQueryCache().subscribe(({ query }) => {
+    if (query.queryKey[0] !== QUERY_KEYS.settings[0]) return;
+    const defaults = (query.state.data as AppSettings | undefined)?.defaultTimerSettings;
+    if (!defaults || defaults === synced) return;
+    synced = defaults;
+    timerStore.getState().syncDefaultSettings(defaults);
+  });
 }

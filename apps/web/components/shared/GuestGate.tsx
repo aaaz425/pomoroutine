@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { GuestPrompt } from '@/components/shared/GuestPrompt';
-import { useLoggedIn } from '@/hooks/useLoggedIn';
+import { useResolved } from '@/hooks/useResolved';
 
 interface Props {
   loggedInPromise: Promise<boolean>;
@@ -12,9 +12,9 @@ interface Props {
 }
 
 export function GuestGate({ loggedInPromise, title, description, children }: Props) {
-  const loggedIn = useLoggedIn(loggedInPromise);
+  const loggedIn = useResolved(loggedInPromise);
 
-  if (loggedIn === null) return null;
+  if (loggedIn === undefined) return null;
   if (!loggedIn) return <GuestPrompt title={title} description={description} />;
   return <>{children}</>;
 }

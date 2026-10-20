@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { AppState } from 'react-native';
-import { formatStartedAtLabel, NOTICE_MESSAGES } from '@pomoroutine/shared';
+import {
+  ABANDONED_CHECK_INTERVAL_MS,
+  formatStartedAtLabel,
+  NOTICE_MESSAGES,
+} from '@pomoroutine/shared';
 import { useTimerStore } from '@/store/StoreProvider';
 import { ConfirmModal } from '@/components/shared/ConfirmModal';
-
-// 웹 SESSION_LIMITS.ABANDONED_CHECK_INTERVAL_MS와 동일 — 아직 packages/shared로 추출되지 않아 값만 맞춰 중복
-const ABANDONED_CHECK_INTERVAL_MS = 30 * 1000;
 
 // document.visibilitychange 대신 AppState로 일시정지 상태 방치를 감지한다
 export function AbandonedSessionDialog() {

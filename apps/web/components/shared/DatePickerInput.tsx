@@ -63,7 +63,7 @@ export function DatePickerInput({
   while (cells.length < 42) cells.push(null); // 항상 6행으로 고정
 
   function dayKey(day: number) {
-    return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return format(new Date(year, month, day), 'yyyy-MM-dd');
   }
 
   function isDisabled(day: number) {

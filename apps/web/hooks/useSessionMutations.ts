@@ -11,7 +11,9 @@ import {
   removeSessionFromPages,
   type SessionPages,
 } from '@/lib/query/sessionCache';
-import { deleteSession, insertSession, updateSession } from '@/lib/supabase/sessions';
+import { insertSession } from '@pomoroutine/shared';
+import { createClient } from '@/lib/supabase/client';
+import { deleteSession, updateSession } from '@/lib/supabase/sessions';
 import type { Session, SessionEditableFields } from '@/types';
 
 type Snapshot = [QueryKey, unknown][];
@@ -43,7 +45,7 @@ export function useSessionMutations() {
   }
 
   const add = useMutation({
-    mutationFn: insertSession,
+    mutationFn: (input: Omit<Session, 'id'>) => insertSession(createClient(), input),
     onError: () => toast(TOAST_MESSAGES.sessionSaveFailed),
     onSuccess: () => {
       toast(TOAST_MESSAGES.sessionSaved);
