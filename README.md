@@ -2,7 +2,7 @@
 
 [![Vercel](https://img.shields.io/badge/배포-Vercel-black?logo=vercel)](https://pomoroutine.com) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 
-계획하고, 집중하고, 기록하는 포모도로 집중 도구
+집중하고, 기록하고, 분석하는 포모도로 집중 도구
 
 - 수험생과 취업 준비생을 위한 작업 계획 → 집중 타이머 → 회고 기록 → 통계 흐름
 - 웹과 React Native 앱을 함께 개발, 한 계정으로 기기 간 기록 동기화

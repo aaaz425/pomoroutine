@@ -13,7 +13,7 @@ export function LandingHero({ isLoggedIn }: Props) {
         습관이 됩니다
       </h1>
       <p className="text-base sm:text-lg text-muted-foreground max-w-md leading-relaxed break-keep">
-        포모도로 타이머로 작업을 계획하고, 집중하고, 기록하세요
+        포모도로 타이머로 집중하고, 기록하고, 분석하세요
         <br />
         매일의 노력이 쌓여 결과로 이어집니다
       </p>
