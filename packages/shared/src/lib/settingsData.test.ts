@@ -26,7 +26,7 @@ const cached = () => client.getQueryData<AppSettings>(QUERY_KEYS.settings);
 beforeEach(() => {
   api = {
     fetchSettings: vi.fn().mockResolvedValue(DEFAULT_APP_SETTINGS),
-    saveSettings: vi.fn().mockResolvedValue({ error: false }),
+    saveSettings: vi.fn().mockResolvedValue(undefined),
     toast: vi.fn(),
   };
   client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -35,12 +35,12 @@ beforeEach(() => {
 describe('getSettingsActions', () => {
   it('저장 전에 화면에 먼저 반영하고 전체 설정을 저장', async () => {
     const actions = setup();
-    let resolve: (value: { error: boolean }) => void = () => {};
+    let resolve: () => void = () => {};
     vi.mocked(api.saveSettings).mockReturnValue(new Promise((r) => (resolve = r)));
 
     const pending = actions.setSoundAlert(false);
     await vi.waitFor(() => expect(cached()?.soundAlert).toBe(false));
-    resolve({ error: false });
+    resolve();
     await pending;
 
     expect(api.saveSettings).toHaveBeenCalledWith({ ...DEFAULT_APP_SETTINGS, soundAlert: false });
@@ -51,9 +51,10 @@ describe('getSettingsActions', () => {
     let failNicknameSave = () => {};
     vi.mocked(api.saveSettings)
       .mockImplementationOnce(
-        () => new Promise((resolve) => (failNicknameSave = () => resolve({ error: true }))),
+        () =>
+          new Promise((_, reject) => (failNicknameSave = () => reject(new Error('save failed')))),
       )
-      .mockResolvedValueOnce({ error: false });
+      .mockResolvedValueOnce(undefined);
 
     const nicknameSave = actions.setNickname('새 이름');
     await actions.setSoundAlert(false);

@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { formatStartedAtLabel, NOTICE_MESSAGES } from '@pomoroutine/shared';
 import { useTimerStore, useHydrated } from '@/store/StoreProvider';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
-import { SESSION_LIMITS } from '@/lib/constants/limits';
+import { ABANDONED_CHECK_INTERVAL_MS } from '@/lib/constants/ux';
 
 export function AbandonedSessionDialog() {
   const hydrated = useHydrated();
@@ -23,7 +23,7 @@ export function AbandonedSessionDialog() {
     if (!hydrated || !sessionStarted || sessionEnded || startedAt !== null) return;
 
     checkAbandoned();
-    const id = setInterval(checkAbandoned, SESSION_LIMITS.ABANDONED_CHECK_INTERVAL_MS);
+    const id = setInterval(checkAbandoned, ABANDONED_CHECK_INTERVAL_MS);
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') checkAbandoned();
     };

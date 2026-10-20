@@ -1,6 +1,7 @@
 'use client';
 
 import { getSessionOrdinalTitle } from '@pomoroutine/shared';
+import { INPUT_LIMITS } from '@/lib/constants/limits';
 import { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useTasks, useCategories } from '@/hooks/useTasks';
@@ -202,7 +203,7 @@ export function JournalDetailPanel({
               className="flex-1 min-h-0 w-full resize-none rounded-lg bg-muted/50 dark:bg-muted/50 border-border px-3 py-2.5 text-base text-foreground placeholder:text-muted-foreground outline-none focus-visible:border-border focus-visible:ring-1 focus-visible:ring-primary"
             />
             <span className="text-xs text-muted-foreground self-end">
-              {draft?.note.length ?? 0} / 500
+              {draft?.note.length ?? 0} / {INPUT_LIMITS.NOTE_MAX_LENGTH}
             </span>
           </div>
         ) : (

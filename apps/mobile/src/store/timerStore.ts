@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
+  ACTIVE_TIMER_STORAGE_KEY,
   ActiveTimerStateSchema,
   createTimerStore as createSharedTimerStore,
   TOAST_MESSAGES,
@@ -7,9 +8,6 @@ import {
   type TimerStorePorts,
 } from '@pomoroutine/shared';
 import { toast } from '@/lib/toast';
-
-// 계정과 무관하게 저장되므로 로그아웃/탈퇴 시 AuthProvider에서 반드시 정리해야 함(다음 사용자에게 이전 세션이 새는 것 방지)
-export const ACTIVE_TIMER_STORAGE_KEY = 'pomoroutine:active-timer';
 
 // AsyncStorage는 비동기라 동기 loadSnapshot 시그니처에 못 꽂으므로, hydrate() 전에 preloadTimerSnapshot()으로 캐시를 미리 채운다
 let cachedSnapshot: TimerSnapshot | null = null;

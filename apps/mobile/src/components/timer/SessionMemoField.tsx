@@ -1,11 +1,9 @@
 import { StyleSheet, View } from 'react-native';
 import { Text } from '@/components/shared/Text';
 import { TextInput } from '@/components/shared/TextInput';
-import { withAlpha } from '@pomoroutine/shared';
+import { INPUT_LIMITS, withAlpha } from '@pomoroutine/shared';
 import { FONTS } from '@/constants/fonts';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
-
-const NOTE_MAX_LENGTH = 500;
 
 interface Props {
   value: string;
@@ -20,7 +18,7 @@ export function SessionMemoField({ value, onChange }: Props) {
       <TextInput
         multiline
         numberOfLines={4}
-        maxLength={NOTE_MAX_LENGTH}
+        maxLength={INPUT_LIMITS.NOTE_MAX_LENGTH}
         value={value}
         onChangeText={onChange}
         placeholder="무엇을 집중해서 했나요? 짧게 메모해두면 나중에 돌아볼 수 있어요."
@@ -32,7 +30,7 @@ export function SessionMemoField({ value, onChange }: Props) {
           { color: withAlpha(theme.mutedForeground, 0.6), fontFamily: FONTS.sansRegular },
         ]}
       >
-        {value.length} / {NOTE_MAX_LENGTH}
+        {value.length} / {INPUT_LIMITS.NOTE_MAX_LENGTH}
       </Text>
     </View>
   );

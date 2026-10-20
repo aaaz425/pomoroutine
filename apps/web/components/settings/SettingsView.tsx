@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { useResolved } from '@/hooks/useResolved';
 import { useSettings } from '@/hooks/useSettings';
 import { useTasks, useCategories } from '@/hooks/useTasks';
 import { toast } from '@/lib/toast';
@@ -80,8 +81,7 @@ export function SettingsView({ userPromise }: Props) {
   const reducedMotion = useReducedMotion();
   const [activeCategory, setActiveCategory] = useState<CategoryKey | null>(null);
   const [openMenu, setOpenMenu] = useState<MenuKey | null>(null);
-  const [user, setUser] = useState<SettingsUser | null>(null);
-  const [userLoaded, setUserLoaded] = useState(false);
+  const user = useResolved(userPromise);
   const searchParams = useSearchParams();
   const deletingRef = useRef(false);
 
@@ -94,18 +94,6 @@ export function SettingsView({ userPromise }: Props) {
   const browserNotification = useSettings((s) => s.browserNotification);
   const soundAlert = useSettings((s) => s.soundAlert);
 
-  useEffect(() => {
-    let active = true;
-    userPromise.then((u) => {
-      if (!active) return;
-      setUser(u);
-      setUserLoaded(true);
-    });
-    return () => {
-      active = false;
-    };
-  }, [userPromise]);
-
   // 카카오 재인증(회원탈퇴 확인) 라운드트립 자체가 본인 확인이므로 추가 확인 없이 탈퇴를 마무리한다
   useEffect(() => {
     if (searchParams.get('confirmDelete') !== '1' || deletingRef.current) return;
@@ -116,7 +104,7 @@ export function SettingsView({ userPromise }: Props) {
     });
   }, [searchParams]);
 
-  if (!hydrated || !userLoaded) return showSkeleton ? <SettingsSkeleton /> : null;
+  if (!hydrated || user === undefined) return showSkeleton ? <SettingsSkeleton /> : null;
   if (!user) return <GuestPrompt title={NOTICE_MESSAGES.guestSettings} />;
 
   const activeLabel = CATEGORIES.find((c) => c.key === activeCategory)?.label;

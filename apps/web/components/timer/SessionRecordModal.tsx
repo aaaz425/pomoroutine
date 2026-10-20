@@ -1,14 +1,15 @@
 'use client';
 
 import { buildSessionRecord, formatDuration } from '@pomoroutine/shared';
+import { INPUT_LIMITS } from '@/lib/constants/limits';
 import { useState } from 'react';
 import Link from 'next/link';
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog';
 import { Check } from 'lucide-react';
-import { useTimerStore, useHydrated } from '@/store/StoreProvider';
+import { useTimerStore, useTimerStoreApi, useHydrated } from '@/store/StoreProvider';
 import { useSessionMutations } from '@/hooks/useSessionMutations';
 import { useCurrentTask } from '@/hooks/useCurrentTask';
-import { useLoggedIn } from '@/hooks/useLoggedIn';
+import { useResolved } from '@/hooks/useResolved';
 import { CategoryBadge } from '@/components/shared/CategoryBadge';
 import { SessionProgressBadge } from '@/components/timer/SessionProgressBadge';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
@@ -25,13 +26,35 @@ interface Props {
   loggedInPromise: Promise<boolean>;
 }
 
+const SHEET_POPUP_CLASS = [
+  'fixed z-50 bg-card border border-border shadow-2xl overflow-y-auto outline-none',
+  'bottom-0 left-0 right-0 rounded-t-2xl max-h-[82vh] standalone:pb-[env(safe-area-inset-bottom)]',
+  'sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:pb-0',
+  'sm:w-[600px] sm:rounded-xl sm:max-h-[85vh]',
+].join(' ');
+
+function RecordCompleteHeader() {
+  return (
+    <>
+      <div className="flex items-center justify-center w-14 h-14 sm:w-[72px] sm:h-[72px] rounded-full bg-primary/20">
+        <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary">
+          <Check className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" strokeWidth={2.5} />
+        </div>
+      </div>
+      <h2 className="text-[26px] font-bold tracking-tight text-foreground text-center">
+        집중 완료!
+      </h2>
+    </>
+  );
+}
+
 export function SessionRecordModal({ loggedInPromise }: Props) {
   const hydrated = useHydrated();
-  const loggedIn = useLoggedIn(loggedInPromise);
+  const loggedIn = useResolved(loggedInPromise);
   const sessionEnded = useTimerStore((s) => s.sessionEnded);
   const sessionEndedAt = useTimerStore((s) => s.sessionEndedAt);
 
-  if (!hydrated || !sessionEnded || sessionEndedAt === null || loggedIn === null) return null;
+  if (!hydrated || !sessionEnded || sessionEndedAt === null || loggedIn === undefined) return null;
   return loggedIn ? <SessionRecordForm sessionEndedAt={sessionEndedAt} /> : <GuestRecordPrompt />;
 }
 
@@ -47,26 +70,11 @@ function GuestRecordPrompt() {
         <DialogPrimitive.Backdrop className="backdrop-enter fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" />
         <DialogPrimitive.Popup
           aria-label="집중 완료"
-          className={[
-            'sheet-enter fixed z-50 bg-card border border-border shadow-2xl overflow-y-auto outline-none',
-            'bottom-0 left-0 right-0 rounded-t-2xl max-h-[82vh] standalone:pb-[env(safe-area-inset-bottom)]',
-            'sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:pb-0',
-            'sm:w-[600px] sm:rounded-xl sm:max-h-[85vh]',
-          ].join(' ')}
+          className={`sheet-enter ${SHEET_POPUP_CLASS}`}
         >
           <div className="flex flex-col items-center gap-5 p-5 sm:gap-7 sm:p-10">
             <div className="flex flex-col items-center gap-4">
-              <div className="flex items-center justify-center w-14 h-14 sm:w-[72px] sm:h-[72px] rounded-full bg-primary/20">
-                <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary">
-                  <Check
-                    className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground"
-                    strokeWidth={2.5}
-                  />
-                </div>
-              </div>
-              <h2 className="text-[26px] font-bold tracking-tight text-foreground text-center">
-                집중 완료!
-              </h2>
+              <RecordCompleteHeader />
               <p className="text-sm text-muted-foreground text-center">
                 {mode !== 'free' && `${cycleCount}사이클 동안 `}
                 {formatDuration(accFocusSeconds)} 집중했어요
@@ -92,14 +100,9 @@ function GuestRecordPrompt() {
 }
 
 function SessionRecordForm({ sessionEndedAt }: { sessionEndedAt: number }) {
+  const timerStore = useTimerStoreApi();
   const dismissSessionRecord = useTimerStore((s) => s.dismissSessionRecord);
-  const cycleCount = useTimerStore((s) => s.cycleCount);
-  const settings = useTimerStore((s) => s.settings);
-  const mode = useTimerStore((s) => s.mode);
   const currentTaskId = useTimerStore((s) => s.currentTaskId);
-  const sessionStartedAt = useTimerStore((s) => s.sessionStartedAt);
-  const accFocusSeconds = useTimerStore((s) => s.accFocusSeconds);
-  const rawFocusPeriods = useTimerStore((s) => s.rawFocusPeriods);
 
   const { task, category } = useCurrentTask();
   const { addSession, isAdding } = useSessionMutations();
@@ -120,15 +123,7 @@ function SessionRecordForm({ sessionEndedAt }: { sessionEndedAt: number }) {
     if (isAdding) return;
     addSession(
       buildSessionRecord(
-        {
-          mode,
-          cycleCount,
-          settings,
-          sessionStartedAt,
-          sessionEndedAt,
-          accFocusSeconds,
-          rawFocusPeriods,
-        },
+        { ...timerStore.getState(), sessionEndedAt },
         {
           taskId: isTaskSession ? currentTaskId : selectedTaskId,
           note,
@@ -156,29 +151,14 @@ function SessionRecordForm({ sessionEndedAt }: { sessionEndedAt: number }) {
           <DialogPrimitive.Popup
             ref={sheetRef}
             aria-label="기록 작성"
-            className={[
-              'fixed z-50 bg-card border border-border shadow-2xl overflow-y-auto outline-none',
-              'bottom-0 left-0 right-0 rounded-t-2xl max-h-[82vh] standalone:pb-[env(safe-area-inset-bottom)]',
-              'sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:pb-0',
-              'sm:w-[600px] sm:rounded-xl sm:max-h-[85vh]',
-            ].join(' ')}
+            className={SHEET_POPUP_CLASS}
           >
             <SheetGrabber {...handleProps} className="sticky top-0 z-10 bg-card pb-1 touch-none" />
             <div className="flex flex-col gap-5 p-5 pt-3 sm:gap-7 sm:p-10">
               {/* Header */}
               <div className="flex flex-col gap-2.5">
                 <div className="flex flex-col items-center gap-4">
-                  <div className="flex items-center justify-center w-14 h-14 sm:w-[72px] sm:h-[72px] rounded-full bg-primary/20">
-                    <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary">
-                      <Check
-                        className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground"
-                        strokeWidth={2.5}
-                      />
-                    </div>
-                  </div>
-                  <h2 className="text-[26px] font-bold tracking-tight text-foreground text-center">
-                    집중 완료!
-                  </h2>
+                  <RecordCompleteHeader />
                 </div>
 
                 {/* Divider */}
@@ -233,7 +213,9 @@ function SessionRecordForm({ sessionEndedAt }: { sessionEndedAt: number }) {
                   ].join(' ')}
                 />
                 <div className="flex justify-end">
-                  <span className="text-[11px] text-muted-foreground/60">{note.length} / 500</span>
+                  <span className="text-[11px] text-muted-foreground/60">
+                    {note.length} / {INPUT_LIMITS.NOTE_MAX_LENGTH}
+                  </span>
                 </div>
               </div>
 

@@ -3,7 +3,7 @@
 import { createContext, startTransition, useContext, useEffect, useState } from 'react';
 import { useStore } from 'zustand';
 import { QueryClientProvider, type QueryClient } from '@tanstack/react-query';
-import { QUERY_KEYS, WEBVIEW_TAB_FOCUS_EVENT, type AppSettings } from '@pomoroutine/shared';
+import { subscribeTimerDefaults, WEBVIEW_TAB_FOCUS_EVENT } from '@pomoroutine/shared';
 import { createTimerStore } from '@/store/timerStore';
 import { createQueryClient } from '@/lib/query/client';
 import { taskQueries } from '@/lib/query/tasks';
@@ -12,10 +12,14 @@ import type { TimerStoreApi, TimerStore } from '@/store/timerStore';
 
 const TimerStoreContext = createContext<TimerStoreApi | null>(null);
 
-export function useTimerStore<T>(selector: (state: TimerStore) => T): T {
+export function useTimerStoreApi(): TimerStoreApi {
   const store = useContext(TimerStoreContext);
   if (!store) throw new Error('useTimerStore must be used within StoreProvider');
-  return useStore(store, selector);
+  return store;
+}
+
+export function useTimerStore<T>(selector: (state: TimerStore) => T): T {
+  return useStore(useTimerStoreApi(), selector);
 }
 
 // localStorage는 마운트 후 hydrate()로 반영 (SSR 기본값 → 실제 저장값)
@@ -50,16 +54,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener(WEBVIEW_TAB_FOCUS_EVENT, handleWebViewTabFocus);
   }, [hydrated, queryClient]);
 
-  useEffect(() => {
-    let synced: AppSettings['defaultTimerSettings'] | null = null;
-    return queryClient.getQueryCache().subscribe(({ query }) => {
-      if (query.queryKey[0] !== QUERY_KEYS.settings[0]) return;
-      const defaults = (query.state.data as AppSettings | undefined)?.defaultTimerSettings;
-      if (!defaults || defaults === synced) return;
-      synced = defaults;
-      timerStore.getState().syncDefaultSettings(defaults);
-    });
-  }, [queryClient, timerStore]);
+  useEffect(() => subscribeTimerDefaults(queryClient, timerStore), [queryClient, timerStore]);
 
   return (
     <QueryClientProvider client={queryClient}>

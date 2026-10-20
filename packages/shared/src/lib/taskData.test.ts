@@ -18,13 +18,13 @@ function createApi(): TaskDataApi {
     fetchTasks: vi.fn().mockResolvedValue({ tasks: [], invalidCount: 0 }),
     fetchCategories: vi.fn().mockResolvedValue({ categories: [], invalidCount: 0 }),
     insertTask: vi.fn(),
-    updateTask: vi.fn().mockResolvedValue({ error: false }),
-    deleteTask: vi.fn().mockResolvedValue({ error: false }),
-    reorderTasks: vi.fn().mockResolvedValue({ error: false }),
+    updateTask: vi.fn().mockResolvedValue(undefined),
+    deleteTask: vi.fn().mockResolvedValue(undefined),
+    reorderTasks: vi.fn().mockResolvedValue(undefined),
     insertCategory: vi.fn(),
-    updateCategory: vi.fn().mockResolvedValue({ error: false }),
-    deleteCategory: vi.fn().mockResolvedValue({ error: false, blocked: false }),
-    reorderCategories: vi.fn().mockResolvedValue({ error: false }),
+    updateCategory: vi.fn().mockResolvedValue(undefined),
+    deleteCategory: vi.fn().mockResolvedValue({ blocked: false }),
+    reorderCategories: vi.fn().mockResolvedValue(undefined),
     toast: vi.fn(),
   };
 }
@@ -76,7 +76,7 @@ describe('작업', () => {
 
   it('addTask — 저장 실패면 목록을 그대로 두고 null 반환', async () => {
     const actions = setup([task('t1')]);
-    vi.mocked(api.insertTask).mockResolvedValue(null);
+    vi.mocked(api.insertTask).mockRejectedValue(new Error('insert failed'));
 
     const id = await actions.addTask({ title: '새 작업', categoryId: 'c1' });
 
@@ -87,12 +87,12 @@ describe('작업', () => {
 
   it('updateTask — 저장 전에 화면에 먼저 반영', async () => {
     const actions = setup([task('t1')]);
-    let resolve: (value: { error: boolean }) => void = () => {};
+    let resolve: () => void = () => {};
     vi.mocked(api.updateTask).mockReturnValue(new Promise((r) => (resolve = r)));
 
     const pending = actions.updateTask('t1', { title: '  바뀐 제목 ' });
     await vi.waitFor(() => expect(cachedTasks()?.[0].title).toBe('바뀐 제목'));
-    resolve({ error: false });
+    resolve();
     await pending;
 
     expect(api.updateTask).toHaveBeenCalledWith('t1', { title: '바뀐 제목' });
@@ -100,7 +100,7 @@ describe('작업', () => {
 
   it('updateTask — 저장 실패면 이전 값으로 되돌림', async () => {
     const actions = setup([task('t1')]);
-    vi.mocked(api.updateTask).mockResolvedValue({ error: true });
+    vi.mocked(api.updateTask).mockRejectedValue(new Error('update failed'));
 
     await actions.updateTask('t1', { title: '바뀐 제목' });
 
@@ -175,7 +175,7 @@ describe('카테고리', () => {
 
   it('deleteCategory — DB가 참조 때문에 막으면 되돌리고 사용 중 알림', async () => {
     const actions = setup([], [category('c1')]);
-    vi.mocked(api.deleteCategory).mockResolvedValue({ error: true, blocked: true });
+    vi.mocked(api.deleteCategory).mockResolvedValue({ blocked: true });
 
     await actions.deleteCategory('c1');
 

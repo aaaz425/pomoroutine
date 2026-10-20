@@ -11,8 +11,13 @@ export type { ToastType, ToastMessage } from './constants/toastMessages';
 export type { SoundType, AppSettings } from './types/settings';
 export type { Task, Category } from './types/task';
 export { createTaskQueries, getTaskActions } from './lib/taskData';
-export { createSettingsQuery, getSettingsActions, toMessageKeys } from './lib/settingsData';
-export { createTaskDataApi, createSettingsDataApi } from './lib/supabaseData';
+export {
+  createSettingsQuery,
+  getSettingsActions,
+  subscribeTimerDefaults,
+  toMessageKeys,
+} from './lib/settingsData';
+export { createTaskDataApi, createSettingsDataApi, insertSession } from './lib/supabaseData';
 export {
   ActiveTimerStateSchema,
   LoginCredentialsSchema,
@@ -29,6 +34,9 @@ export { buildSessionRecord } from './lib/sessionRecord';
 export { hexToHsv, hsvToHex, withAlpha } from './lib/color';
 export {
   MESSAGE_ROTATE_INTERVAL_MS,
+  ABANDONED_CHECK_INTERVAL_MS,
+  SOUND_SEQUENCE_INTERVAL_MS,
+  ACTIVE_TIMER_STORAGE_KEY,
   CATEGORY_PRESET_COLORS,
   SOUND_TYPE_LABELS,
 } from './constants/ui';

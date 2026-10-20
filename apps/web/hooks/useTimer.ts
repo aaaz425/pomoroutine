@@ -15,14 +15,8 @@ export function useTimer() {
   const runningDisplaySeconds = useTimerStore((s) => s.runningDisplaySeconds);
 
   // 정지 중이거나 TimerEngine의 첫 tick 전에는 store 값 직접 사용
-  const displaySeconds =
-    mode === 'free'
-      ? startedAt !== null
-        ? (runningDisplaySeconds ?? accFocusSeconds)
-        : accFocusSeconds
-      : startedAt !== null
-        ? (runningDisplaySeconds ?? remainingSeconds)
-        : remainingSeconds;
+  const idleSeconds = mode === 'free' ? accFocusSeconds : remainingSeconds;
+  const displaySeconds = startedAt !== null ? (runningDisplaySeconds ?? idleSeconds) : idleSeconds;
 
   const elapsedMinutes = deriveElapsedMinutes({
     mode,
