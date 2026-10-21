@@ -188,6 +188,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
+      if (error.code === 'same_password') {
+        return { error: AUTH_ERROR_MESSAGES.samePassword };
+      }
       return { error: AUTH_ERROR_MESSAGES.passwordUpdateFailed };
     }
 
