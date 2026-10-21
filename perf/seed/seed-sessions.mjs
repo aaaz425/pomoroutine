@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process';
+import { makeHelpers, splitPeriods } from '../../scripts/lib/sessionGen.mjs';
 
 const DATASETS = [
   { email: 'perf-100@example.com', count: 100 },
@@ -64,39 +65,11 @@ function mulberry32(seed) {
   };
 }
 
-function makeHelpers(rand) {
-  const int = (min, max) => min + Math.floor(rand() * (max - min + 1));
-  const pick = (arr) => arr[Math.floor(rand() * arr.length)];
-  const chance = (p) => rand() < p;
-  return { int, pick, chance };
-}
-
 function makeNote({ int, pick }) {
   const target = int(30, 200);
   let note = '';
   while (note.length < target) note += (note ? ' ' : '') + pick(NOTE_WORDS);
   return note.slice(0, target);
-}
-
-function splitPeriods(startMs, focusSeconds, pausedSeconds, { int }) {
-  const n = Math.max(1, Math.min(8, int(1, 8), Math.floor(focusSeconds / 60)));
-  const periods = [];
-  let cursor = startMs;
-  let remainingFocus = focusSeconds;
-  let remainingPause = pausedSeconds;
-  for (let i = 0; i < n; i++) {
-    const last = i === n - 1;
-    const focus = last ? remainingFocus : Math.floor(remainingFocus / (n - i));
-    const pause = last ? 0 : Math.floor(remainingPause / (n - 1 - i));
-    periods.push({
-      start: new Date(cursor).toISOString(),
-      end: new Date(cursor + focus * 1000).toISOString(),
-    });
-    cursor += (focus + pause) * 1000;
-    remainingFocus -= focus;
-    remainingPause -= pause;
-  }
-  return { periods, endMs: cursor };
 }
 
 function generateSessions(count, taskIds, seed) {

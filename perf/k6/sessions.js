@@ -23,7 +23,10 @@ const failures = new Counter('perf_failures');
 
 const targets =
   MODE === 'concurrent'
-    ? [{ dataset: '10k', endpoint: 'all' }]
+    ? [
+        { dataset: '10k', endpoint: 'all' },
+        { dataset: '10k', endpoint: 'rpc' },
+      ]
     : DATASETS.flatMap((d) => ENDPOINTS.map((e) => ({ dataset: d.name, endpoint: e })));
 
 const thresholds = {};
