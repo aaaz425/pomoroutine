@@ -40,6 +40,7 @@ import { GuestPrompt } from '@/components/shared/GuestPrompt';
 import { useDelayedHydration } from '@/hooks/useDelayedHydration';
 import { useTheme, type ThemeMode } from '@/hooks/useTheme';
 import { useAccentTheme } from '@/hooks/useAccentTheme';
+import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { withReducedMotion } from '@/lib/motion';
 import { STORAGE_KEYS } from '@/types';
 import type { SettingsUser } from '@/types';
@@ -87,6 +88,7 @@ export function SettingsView({ userPromise }: Props) {
   const deletingRef = useRef(false);
 
   const { mode } = useTheme();
+  const { status: installStatus } = useInstallPrompt();
   const { colorTheme } = useAccentTheme();
   const defaultTimerSettings = useSettings((s) => s.defaultTimerSettings);
   const taskCount = useTasks().length;
@@ -214,9 +216,11 @@ export function SettingsView({ userPromise }: Props) {
 
               {activeCategory === 'about' && (
                 <div className="flex flex-col gap-6">
-                  <SettingCard title="앱 설치">
-                    <InstallSection />
-                  </SettingCard>
+                  {installStatus !== 'unavailable' && (
+                    <SettingCard title="앱 설치">
+                      <InstallSection />
+                    </SettingCard>
+                  )}
                   <SettingCard>
                     <AboutSection />
                   </SettingCard>

@@ -1,51 +1,67 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-export function useInstallPrompt() {
-  const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches,
-  );
+type InstallStatus = 'installed' | 'installable' | 'ios' | 'unavailable';
 
-  useEffect(() => {
-    if (isInstalled) return;
+let promptEvent: BeforeInstallPromptEvent | null = null;
+let installed = false;
+const listeners = new Set<() => void>();
 
-    const handlePrompt = (e: Event) => {
-      e.preventDefault();
-      setPromptEvent(e as BeforeInstallPromptEvent);
-    };
+function emit() {
+  listeners.forEach((listener) => listener());
+}
 
-    const handleInstalled = () => {
-      setIsInstalled(true);
-      setPromptEvent(null);
-    };
+if (typeof window !== 'undefined') {
+  installed = window.matchMedia('(display-mode: standalone)').matches;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    promptEvent = e as BeforeInstallPromptEvent;
+    emit();
+  });
+  window.addEventListener('appinstalled', () => {
+    installed = true;
+    promptEvent = null;
+    emit();
+  });
+}
 
-    window.addEventListener('beforeinstallprompt', handlePrompt);
-    window.addEventListener('appinstalled', handleInstalled);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handlePrompt);
-      window.removeEventListener('appinstalled', handleInstalled);
-    };
-  }, [isInstalled]);
-
-  async function triggerInstall() {
-    if (!promptEvent) return;
-    await promptEvent.prompt();
-    const { outcome } = await promptEvent.userChoice;
-    if (outcome === 'accepted') setIsInstalled(true);
-    setPromptEvent(null);
-  }
-
-  return {
-    canInstall: !!promptEvent && !isInstalled,
-    isInstalled,
-    triggerInstall,
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
   };
+}
+
+function isIos() {
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  );
+}
+
+function getStatus(): InstallStatus {
+  if (installed) return 'installed';
+  if (promptEvent) return 'installable';
+  if (isIos()) return 'ios';
+  return 'unavailable';
+}
+
+async function triggerInstall() {
+  if (!promptEvent) return;
+  await promptEvent.prompt();
+  const { outcome } = await promptEvent.userChoice;
+  if (outcome === 'accepted') installed = true;
+  promptEvent = null;
+  emit();
+}
+
+export function useInstallPrompt() {
+  const status = useSyncExternalStore(subscribe, getStatus, () => 'unavailable' as const);
+  return { status, triggerInstall };
 }
