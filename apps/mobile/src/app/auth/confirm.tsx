@@ -9,7 +9,7 @@ import { useThemeTokens } from '@/hooks/use-theme-scheme';
 
 // 세션 교환이 끝나면 onAuthStateChange가 반영하고 (app)/_layout이 알아서 앱으로 전환한다
 export default function AuthConfirmScreen() {
-  const { code } = useLocalSearchParams<{ code?: string }>();
+  const { token_hash: tokenHash } = useLocalSearchParams<{ token_hash?: string }>();
   const theme = useThemeTokens();
   const [error, setError] = useState<string | null>(null);
   const handled = useRef(false);
@@ -18,19 +18,19 @@ export default function AuthConfirmScreen() {
     if (handled.current) return;
     handled.current = true;
 
-    if (!code) {
+    if (!tokenHash) {
       router.replace('/login');
       return;
     }
 
-    supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+    supabase.auth.verifyOtp({ type: 'email', token_hash: tokenHash }).then(({ error }) => {
       if (error) {
         setError('인증에 실패했어요. 다시 시도해주세요');
         return;
       }
       router.replace('/');
     });
-  }, [code]);
+  }, [tokenHash]);
 
   return (
     <AuthShell>
