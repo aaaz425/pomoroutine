@@ -11,7 +11,6 @@ import {
   type AuthActionResult,
 } from '@/types/auth';
 
-// 비밀번호 재설정은 웹 페이지로 보내야 해서 유지 — 이메일 인증은 커스텀 스킴(pomoroutine://auth/confirm)으로 앱이 직접 처리
 export const WEB_APP_URL = 'https://pomoroutine.com';
 
 interface AuthContextValue {
@@ -141,7 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
-      options: { emailRedirectTo: 'pomoroutine://auth/confirm' },
+      options: { emailRedirectTo: `${WEB_APP_URL}/auth/verify-email` },
     });
 
     if (error) {
