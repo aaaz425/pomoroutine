@@ -74,7 +74,7 @@ export async function signup(formData: FormData): Promise<AuthActionResult> {
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
-    options: { emailRedirectTo: `${origin}/auth/confirm` },
+    options: { emailRedirectTo: `${origin}/auth/verify-email` },
   });
 
   if (error) {
