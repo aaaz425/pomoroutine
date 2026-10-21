@@ -129,6 +129,9 @@ export async function updatePassword(formData: FormData): Promise<AuthActionResu
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
 
   if (error) {
+    if (error.code === 'same_password') {
+      return { error: AUTH_ERROR_MESSAGES.samePassword };
+    }
     return { error: AUTH_ERROR_MESSAGES.passwordUpdateFailed };
   }
 

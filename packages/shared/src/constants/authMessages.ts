@@ -10,6 +10,7 @@ export const AUTH_ERROR_MESSAGES = {
   signupFailed: '가입에 실패했어요. 잠시 후 다시 시도해주세요',
   emailAlreadyRegistered: '이미 가입된 이메일이에요. 로그인해주세요',
   passwordUpdateFailed: '비밀번호 변경에 실패했어요. 다시 시도해주세요',
+  samePassword: '지금 쓰는 비밀번호와 다르게 설정해주세요',
   deleteAccountFailed: '탈퇴 처리에 실패했어요. 잠시 후 다시 시도해주세요',
   passwordRequired: '비밀번호를 입력해주세요',
 } as const;
