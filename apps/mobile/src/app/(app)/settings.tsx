@@ -7,6 +7,7 @@ import {
   Bell,
   ChevronLeft,
   Info,
+  MessageCircle,
   SlidersHorizontal,
   User,
   type LucideIcon,
@@ -31,6 +32,7 @@ import { TimerDefaultsModal } from '@/components/settings/TimerDefaultsModal';
 import { TaskModal } from '@/components/tasks/TaskModal';
 import { CategoryModal } from '@/components/settings/CategoryModal';
 import { MotivationalModal } from '@/components/settings/MotivationalModal';
+import { FeedbackModal } from '@/components/settings/FeedbackModal';
 import { FONTS } from '@/constants/fonts';
 import { useThemeTokens } from '@/hooks/use-theme-scheme';
 import { NOTICE_MESSAGES } from '@pomoroutine/shared';
@@ -78,7 +80,7 @@ export default function SettingsScreen() {
   const [activeCategory, setActiveCategory] = useState<CategoryKey | null>(null);
 
   const [openMenu, setOpenMenu] = useState<
-    'theme' | 'timer' | 'task' | 'category' | 'motivational' | null
+    'theme' | 'timer' | 'task' | 'category' | 'motivational' | 'feedback' | null
   >(null);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
@@ -140,6 +142,12 @@ export default function SettingsScreen() {
                     onPress={() => setActiveCategory(key)}
                   />
                 ))}
+                <SettingsMenuRow
+                  Icon={MessageCircle}
+                  label="의견 보내기"
+                  value=""
+                  onPress={() => setOpenMenu('feedback')}
+                />
               </SettingsRowGroup>
             </Animated.View>
           ) : (
@@ -200,6 +208,7 @@ export default function SettingsScreen() {
       <TaskModal visible={openMenu === 'task'} onClose={() => setOpenMenu(null)} />
       <CategoryModal visible={openMenu === 'category'} onClose={() => setOpenMenu(null)} />
       <MotivationalModal visible={openMenu === 'motivational'} onClose={() => setOpenMenu(null)} />
+      <FeedbackModal visible={openMenu === 'feedback'} onClose={() => setOpenMenu(null)} />
       <DeleteAccountModal visible={showDeleteAccount} onClose={() => setShowDeleteAccount(false)} />
       <PasswordChangeModal
         visible={showPasswordChange}

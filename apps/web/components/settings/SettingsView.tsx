@@ -14,6 +14,7 @@ import {
   ChevronLeft,
   Info,
   ListChecks,
+  MessageCircle,
   MessageSquareQuote,
   Palette,
   SlidersHorizontal,
@@ -29,6 +30,7 @@ import { ProfileSection } from '@/components/settings/ProfileSection';
 import { ThemeModal } from '@/components/settings/ThemeModal';
 import { InstallSection } from '@/components/settings/InstallSection';
 import { AboutSection } from '@/components/settings/AboutSection';
+import { FeedbackModal } from '@/components/settings/FeedbackModal';
 import { NotificationSection } from '@/components/settings/notification/NotificationSection';
 import { TimerDefaultsModal } from '@/components/settings/timer-defaults/TimerDefaultsModal';
 import { CategoryModal } from '@/components/settings/category/CategoryModal';
@@ -46,7 +48,7 @@ import { STORAGE_KEYS } from '@/types';
 import type { SettingsUser } from '@/types';
 
 type CategoryKey = 'account' | 'presets' | 'notifications' | 'about';
-type MenuKey = 'timer' | 'task' | 'category' | 'motivational' | 'theme';
+type MenuKey = 'timer' | 'task' | 'category' | 'motivational' | 'theme' | 'feedback';
 
 const THEME_MODE_LABELS: Record<ThemeMode, string> = {
   light: '라이트',
@@ -147,6 +149,12 @@ export function SettingsView({ userPromise }: Props) {
                   onClick={() => setActiveCategory(key)}
                 />
               ))}
+              <SettingsMenuRow
+                Icon={MessageCircle}
+                label="의견 보내기"
+                value=""
+                onClick={() => setOpenMenu('feedback')}
+              />
             </motion.div>
           ) : (
             <motion.div
@@ -236,6 +244,7 @@ export function SettingsView({ userPromise }: Props) {
       {openMenu === 'task' && <TaskManageModal onClose={() => setOpenMenu(null)} />}
       {openMenu === 'category' && <CategoryModal onClose={() => setOpenMenu(null)} />}
       {openMenu === 'motivational' && <MotivationalModal onClose={() => setOpenMenu(null)} />}
+      {openMenu === 'feedback' && <FeedbackModal onClose={() => setOpenMenu(null)} />}
     </>
   );
 }

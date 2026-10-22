@@ -16,6 +16,8 @@ export { AUTH_ERROR_MESSAGES } from './constants/authMessages';
 export type { ToastType, ToastMessage } from './constants/toastMessages';
 export type { SoundType, AppSettings } from './types/settings';
 export type { Task, Category } from './types/task';
+export type { FeedbackPlatform, FeedbackInput } from './types/feedback';
+export { sendFeedback } from './lib/feedback';
 export { createTaskQueries, getTaskActions } from './lib/taskData';
 export {
   createSettingsQuery,
