@@ -1,7 +1,13 @@
 export type { TimerPhase, TimerMode, TimerSettings } from './types/timer';
 export type { FocusRating, Session } from './types/session';
 export type { ShareCardAction, WebviewBridgeMessage } from './types/webviewBridge';
-export { TIMER_LIMITS, AUTH_LIMITS, INPUT_LIMITS, SOUND_LIMITS } from './constants/limits';
+export {
+  TIMER_LIMITS,
+  AUTH_LIMITS,
+  INPUT_LIMITS,
+  SOUND_LIMITS,
+  FEEDBACK_LIMITS,
+} from './constants/limits';
 export { DEFAULT_CATEGORIES, DEFAULT_APP_SETTINGS } from './constants/defaults';
 export { TOAST_MESSAGES } from './constants/toastMessages';
 export { NOTICE_MESSAGES } from './constants/notices';

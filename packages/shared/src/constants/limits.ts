@@ -39,3 +39,8 @@ export const SOUND_LIMITS = {
   REPEAT_MIN: 1,
   REPEAT_MAX: 5,
 } as const;
+
+export const FEEDBACK_LIMITS = {
+  MESSAGE_MAX_LENGTH: 1000,
+  DAILY_MAX: 5,
+} as const;
