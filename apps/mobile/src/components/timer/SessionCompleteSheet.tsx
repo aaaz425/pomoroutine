@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { Keyboard, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
+import { BackHandler, Keyboard, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import { GestureDetector } from 'react-native-gesture-handler';
+import Animated, { FadeIn, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { router } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
 import {
@@ -40,6 +41,28 @@ function SessionCompleteSheetContent() {
   return session ? <RecordForm sessionEndedAt={sessionEndedAt} /> : <GuestPrompt />;
 }
 
+function SheetOverlay({
+  onRequestClose,
+  children,
+}: {
+  onRequestClose: () => void;
+  children: ReactNode;
+}) {
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      onRequestClose();
+      return true;
+    });
+    return () => sub.remove();
+  }, [onRequestClose]);
+
+  return (
+    <Animated.View entering={FadeIn} style={styles.root}>
+      {children}
+    </Animated.View>
+  );
+}
+
 function GuestPrompt() {
   const theme = useThemeTokens();
   const dismissSessionRecord = useTimerStore((s) => s.dismissSessionRecord);
@@ -48,61 +71,59 @@ function GuestPrompt() {
   const accFocusSeconds = useTimerStore((s) => s.accFocusSeconds);
 
   return (
-    <Modal visible animationType="fade" transparent onRequestClose={dismissSessionRecord}>
-      <View style={styles.root}>
-        <Pressable style={styles.backdrop} onPress={dismissSessionRecord} />
-        <View style={styles.sheetWrap} pointerEvents="box-none">
-          <View style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <SafeAreaView edges={['bottom']}>
-              <View style={styles.scrollOuter}>
-                <View style={styles.headerGroup}>
-                  <SessionCompleteHeader />
-                </View>
-
-                <Text
-                  style={[
-                    styles.summaryText,
-                    { color: theme.mutedForeground, fontFamily: FONTS.sansRegular },
-                  ]}
-                >
-                  {mode !== 'free' && `${cycleCount}사이클 동안 `}
-                  {formatDuration(accFocusSeconds)} 집중했어요
-                </Text>
-
-                <View style={styles.guestActions}>
-                  <Pressable
-                    onPress={() => {
-                      dismissSessionRecord();
-                      router.push('/login');
-                    }}
-                    style={[styles.cta, { backgroundColor: theme.primary }]}
-                  >
-                    <Text
-                      style={[
-                        styles.ctaText,
-                        { color: theme.primaryForeground, fontFamily: FONTS.sansSemiBold },
-                      ]}
-                    >
-                      로그인하고 기록 남기기
-                    </Text>
-                  </Pressable>
-                  <Pressable onPress={dismissSessionRecord} style={styles.closeButton}>
-                    <Text
-                      style={[
-                        styles.closeText,
-                        { color: theme.mutedForeground, fontFamily: FONTS.sansMedium },
-                      ]}
-                    >
-                      닫기
-                    </Text>
-                  </Pressable>
-                </View>
+    <SheetOverlay onRequestClose={dismissSessionRecord}>
+      <Pressable style={styles.backdrop} onPress={dismissSessionRecord} />
+      <View style={styles.sheetWrap} pointerEvents="box-none">
+        <View style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <SafeAreaView edges={['bottom']}>
+            <View style={styles.scrollOuter}>
+              <View style={styles.headerGroup}>
+                <SessionCompleteHeader />
               </View>
-            </SafeAreaView>
-          </View>
+
+              <Text
+                style={[
+                  styles.summaryText,
+                  { color: theme.mutedForeground, fontFamily: FONTS.sansRegular },
+                ]}
+              >
+                {mode !== 'free' && `${cycleCount}사이클 동안 `}
+                {formatDuration(accFocusSeconds)} 집중했어요
+              </Text>
+
+              <View style={styles.guestActions}>
+                <Pressable
+                  onPress={() => {
+                    dismissSessionRecord();
+                    router.push('/login');
+                  }}
+                  style={[styles.cta, { backgroundColor: theme.primary }]}
+                >
+                  <Text
+                    style={[
+                      styles.ctaText,
+                      { color: theme.primaryForeground, fontFamily: FONTS.sansSemiBold },
+                    ]}
+                  >
+                    로그인하고 기록 남기기
+                  </Text>
+                </Pressable>
+                <Pressable onPress={dismissSessionRecord} style={styles.closeButton}>
+                  <Text
+                    style={[
+                      styles.closeText,
+                      { color: theme.mutedForeground, fontFamily: FONTS.sansMedium },
+                    ]}
+                  >
+                    닫기
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          </SafeAreaView>
         </View>
       </View>
-    </Modal>
+    </SheetOverlay>
   );
 }
 
@@ -160,102 +181,99 @@ function RecordForm({ sessionEndedAt }: { sessionEndedAt: number }) {
   }
 
   return (
-    <Modal visible animationType="fade" transparent onRequestClose={() => setPendingAction('skip')}>
-      {/* RN <Modal>은 별도 네이티브 루트라 앱 루트의 GestureHandlerRootView가 닿지 않음 */}
-      <GestureHandlerRootView style={styles.root}>
-        <Pressable style={styles.backdrop} onPress={() => setPendingAction('skip')} />
-        <View style={styles.sheetWrap} pointerEvents="box-none">
-          <Animated.View
-            onLayout={(event) => sheetHeight.set(event.nativeEvent.layout.height)}
-            style={[
-              styles.sheet,
-              { backgroundColor: theme.card, borderColor: theme.border },
-              sheetAnimatedStyle,
-            ]}
-          >
-            <GestureDetector gesture={dismissGesture}>
-              <View style={styles.grabberArea}>
-                <SheetGrabber />
-              </View>
-            </GestureDetector>
-            <SafeAreaView edges={['bottom']}>
-              <ScrollView
-                contentContainerStyle={styles.scrollOuter}
-                keyboardShouldPersistTaps="handled"
-              >
-                {/* 입력창 바깥(비어있는 영역)을 탭하면 키보드를 내려 blur를 유도한다 —
+    <SheetOverlay onRequestClose={() => setPendingAction('skip')}>
+      <Pressable style={styles.backdrop} onPress={() => setPendingAction('skip')} />
+      <View style={styles.sheetWrap} pointerEvents="box-none">
+        <Animated.View
+          onLayout={(event) => sheetHeight.set(event.nativeEvent.layout.height)}
+          style={[
+            styles.sheet,
+            { backgroundColor: theme.card, borderColor: theme.border },
+            sheetAnimatedStyle,
+          ]}
+        >
+          <GestureDetector gesture={dismissGesture}>
+            <View style={styles.grabberArea}>
+              <SheetGrabber />
+            </View>
+          </GestureDetector>
+          <SafeAreaView edges={['bottom']}>
+            <ScrollView
+              contentContainerStyle={styles.scrollOuter}
+              keyboardShouldPersistTaps="handled"
+            >
+              {/* 입력창 바깥(비어있는 영역)을 탭하면 키보드를 내려 blur를 유도한다 —
                       RN ScrollView는 keyboardShouldPersistTaps="handled"만으로는 자식이
                       처리하지 않은 빈 영역 탭에서도 blur가 안정적으로 발동하지 않는다. */}
-                <Pressable style={styles.scrollContent} onPress={() => Keyboard.dismiss()}>
-                  <View style={styles.headerGroup}>
-                    <SessionCompleteHeader />
-                    <View style={[styles.divider, { backgroundColor: theme.border }]} />
-                  </View>
+              <Pressable style={styles.scrollContent} onPress={() => Keyboard.dismiss()}>
+                <View style={styles.headerGroup}>
+                  <SessionCompleteHeader />
+                  <View style={[styles.divider, { backgroundColor: theme.border }]} />
+                </View>
 
-                  <SessionTaskSummary
-                    isTaskSession={isTaskSession}
-                    task={task}
-                    category={category}
-                    selectedTaskId={selectedTaskId}
-                    onSelectTask={setSelectedTaskId}
-                  />
+                <SessionTaskSummary
+                  isTaskSession={isTaskSession}
+                  task={task}
+                  category={category}
+                  selectedTaskId={selectedTaskId}
+                  onSelectTask={setSelectedTaskId}
+                />
 
-                  <View style={styles.field}>
-                    <Text
-                      style={[
-                        styles.sectionLabel,
-                        { color: theme.mutedForeground, fontFamily: FONTS.sansSemiBold },
-                      ]}
-                    >
-                      집중도 (선택)
-                    </Text>
-                    <FocusRatingPicker value={focusRating} onChange={setFocusRating} />
-                  </View>
+                <View style={styles.field}>
+                  <Text
+                    style={[
+                      styles.sectionLabel,
+                      { color: theme.mutedForeground, fontFamily: FONTS.sansSemiBold },
+                    ]}
+                  >
+                    집중도 (선택)
+                  </Text>
+                  <FocusRatingPicker value={focusRating} onChange={setFocusRating} />
+                </View>
 
-                  <View style={styles.field}>
-                    <Text
-                      style={[
-                        styles.sectionLabel,
-                        { color: theme.mutedForeground, fontFamily: FONTS.sansSemiBold },
-                      ]}
-                    >
-                      방해요소 (선택)
-                    </Text>
-                    <DistractionTagPicker value={distractionTags} onChange={setDistractionTags} />
-                  </View>
+                <View style={styles.field}>
+                  <Text
+                    style={[
+                      styles.sectionLabel,
+                      { color: theme.mutedForeground, fontFamily: FONTS.sansSemiBold },
+                    ]}
+                  >
+                    방해요소 (선택)
+                  </Text>
+                  <DistractionTagPicker value={distractionTags} onChange={setDistractionTags} />
+                </View>
 
-                  <SessionMemoField value={note} onChange={setNote} />
+                <SessionMemoField value={note} onChange={setNote} />
 
-                  <SessionActionButtons
-                    onSkip={() => setPendingAction('skip')}
-                    onSave={() => setPendingAction('save')}
-                  />
-                </Pressable>
-              </ScrollView>
-            </SafeAreaView>
-          </Animated.View>
-        </View>
+                <SessionActionButtons
+                  onSkip={() => setPendingAction('skip')}
+                  onSave={() => setPendingAction('save')}
+                />
+              </Pressable>
+            </ScrollView>
+          </SafeAreaView>
+        </Animated.View>
+      </View>
 
-        <ConfirmModal
-          visible={pendingAction === 'skip'}
-          title="기록을 건너뛸까요?"
-          description="작성한 메모는 저장되지 않아요"
-          confirmLabel="건너뛰기"
-          destructive
-          onConfirm={dismissSessionRecord}
-          onCancel={() => setPendingAction(null)}
-        />
+      <ConfirmModal
+        visible={pendingAction === 'skip'}
+        title="기록을 건너뛸까요?"
+        description="작성한 메모는 저장되지 않아요"
+        confirmLabel="건너뛰기"
+        destructive
+        onConfirm={dismissSessionRecord}
+        onCancel={() => setPendingAction(null)}
+      />
 
-        <ConfirmModal
-          visible={pendingAction === 'save'}
-          title="기록을 저장할까요?"
-          confirmLabel="저장"
-          onConfirm={handleSave}
-          onCancel={() => setPendingAction(null)}
-          loading={save.isPending}
-        />
-      </GestureHandlerRootView>
-    </Modal>
+      <ConfirmModal
+        visible={pendingAction === 'save'}
+        title="기록을 저장할까요?"
+        confirmLabel="저장"
+        onConfirm={handleSave}
+        onCancel={() => setPendingAction(null)}
+        loading={save.isPending}
+      />
+    </SheetOverlay>
   );
 }
 
@@ -269,7 +287,11 @@ export function SessionCompleteSheet() {
 
 const styles = StyleSheet.create({
   root: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   backdrop: {
     position: 'absolute',
