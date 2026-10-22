@@ -1,3 +1,5 @@
+import { FEEDBACK_LIMITS } from './limits';
+
 export type ToastType = 'success' | 'info' | 'error';
 
 export interface ToastMessage {
@@ -31,5 +33,8 @@ export const TOAST_MESSAGES = {
   settingsSaveFailed: error('설정 저장에 실패했어요. 다시 시도해주세요'),
   soundPlayFailed: error('소리를 재생하지 못했어요'),
   shareCardSaved: success('사진 앱에 공유 카드를 저장했어요'),
+  feedbackSent: success('의견을 보냈어요'),
+  feedbackSendFailed: error('의견 전송에 실패했어요. 다시 시도해주세요'),
+  feedbackLimitExceeded: info(`의견은 하루에 ${FEEDBACK_LIMITS.DAILY_MAX}번까지 보낼 수 있어요`),
   errorMessage: error,
 } as const;
