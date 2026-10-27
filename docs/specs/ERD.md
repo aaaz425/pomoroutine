@@ -38,6 +38,7 @@ erDiagram
         int focus_seconds "일시정지 제외 집중 시간"
         int paused_seconds
         jsonb focus_periods "집중 구간 배열, 최대 100개"
+        int[] hourly_focus_seconds "UTC 기준 시간대별 집중 초 24칸, 트리거 계산"
         text note "nullable, 최대 500자"
         smallint focus_rating "nullable, 1-3"
         text[] distraction_tags
@@ -60,6 +61,15 @@ erDiagram
         timestamptz updated_at
     }
 
+    FEEDBACK {
+        uuid id PK
+        uuid user_id FK
+        text message "1-1000자"
+        text platform "web, ios, android"
+        text app_version "최대 50자"
+        timestamptz created_at
+    }
+
     CATEGORIES ||--o{ TASKS : "분류"
     TASKS |o--o{ SESSIONS : "기록"
 ```
@@ -70,6 +80,7 @@ erDiagram
 | tasks | 집중할 대상, 제목과 카테고리만 보관 |
 | sessions | 타이머 한 번의 실행 기록 |
 | settings | 유저당 1행, 타이머 기본값과 알림, 메시지 설정 |
+| feedback | 설정의 의견 보내기, 본인 insert만 허용하고 24시간에 5건 제한 |
 
 ## 설계 결정
 
@@ -96,6 +107,9 @@ erDiagram
 
 **전체 기록이 필요한 통계는 RPC로 계산**
 - 스트릭, 월간 히트맵, 직전 기간 비교, 가장 바쁜 요일은 `get_dashboard_summary`에서 계산
+- 기록 화면의 전체 개수와 카테고리별 집중도는 `get_journal_summary`에서 계산
+- 시간대별 집중은 기록 저장 시 트리거가 `hourly_focus_seconds`에 미리 계산해 두고 RPC는 합산만
+- 작업과 카테고리 순서 변경은 `reorder_tasks`, `reorder_categories`로 한 번에 저장
 - 날짜 경계는 서버 시계가 아닌 사용자 시간대 기준
 - 호출한 사용자의 권한으로 실행돼 RLS가 그대로 적용됨
 

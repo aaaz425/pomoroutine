@@ -63,6 +63,7 @@
 
 - 전체 기록을 훑어야 하는 값은 RPC `get_dashboard_summary(p_timezone)`가 계산 — 스트릭, 월간 히트맵, 직전 기간 비교, 가장 바쁜 요일, 전체 탭 통계와 차트, 뱃지 판정값
 - `lib/supabase/dashboard.ts`의 `fetchDashboardSummary()`로 호출하고 Zod 검증
+- 저널의 전체 개수와 카테고리별 집중도는 RPC `get_journal_summary()` — `lib/supabase/journal.ts`
 - 오늘, 이번 주, 이번 달 탭은 `fetchDashboardSessions()`로 이번 주와 이번 달을 덮는 구간만 받아 클라이언트에서 계산
 - 기록에서 파생된 서버 데이터는 TanStack Query로 조회, 쿼리 키는 `lib/query/keys.ts`의 `sessionKeys`
 - 기록 추가, 수정, 삭제가 성공하면 `['sessions']` 접두사 쿼리를 무효화, 화면 복귀 시에는 활성 쿼리가 다시 조회

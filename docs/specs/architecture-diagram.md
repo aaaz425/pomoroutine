@@ -8,7 +8,7 @@
 ```mermaid
 flowchart TB
     subgraph Web["apps/web — Next.js, Vercel"]
-        WebApp["화면, Zustand 스토어"]
+        WebApp["화면, Zustand 스토어, TanStack Query"]
         Embed["/embed/dashboard, /embed/journal"]
     end
     subgraph Mobile["apps/mobile — Expo"]
@@ -55,9 +55,10 @@ flowchart TB
 - 앱이 가진 로그인 토큰을 웹의 브릿지 엔드포인트로 넘기면 웹이 세션 쿠키를 만들고 embed 화면으로 이동
 - embed 화면은 웹 내비게이션을 빼고 콘텐츠만 표시
 
-**낙관적 업데이트와 임시 ID**
-- 작업, 카테고리, 기록 변경은 화면에 먼저 반영하고 저장에 실패하면 되돌림
-- 생성 직후 서버 응답 전에 수정이나 삭제가 들어오면, 생성이 끝날 때까지 기다린 뒤 실제 id로 처리해 늦게 온 응답이 변경을 덮어쓰지 않게 함
+**낙관적 업데이트**
+- 작업, 카테고리, 기록의 수정과 삭제는 화면에 먼저 반영하고 저장에 실패하면 되돌림
+- 추가는 저장이 끝난 뒤 실제 id로 캐시에 넣어 임시 id를 쓰지 않음
+- 진행 중인 변경이 모두 끝난 뒤 한 번만 다시 조회해 늦게 온 응답이 변경을 덮어쓰지 않게 함
 
 **통계는 서버에서 집계**
 - 스트릭과 월간 히트맵처럼 전체 기록이 필요한 통계는 Postgres RPC에서 계산

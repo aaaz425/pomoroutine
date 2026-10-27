@@ -35,10 +35,10 @@
 - 타이머와 설정은 네이티브, 통계와 기록 탭은 웹 화면을 WebView로 재사용
 - 앱 로그인 상태를 WebView로 전달해 재로그인 불필요
 
-**낙관적 업데이트와 임시 ID 처리**
-- 작업, 카테고리, 기록은 화면에 먼저 반영하고 실패하면 되돌림
-- 문제 — 생성 응답보다 수정, 삭제가 먼저 오면 늦은 응답이 변경을 덮어씀
-- 해결 — 생성 완료를 기다렸다가 실제 DB id로 처리 [#140](https://github.com/aaaz425/pomoroutine/pull/140)
+**낙관적 업데이트**
+- 작업, 카테고리, 기록의 수정과 삭제는 화면에 먼저 반영하고 실패하면 되돌림
+- 추가는 저장이 끝난 뒤 실제 DB id로 캐시에 넣어 임시 id를 쓰지 않음
+- 진행 중인 변경이 모두 끝난 뒤 한 번만 다시 조회해 늦게 온 응답이 화면을 덮어쓰지 않게 함 [#190](https://github.com/aaaz425/pomoroutine/pull/190)
 
 **서버 집계와 이중 검증**
 - 스트릭, 월간 히트맵처럼 전체 기록이 필요한 통계는 Postgres RPC에서 계산
@@ -86,7 +86,7 @@
 |---|---|
 | 웹 | Next.js 16 App Router, Tailwind CSS, shadcn/ui, Recharts, framer-motion |
 | 앱 | React Native, Expo Router, react-native-reanimated, react-native-webview |
-| 상태와 검증 | Zustand, Zod |
+| 상태와 검증 | Zustand, TanStack Query, Zod |
 | 백엔드 | Supabase Postgres, Auth, RLS, Edge Functions |
 | 테스트 | Vitest, Playwright, GitHub Actions |
 | 인프라 | pnpm workspace, Turborepo, Vercel |
