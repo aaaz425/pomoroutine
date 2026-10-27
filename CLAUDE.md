@@ -35,13 +35,23 @@ pnpm --filter mobile start   # Expo 개발 서버 (apps/mobile)
 - 새 기능 작업 시작 전 **반드시** `docs/roadmap.md`를 읽고 다음에 할 작업을 파악한다
 - 파악한 내용을 사용자에게 제시하고 **승인을 받은 후** 브랜치를 생성한다
 - 임의로 작업 범위를 결정하거나 브랜치를 생성하지 않는다
-- 로드맵에 없는 작업은 사용자 지시를 따른다 — 로드맵에 추가할지도 사용자가 정한다
+- 로드맵에 없는 작업은 사용자 지시를 따르고 로드맵에 추가하지 않는다 — 추가는 사용자가 요청할 때만
+- 승인된 계획보다 간단한 구현이 보이면 그쪽을 택하고, 달라진 점은 커밋 요약 때 알린다
+
+### 응답과 검증
+
+- 사용자에게 쓰는 응답은 항상 한국어, 두괄식으로 짧게
+- 선택지를 물을 때는 AskUserQuestion 대신 텍스트로 번호를 매긴다 — 한글 선택지가 깨져 보임
+- `pnpm build`, 브라우저 자동화, 시뮬레이터 테스트는 사용자가 요청할 때만 — 단위 테스트와 타입체크는 직접 실행해도 됨
+- 이미 켜진 dev 서버는 끄지 않는다
+- 테스트는 깨지면 아픈 핵심 로직만 추가한다
 
 ### 웹과 모바일 동시 적용
 
 - 기능 변경과 버그 수정은 `apps/web`과 `apps/mobile`에 **함께** 적용한다
 - 두 앱이 같은 로직을 쓰면 각자 구현하지 말고 `packages/shared`로 옮긴다
 - 리뷰나 조사도 한쪽만 보지 말고 두 앱을 같이 확인한다
+- 앱 UI는 웹의 모바일 화면과 픽셀 단위로 동일하게 — 색상, 레이아웃, 컴포넌트 구성까지 1:1로 옮긴다
 
 ### Zustand
 
@@ -133,6 +143,7 @@ targetSeconds - Math.floor((Date.now() - startedAt) / 1000)
 - 브랜치 생성이나 계획을 승인받았어도 커밋 승인은 따로 받는다
 - PR 생성 전 **반드시** feature 브랜치에서 rebase, PR과 squash merge는 각각 승인 후 Claude가 처리
 - 커밋, PR, 문서에는 무엇을 바꿨는지만 쓰고 대화 속 의도나 대상 독자는 드러내지 않는다
+- 커밋, PR, 문서, 로드맵 문구는 `docs/guides/commit-convention.md`의 문체 규칙을 따른다
 
 ### 로드맵 상태 관리 (docs/roadmap.md)
 
@@ -141,6 +152,18 @@ targetSeconds - Math.floor((Date.now() - startedAt) / 1000)
 - **브랜치 생성 시** → 해당 항목 `[ ]` → `[>]` 로 변경 후 feature 브랜치에 커밋
 - **사용자 승인 후, squash merge 실행 전** → 해당 항목 `[>]` → `[x]` 로 변경 후 feature 브랜치에 커밋·push → 그 다음 merge
   - `[x]` 변경이 squash commit 안에 포함되어 PR 번호와 함께 main에 기록됨
+
+---
+
+## 하네스
+
+| 위치 | 동작 |
+|---|---|
+| `.claude/settings.json` UserPromptSubmit | 로드맵의 진행 중 항목 표시 |
+| `.claude/settings.json` Stop | git status와 로드맵 다음 작업 표시 |
+| `.claude/hooks/check-pr-style.sh` | `gh pr create`, `gh pr edit` 명령에 중간점이 있으면 차단 |
+| `lefthook.yml` | pre-commit 포맷, 웹 타입체크와 린트, 앱과 shared 타입체크, pre-push main 직접 push 차단 |
+| `.github/workflows/` | PR마다 단위 테스트, e2e, 앱 타입체크와 린트 |
 
 ---
 
