@@ -2,15 +2,41 @@
   "hooks": {
     "UserPromptSubmit": [
       {
-        "command": "ROADMAP=/Users/park/project/ai/pomodash/docs/roadmap.md; IN_PROGRESS=$(grep '^- \\[>\\]' \"$ROADMAP\" 2>/dev/null); [ -n \"$IN_PROGRESS\" ] && printf '── 진행 중 ──\\n%s\\n' \"$IN_PROGRESS\""
+        "hooks": [
+          {
+            "type": "command",
+            "command": "IN_PROGRESS=$(grep '^- \\[>\\]' \"$CLAUDE_PROJECT_DIR/docs/roadmap.md\" 2>/dev/null); [ -z \"$IN_PROGRESS\" ] || printf '── 진행 중 ──\\n%s\\n' \"$IN_PROGRESS\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/check-pr-style.sh\""
+          }
+        ]
       }
     ],
     "Stop": [
       {
-        "command": "git status --short 2>/dev/null | head -10"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "git status --short 2>/dev/null | head -10"
+          }
+        ]
       },
       {
-        "command": "ROADMAP=/Users/park/project/ai/pomodash/docs/roadmap.md; NEXT=$(grep '^- \\[ \\]' \"$ROADMAP\" 2>/dev/null | head -3); [ -n \"$NEXT\" ] && printf '── 다음 작업 ──\\n%s\\n' \"$NEXT\""
+        "hooks": [
+          {
+            "type": "command",
+            "command": "NEXT=$(grep '^- \\[ \\]' \"$CLAUDE_PROJECT_DIR/docs/roadmap.md\" 2>/dev/null | head -3); [ -z \"$NEXT\" ] || printf '── 다음 작업 ──\\n%s\\n' \"$NEXT\""
+          }
+        ]
       }
     ]
   }
