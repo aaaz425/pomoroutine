@@ -9,9 +9,9 @@
 - 서비스 https://pomoroutine.com
 
 <div align="center">
-  <img width="32%" alt="메인 화면" src="docs/specs/images/main.png" />
   <img width="32%" alt="집중 모드" src="docs/specs/images/focus-mode.png" />
-  <img width="32%" alt="대시보드" src="docs/specs/images/dashboard.png" />
+  <img width="32%" alt="기록" src="docs/specs/images/journal.png" />
+  <img width="32%" alt="통계" src="docs/specs/images/dashboard.png" />
 </div>
 
 ## 핵심 기능
@@ -86,7 +86,7 @@
 |---|---|
 | 웹 | Next.js 16 App Router, Tailwind CSS, shadcn/ui, Recharts, framer-motion |
 | 앱 | React Native, Expo Router, react-native-reanimated, react-native-webview |
-| 상태와 검증 | Zustand, TanStack Query, Zod |
+| 상태 관리 | Zustand, TanStack Query |
 | 백엔드 | Supabase Postgres, Auth, RLS, Edge Functions |
 | 테스트 | Vitest, Playwright, GitHub Actions |
 | 인프라 | pnpm workspace, Turborepo, Vercel |

@@ -8,8 +8,8 @@ const FEATURES = [
     desc: '필요한 것만 남기고 나머지는 사라집니다\n타이머와 지금 할 일에만 온전히 집중하세요',
     src: '/landing/focus-mode.png',
     alt: '집중 모드 화면',
-    width: 2560,
-    height: 1600,
+    width: 2940,
+    height: 1602,
   },
   {
     icon: BookOpen,
@@ -17,8 +17,8 @@ const FEATURES = [
     desc: '집중이 끝날 때마다 짧게 기록을 남기세요\n작은 회고가 성장의 흔적이 됩니다',
     src: '/landing/journal.png',
     alt: '기록 화면',
-    width: 2560,
-    height: 1600,
+    width: 2940,
+    height: 1602,
   },
   {
     icon: BarChart2,
@@ -26,8 +26,8 @@ const FEATURES = [
     desc: '카테고리별 집중 시간부터 연속 기록까지, 대시보드에서 나의 흐름을 확인하세요',
     src: '/landing/dashboard.png',
     alt: '통계 대시보드 화면',
-    width: 2560,
-    height: 1395,
+    width: 2940,
+    height: 1602,
   },
 ];
 
