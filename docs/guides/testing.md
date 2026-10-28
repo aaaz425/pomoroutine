@@ -6,9 +6,9 @@ version: 1.0
 
 | 종류 | 도구 | 실행 |
 |---|---|---|
-| 단위 | Vitest | `pnpm test` — `packages/shared`와 `apps/web`을 함께 실행 |
+| 단위 | Vitest | `pnpm test` — `packages/shared`와 `apps/web`을 함께 실행, PR마다 `.github/workflows/unit-test.yml`에서 자동 실행 |
 | e2e | Playwright | PR마다 GitHub Actions에서 자동 실행, 로컬은 `pnpm test:e2e` |
-| 모바일 | 없음 | CI에서 타입체크와 린트만 실행 — `.github/workflows/mobile-check.yml` |
+| 모바일 | 없음 | 타입체크는 pre-commit과 CI, 린트는 CI에서만 — `.github/workflows/mobile-check.yml` |
 
 ## 단위 테스트
 
@@ -20,7 +20,7 @@ version: 1.0
 
 **규칙**
 - 테스트 파일은 대상 파일과 같은 폴더에 `*.test.ts`로 둠
-- `lib/`, `store/`, `packages/shared`를 바꾸면 관련 테스트를 직접 실행해 확인 — pre-commit hook은 prettier, 타입체크, 린트만 돌리고 단위 테스트는 돌리지 않음
+- `lib/`, `store/`, `packages/shared`를 바꾸면 관련 테스트를 직접 실행해 확인 — pre-commit hook은 prettier, 타입체크, 린트만 돌리고 단위 테스트는 CI에서 돌림
 
 ## e2e 테스트
 

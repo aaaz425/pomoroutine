@@ -69,7 +69,7 @@ export default function OgImage() {
             color: '#64748b',
           }}
         >
-          작업 계획 · 집중 · 기록을 한 곳에서
+          집중하고, 기록하고, 분석하세요
         </div>
       </div>
     </div>,

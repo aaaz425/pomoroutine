@@ -8,8 +8,10 @@ pre-commit:
       run: pnpm --filter web exec tsc --noEmit
     lint:
       run: pnpm --filter web lint
-    # unit-test: vitest 도입 후 활성화
-    #   run: pnpm --filter web test -- --run
+    typecheck-mobile:
+      run: pnpm --filter mobile typecheck
+    typecheck-shared:
+      run: pnpm --filter @pomoroutine/shared typecheck
 
 pre-push:
   commands:
