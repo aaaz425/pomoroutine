@@ -43,6 +43,9 @@ export const metadata: Metadata = {
     description: siteConfig.twitterDescription,
   },
   robots: { index: true, follow: true },
+  verification: {
+    other: { 'naver-site-verification': '28438122553d5702864c7e030e1cddbcb0d8255f' },
+  },
 };
 
 export const viewport: Viewport = {
