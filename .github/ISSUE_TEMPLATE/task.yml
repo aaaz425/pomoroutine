@@ -1,0 +1,17 @@
+name: 작업 요청
+description: 기능 추가, 변경, 버그 수정, 의존성 업데이트
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: 무엇을
+      description: 버그면 재현 방법과 플랫폼도 함께
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: 완료 조건
+      description: 끝났다고 판단하는 기준과 확인 방법
+    validations:
+      required: true
